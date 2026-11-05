@@ -1,0 +1,68 @@
+/* Hopfield background. Fills its parent with a wash and holds the open network on the right. */
+.hopfield-background {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: var(--s8);
+}
+
+/* On a hero, the title block centres vertically and its text wraps clear of the network. */
+.hero-panel:has(.hopfield-background) { justify-content: center; }
+.hero-panel:has(.hopfield-background) .hero-content { padding-bottom: 0; }
+.hero-panel:has(.hopfield-background) .hero-content p { max-width: calc(var(--s12) * 9); }
+
+.hopfield-net {
+  position: relative;
+  width: 300px;
+}
+
+/* The grid's frame and the scramble box share one edge and fill, so they read as a pair. */
+.hopfield-frame,
+.reveal .hopfield-scramble {
+  border: var(--line-width-strong) solid var(--border);
+  border-radius: var(--s2);
+  background: var(--graphic-soft);
+}
+
+.hopfield-frame { padding: var(--s2); }
+
+.hopfield-grid {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  cursor: crosshair;
+  touch-action: none;
+  user-select: none;
+}
+
+.reveal .hopfield-name {
+  margin: var(--s2) 0 0;
+  font-weight: var(--w-semibold);
+}
+
+.reveal .hopfield-status {
+  margin: 0;
+  min-height: 1.4em;
+  font-size: var(--t-sm);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-soft);
+}
+
+/* The hit only tints the border, which then fades back. */
+.reveal .hopfield-scramble {
+  margin: var(--s2) 0 0;
+  padding: var(--s2);
+  font-size: var(--t-sm);
+  font-weight: var(--w-medium);
+  text-align: center;
+  transition: border-color var(--dur-slow) var(--ease);
+}
+
+.reveal .hopfield-scramble.is-hit {
+  border-color: var(--accent-strong);
+  transition: none;
+}

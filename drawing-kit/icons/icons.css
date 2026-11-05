@@ -1,0 +1,82 @@
+/* Shared appearance defaults for inline SVG icons from core/drawing-kit/icons/icons.js.
+   Icon geometry lives in JS; this file maps icon parts to semantic theme tokens.
+   Components and diagrams override the --icon-* variables in their own scope. */
+
+.icon {
+  --icon-primary: var(--graphic-primary);
+  --icon-secondary: var(--graphic-secondary);
+  --icon-surface: var(--graphic-soft);
+  --icon-detail: var(--text);
+  --icon-person: var(--text);
+  --icon-person-opacity: 0.4;
+  /* Fallbacks in authoring units (the 0 0 100 100 box), for geometry used
+     without Icons.place(). place() overrides these inline with the theme's
+     absolute widths counter-scaled to the placed size. */
+  --icon-stroke-width: 6;
+  --icon-stroke-width-thin: 5;
+  --icon-detail-stroke-width: 4;
+}
+
+.icon .icon-person {
+  fill: var(--icon-person);
+  opacity: var(--icon-person-opacity);
+}
+
+.icon .icon-line {
+  stroke: var(--icon-primary);
+  stroke-width: var(--icon-stroke-width);
+  fill: none;
+}
+
+/* A width override only — pair it with .icon-line, never use it alone.
+   On its own an element has no stroke/fill at all and disappears (or, on a
+   closed shape, falls back to the SVG default black fill). */
+.icon .icon-line-thin {
+  stroke-width: var(--icon-stroke-width-thin);
+}
+
+.icon .icon-card {
+  stroke: var(--icon-primary);
+  stroke-width: var(--icon-stroke-width);
+  fill: var(--icon-surface);
+}
+
+.icon .icon-fill {
+  fill: var(--icon-primary);
+  stroke: none;
+}
+
+.icon .icon-round {
+  stroke-linecap: round;
+}
+
+.icon .icon-join {
+  stroke-linejoin: round;
+}
+
+.icon .icon-robot-head,
+.icon .icon-robot-accent {
+  fill: var(--icon-secondary);
+}
+
+.icon .icon-robot-ant {
+  stroke: var(--icon-secondary);
+  stroke-width: var(--icon-detail-stroke-width);
+  stroke-linecap: round;
+  fill: none;
+}
+
+.icon .icon-robot-screen {
+  fill: var(--icon-surface);
+}
+
+.icon .icon-robot-face {
+  fill: var(--icon-detail);
+}
+
+.icon .icon-robot-mouth {
+  stroke: var(--icon-detail);
+  stroke-width: var(--icon-detail-stroke-width);
+  stroke-linecap: round;
+  fill: none;
+}

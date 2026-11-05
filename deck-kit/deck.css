@@ -1,0 +1,252 @@
+/* ═══════════════════════════════════════════════════════════
+   DECK · what applies to every slide: Reveal resets, tag text sizes, slide frame, footer
+   furniture, fragments, and the page's presenting, editing, and print states. A component's
+   own rules live in its own CSS file.
+═══════════════════════════════════════════════════════════ */
+
+/* Slide text: the tag's size and leading. A component deviating from them says so
+   in its own rule. */
+.reveal h1,
+.reveal h2,
+.reveal h3 {
+  font-family: var(--f-display);
+  font-weight: var(--w-medium);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  text-transform: none;
+  color: inherit;
+  margin: 0;
+}
+
+.reveal h1 { font-size: var(--t-xl); letter-spacing: -0.03em; }
+.reveal h2 { font-size: var(--t-md); }
+
+/* h3 takes prose leading so it shares a baseline with neighbouring prose. */
+.reveal h3 { font-size: var(--t-base); line-height: 1.4; }
+
+/* Formulas typeset from $...$ (inline) and $$...$$ (display); see math/math.js. */
+.reveal .tex-display { display: block; text-align: center; margin: var(--s2) 0; }
+
+.reveal p,
+.reveal li {
+  font-size: var(--t-base);
+  line-height: 1.4;
+}
+
+/* Zero block margins so the layout alone spaces blocks; :where() adds no specificity. */
+.reveal :where(p, ul, ol, li) { margin: 0; }
+
+/* Every list on a slide draws its own markers, if it has any. */
+.reveal :where(ul, ol) { padding: 0; list-style: none; }
+
+/* Reveal.js resets: theme typography on a left-aligned, full-bleed canvas. */
+.reveal {
+  font-family: var(--f-body);
+  font-size: var(--t-base);
+  color: var(--text);
+}
+
+/* Imports are viewBox width × scale, capped at 100% of the container.
+   !important overrides the inline width, in decks only. */
+.reveal .diagram,
+.reveal .chart,
+.reveal .figure {
+  width: min(100%, calc(var(--viewbox-width) * var(--diagram-scale, 1))) !important;
+}
+
+/* Left-align slide content, overriding Reveal's default centering. */
+.reveal .slides {
+  text-align: left;
+}
+
+/* Make each slide fill the canvas and clip overflow with border-box sizing. */
+.reveal section {
+  height: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* Slide frame: a padded column; relative anchors the footer furniture. */
+.slide {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: var(--s10);
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Footer furniture: the brand mark (bottom-right, sized by height) and the
+   page number (bottom-left), both low-opacity. `logoHeight` overrides the height. */
+.logo-corner {
+  position: absolute;
+  bottom: var(--s5);
+  right: var(--s10);
+  height: var(--logo-height, var(--s8));
+  width: auto;
+  opacity: 0.85;
+}
+
+.slide-num {
+  position: absolute;
+  bottom: var(--s5);
+  left: var(--s10);
+  font-size: var(--t-xs);
+  font-weight: var(--w-medium);
+  letter-spacing: 0.06em;
+  opacity: 0.35;
+}
+
+/* Fragment animation: `fade-up` holds a fragment transparent until Reveal adds `.visible`. */
+.reveal .fragment.fade-up {
+  opacity: 0;
+  transition: opacity var(--dur-mid) var(--ease);
+}
+
+.reveal .fragment.fade-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Zero-size marker for a press with nothing of its own to show: its `.visible`
+   class is the signal CSS or JS reacts to. Out of flow, so it costs no space. */
+.deck-fragment-marker {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* Stand-in for a picture or clip that could not load (deck.js). It keeps the failed
+   element's classes, so their size rules apply; with no size to go on it is 16:9. */
+.reveal .deck-media-missing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s1);
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  box-sizing: border-box;
+  padding: var(--s1);
+  overflow: hidden;
+  border: 1px dashed var(--border);
+  color: var(--text-soft);
+}
+
+.reveal .deck-media-missing .icon {
+  flex: 0 1 40px;
+  width: 40px;
+  height: 40px;
+  min-height: 0;
+  --icon-primary: var(--text-soft);
+  --icon-surface: transparent;
+}
+
+.reveal .deck-media-missing .deck-caption {
+  display: -webkit-box;
+  margin-top: 0;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+/* A logo's slot is too small for words; the label stays for assistive tech. */
+.reveal .deck-image-mark.deck-media-missing .deck-caption {
+  display: none;
+}
+
+/* Fullscreen laser pointer. Hidden outside presenting mode; JS positions it
+   under the cursor while fullscreen is active. */
+#laser-pointer {
+  --laser-color: var(--graphic-secondary);
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 10001;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--laser-color);
+  box-shadow:
+    0 0 5px var(--laser-color),
+    0 0 15px var(--laser-color);
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  transition: opacity var(--dur-fast) var(--ease);
+}
+
+:fullscreen {
+  cursor: none;
+}
+
+:-webkit-full-screen {
+  cursor: none;
+}
+
+:fullscreen #laser-pointer {
+  opacity: 1;
+}
+
+:-webkit-full-screen #laser-pointer {
+  opacity: 1;
+}
+
+/* Editable-region highlighting. Active only while `.editing` is set: every
+   `[data-edit]` target gets a dashed outline (solid on :focus) so authors can
+   see and click into the inline-editable fields. */
+.editing [data-edit] {
+  outline: 1.5px dashed color-mix(in srgb, var(--accent) 45%, transparent);
+  outline-offset: calc(var(--s1) * 0.5);
+  border-radius: 3px;
+  cursor: text;
+  transition:
+    outline-color var(--dur-fast) var(--ease),
+    background var(--dur-fast) var(--ease);
+}
+
+/* Hover: brighten the dashed outline to flag the region under the cursor. */
+.editing [data-edit]:hover {
+  outline-color: color-mix(in srgb, var(--accent) 90%, transparent);
+}
+
+/* Focus: switch to a solid outline and tinted background while editing. */
+.editing [data-edit]:focus {
+  outline: 2px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+/* The toolbar's place on a deck; its look is chrome.css. Outside Reveal's scale
+   transform, so sizes are literal screen px. */
+#deck-chrome {
+  position: fixed;
+  top: 24px;
+  right: 40px;
+  z-index: 10000;
+}
+
+/* The editor's status message, left of the buttons; hidden when it has none. */
+#edit-status {
+  background: var(--background);
+  max-width: 420px;
+}
+
+#edit-status:empty {
+  display: none;
+}
+
+/* Hidden while presenting. Separate rules: one unknown selector would invalidate a group. */
+:fullscreen #deck-chrome          { display: none !important; }
+:-webkit-full-screen #deck-chrome { display: none !important; }
+
+/* PDF export: open <deck>.html?print-pdf in Chrome, then Ctrl+P, Save as PDF.
+   Settings: A4 landscape, no margins, background graphics ON. */
+@page { size: landscape; margin: 0; }
+@media print {
+  .reveal .fragment            { opacity: 1 !important; transform: none !important; visibility: visible !important; }
+  *                            { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  [data-edit]                  { outline: none !important; }
+  #deck-chrome                 { display: none !important; }
+}

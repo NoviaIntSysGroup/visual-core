@@ -1,0 +1,274 @@
+/* ═══════════════════════════════════════════════════════════
+   LANDING · the index page listing a project's decks and figures: top bar, hero, tabs, cards,
+   about, footer, and the bare h1/h2/h3/p sizes. Reaches no deck or figure. Sizes are literal
+   screen px, because this page renders outside Reveal's canvas transform.
+═══════════════════════════════════════════════════════════ */
+:root {
+  --landing-width: 1104px;
+  --landing-gutter: 48px;
+}
+
+h1, h2, h3 {
+  font-family: var(--f-display);
+  letter-spacing: -0.02em;
+  font-weight: var(--w-medium);
+  line-height: 1.1;
+  text-transform: none;
+  color: inherit;
+  margin: 0;
+  text-wrap: balance;
+}
+
+h1 { font-size: clamp(40px, 5vw, 64px); letter-spacing: -0.035em; line-height: 1.04; }
+h2 { font-size: 32px; }
+h3 { font-size: 20px; }
+p  { margin: 0; font-size: 17px; line-height: 1.5; }
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; min-height: 100%; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--f-body);
+  color: var(--text);
+  background: var(--background);
+  -webkit-font-smoothing: antialiased;
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: 2px;
+}
+
+/* Full-bleed bands: the padding, not a wrapper, lines their content up with the column below. */
+.landing-bar,
+.landing-hero,
+.landing-footer {
+  padding-inline: max(var(--landing-gutter), calc((100% - var(--landing-width)) / 2));
+}
+
+/* Top bar: stays in view while the page scrolls. */
+.landing-bar {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  height: 64px;
+  background: var(--background);
+  border-bottom: 1px solid var(--graphic-neutral);
+}
+
+.landing-bar img { display: block; height: 28px; }
+
+.landing-bar nav { display: flex; gap: 24px; }
+
+.landing-bar nav a {
+  color: var(--text-soft);
+  font-size: 15px;
+  font-weight: var(--w-medium);
+  text-decoration: none;
+}
+
+.landing-bar nav a:hover { color: var(--text); }
+
+/* Hero: a static glow from two brand hues behind the title and the main deck's preview. */
+.landing-hero {
+  display: grid;
+  grid-template-columns: 5fr 6fr;
+  align-items: center;
+  gap: 56px;
+  padding-block: 88px;
+  background:
+    radial-gradient(60% 90% at 10% 0%, var(--graphic-primary-tint), transparent),
+    radial-gradient(60% 90% at 95% 20%, var(--graphic-secondary-tint), transparent);
+}
+
+.landing-eyebrow {
+  margin-bottom: 16px;
+  color: var(--text-soft);
+  font-size: 15px;
+  font-weight: var(--w-semibold);
+}
+
+.landing-lead {
+  margin-top: 24px;
+  font-size: 20px;
+  line-height: 1.45;
+  color: var(--text-soft);
+}
+
+.landing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.landing-button {
+  padding: 12px 20px;
+  border: 1px solid var(--text);
+  border-radius: 999px;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: var(--w-medium);
+  text-decoration: none;
+  transition: transform var(--dur-fast) var(--ease);
+}
+
+.landing-button:hover { transform: translateY(-2px); }
+
+.landing-button.is-primary {
+  background: var(--text);
+  color: var(--background);
+}
+
+.landing {
+  max-width: calc(var(--landing-width) + 2 * var(--landing-gutter));
+  margin: 0 auto;
+  padding: 72px var(--landing-gutter);
+}
+
+.landing-section { scroll-margin-top: 88px; }
+
+.landing-section > h2 { margin-bottom: 24px; }
+
+/* Tabs: switch between decks and figures. */
+.tabs {
+  display: inline-flex;
+  gap: 4px;
+  margin-bottom: 32px;
+  padding: 4px;
+  border: 1px solid var(--graphic-neutral);
+  border-radius: 999px;
+}
+
+.tab {
+  cursor: pointer;
+  background: none;
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 20px;
+  font: var(--w-medium) 15px/1.2 var(--f-display);
+  color: var(--text-soft);
+  transition:
+    color var(--dur-fast) var(--ease),
+    background var(--dur-fast) var(--ease);
+}
+
+.tab:hover { color: var(--text); }
+
+.tab.is-active {
+  background: var(--text);
+  color: var(--background);
+}
+
+.panel { display: none; }
+.panel.is-active { display: block; }
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.card {
+  display: block;
+  overflow: hidden;
+  color: inherit;
+  text-decoration: none;
+  border: 1px solid var(--graphic-neutral);
+  border-radius: 16px;
+  background: var(--graphic-soft);
+  box-shadow: var(--shadow);
+  transition:
+    transform var(--dur-fast) var(--ease),
+    box-shadow var(--dur-fast) var(--ease);
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+}
+
+.thumb {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: var(--background);
+}
+
+.thumb iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  pointer-events: none;
+  background: var(--background);
+}
+
+.meta {
+  display: block;
+  padding: 16px 20px 18px;
+  border-top: 1px solid var(--graphic-neutral);
+}
+
+.meta h3 { font-size: 17px; line-height: 1.25; letter-spacing: -0.01em; }
+.meta p { margin-top: 4px; font-size: 14px; color: var(--text-soft); }
+
+/* About: the heading beside the prose, then a row of short points. */
+.landing-about {
+  display: grid;
+  grid-template-columns: 5fr 6fr;
+  gap: 24px 56px;
+  margin-top: 72px;
+  padding-top: 72px;
+  border-top: 1px solid var(--graphic-neutral);
+}
+
+.landing-about > h2 { margin-bottom: 0; }
+
+.landing-points {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 32px;
+  margin-top: 32px;
+}
+
+.landing-points p {
+  margin-top: 8px;
+  font-size: 15px;
+  color: var(--text-soft);
+}
+
+.landing-footer {
+  padding-block: 32px;
+  border-top: 1px solid var(--graphic-neutral);
+  font-size: 14px;
+  color: var(--text-soft);
+}
+
+@media (max-width: 900px) {
+  .landing-hero,
+  .landing-about { grid-template-columns: 1fr; }
+  .landing-hero { padding-block: 56px; }
+}
+
+@media (max-width: 760px) {
+  :root { --landing-gutter: 24px; }
+  .landing { padding-block: 48px; }
+  .card-grid { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .card, .landing-button, .tab { transition: none; }
+}

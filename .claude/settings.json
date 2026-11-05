@@ -1,0 +1,15 @@
+{
+  "worktree": {
+    "bgIsolation": "none"
+  },
+  "permissions": {
+    "blockReadsOutsideWorkingDirectories": true,
+    "deny": ["Edit(**/.claude/**)"]
+  },
+  "sandbox": {
+    "enabled": true,
+    "failIfUnavailable": true,
+    "autoAllowBashIfSandboxed": true,
+    "allowUnsandboxedCommands": false
+  }
+}

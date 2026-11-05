@@ -1,0 +1,4 @@
+/* Hopfield Heart Equations — a key row's text, faded while the other colour of link is shown. */
+.hopfield-heart-faded {
+  opacity: 0.35;
+}

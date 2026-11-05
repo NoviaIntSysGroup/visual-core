@@ -1,0 +1,166 @@
+/* Figure composition appearance. Mirrors the diagram kit's split: geometry/size
+   live in figure.js (+ config.js for the type scale); colour, font family,
+   weight, and style come from here via semantic theme tokens. Each figure's
+   diagrams keep their own CSS; this file styles the figure-level text
+   and rules, then the figure page around a figure. */
+
+.figure {
+  /* Figures render in Arial/Helvetica (a standard PDF font, no embedding) so
+     they look identical everywhere. The font is published by config.js as
+     --f-figure (one source of truth, shared with figure.js text measuring);
+     here it overrides --f-body/--f-display for the figure subtree only. */
+  --f-body: var(--f-figure);
+  --f-display: var(--f-figure);
+  font-family: var(--f-body);
+  display: block;
+
+  /* The figure's text colour, as an inherited default on the root. A rule on `text`
+     would outrank `.diagram-node-label` and freeze every placed label at --text. */
+  fill: var(--text);
+}
+
+/* Base figure text: body font; size comes from the JS role, colour is inherited
+   from .figure above. */
+.figure text {
+  font-family: var(--f-body);
+}
+
+/* Role appearance — COLOUR only. Size, weight, and style are set by the figure
+   kit from Config.figure.type (config.js); don't set them here. */
+/* A fig.math formula paints in currentColor. */
+.figure .fig-math      { color: var(--text); overflow: visible; }
+.figure .fig-title     { fill: var(--text); letter-spacing: -0.01em; }
+.figure .fig-label     { fill: var(--text); }
+.figure .fig-subtitle  { fill: var(--text-soft); }
+.figure .fig-slideBody   { fill: var(--text); }
+.figure .fig-slideDetail { fill: var(--text); }
+.figure .fig-body      { fill: var(--text); }
+.figure .fig-legend    { fill: var(--text); }
+.figure .fig-fine      { fill: var(--text); }
+
+/* A label sitting directly on a coloured fill (e.g. a donut segment) rather
+   than the page: plain white so it stays legible whichever hue is under it. */
+.figure .fig-on-fill {
+  fill: var(--background-plain);
+}
+
+/* Inline emphasis inside a line (the coloured word on the slide). */
+.figure .fig-accent {
+  fill: var(--graphic-secondary);
+  font-weight: var(--w-bold);
+  font-style: italic;
+}
+
+/* Inline emphasis: bold a phrase within a line (no colour change). */
+.figure .fig-bold {
+  font-weight: var(--w-bold);
+}
+
+/* Column / section divider, matching the slide's between-column rules. */
+.figure .figure-rule {
+  stroke: var(--border);
+  stroke-width: var(--line-width);
+}
+
+
+/* ── Figure page ──────────────────────────────────────────────────────────────
+   What figure.js builds around a figure. Outside any scale transform, so sizes
+   are literal screen px. Decks load this file too; nothing here matches on them. */
+body.figure-page {
+  margin: 0;
+  padding: 32px;
+  font-family: var(--f-body);
+  color: var(--text);
+  background: var(--background-plain);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* The header row: title, size and note on the left, the toolbar on the right. */
+.figure-chrome {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.figure-chrome h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: var(--w-semibold);
+}
+
+.figure-chrome .chrome {
+  margin-left: auto;
+}
+
+.figure-size,
+.figure-note {
+  font-size: var(--chrome-text);
+}
+
+.figure-size {
+  color: var(--text-soft);
+}
+
+/* Says why exports are disabled; accent because it must be noticed. */
+.figure-note {
+  color: var(--accent);
+}
+
+/* Back/Next and the step counter, set apart from the exports. */
+.figure-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 16px;
+  color: var(--text-soft);
+}
+
+.figure-step-label {
+  min-width: 9ch;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* An authoring aid rather than an export, so it sits apart from them. */
+.figure-debug-toggle {
+  margin-left: 16px;
+}
+
+/* The preview: true physical size (--figure-stage-width, set by the kit) x the
+   import scale, capped at the page width. Exports use the real cm size instead. */
+.figure-stage {
+  width: min(100%, calc(var(--figure-stage-width, 100%) * var(--diagram-scale, 1)));
+  max-width: 100%;
+  border: 1px solid var(--border);
+}
+
+.figure-stage svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ?thumb: chrome-less figure for the landing-page card iframe. */
+body.figure-thumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  background: var(--background-plain);
+}
+
+.figure-thumb-stage {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  border: 0;
+}
+
+.figure-thumb-stage svg {
+  width: 100% !important;
+  height: 100% !important;
+}

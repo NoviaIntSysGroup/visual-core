@@ -1,0 +1,46 @@
+/* Wash — the coloured backdrop layer: which four hues are in play and how much each
+   carries. Position, size and rounding belong to the host. The hues are the graphic
+   tokens blended into the canvas at a --wash-strength* from theme.css. */
+.deck-wash {
+  --deck-wash-strength: var(--wash-strength);
+  --deck-wash-primary:   color-mix(in srgb, var(--graphic-primary)   var(--deck-wash-strength), var(--background));
+  --deck-wash-secondary: color-mix(in srgb, var(--graphic-secondary) var(--deck-wash-strength), var(--background));
+  --deck-wash-tertiary:  color-mix(in srgb, var(--graphic-tertiary)  var(--deck-wash-strength), var(--background));
+  --deck-wash-neutral:   color-mix(in srgb, var(--graphic-neutral)   var(--deck-wash-strength), var(--background));
+
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.deck-wash-strong      { --deck-wash-strength: var(--wash-strength-strong); }
+.deck-wash-very-strong { --deck-wash-strength: var(--wash-strength-very-strong); }
+
+/* The host positions the layer, sets the rounding both take, and clips to it. Padding
+   is the grid's own gap, so the wash frames its content; radius is that padding plus
+   the cell radius, so the curves stay concentric. `align-self` spans the column so a
+   `stretch` grid has a width to fill: a collapsed grid of viewBox-only icons renders
+   differently across browsers. */
+.deck-wash-host {
+  position: relative;
+  align-self: stretch;
+  padding: var(--s2);
+  border-radius: var(--s4);
+  overflow: hidden;
+}
+
+/* Content sits above the layer. A new stacking position, not a z-index: the
+   wash is first in DOM order, so being positioned at all is enough. */
+.deck-wash-host > *:not(.deck-wash) {
+  position: relative;
+}
+
+/* A host whose content states its own size shrinks to it, rather than stretching
+   the wash across the full column while the grid inside stays 100pt wide.
+   `align-self` back to the column's own `align-items`, so a centred column
+   centres it. */
+.deck-wash-host-shrink {
+  align-self: auto;
+  width: fit-content;
+}

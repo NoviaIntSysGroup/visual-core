@@ -1,0 +1,11 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+
+# Claude Code scratch and personal settings
+.claude/.cc-writes
+.claude/settings.local.json

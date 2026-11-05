@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Core Showcase</title>
+
+  <!-- Reveal.js core -->
+  <link rel="stylesheet" href="../../../deck-kit/reveal/reveal.css">
+
+  <!-- The core example sits one level deeper than a project's decks, so core
+       paths are ../../../ here where a project writes ../../core/. -->
+  <link rel="stylesheet" href="../../../theme/theme.css">
+  <link rel="stylesheet" href="../../visuals/brand.css">
+  <link rel="stylesheet" href="../../../deck-kit/deck.css">
+  <link rel="stylesheet" href="../../../theme/chrome.css">
+  <link rel="stylesheet" href="../../../drawing-kit/icons/icons.css">
+  <link rel="stylesheet" href="../../../drawing-kit/diagram/diagram.css">
+  <link rel="stylesheet" href="../../../drawing-kit/charts/charts.css">
+  <link rel="stylesheet" href="../../../figure-kit/figure.css">
+  <link rel="stylesheet" href="../../../deck-kit/widgets/badge.css">
+  <link rel="stylesheet" href="../../../deck-kit/widgets/wash.css">
+  <link rel="stylesheet" href="../../../deck-kit/widgets/timeline.css">
+  <link rel="stylesheet" href="../../../deck-kit/figure-import.css">
+  <link rel="stylesheet" href="../../../deck-kit/image.css">
+  <link rel="stylesheet" href="../../../deck-kit/templates.css">
+</head>
+<body>
+
+<div class="reveal">
+  <div class="slides" id="slides-root">
+    <!-- Slides injected by the deck kit from the SLIDES data below. -->
+  </div>
+</div>
+
+<!-- Reveal.js + shared kit (classic scripts, so this works over file:// too) -->
+<script src="../../../deck-kit/reveal/reveal.js"></script>
+<script src="../../../theme/config.js"></script>
+<script src="../../../math/math.js"></script>
+<script src="../../../math/tex-svg.js"></script>
+<script src="../../../drawing-kit/units.js"></script>
+<script src="../../../drawing-kit/icons/icons.js"></script>
+<script src="../../../drawing-kit/icons/flat-icons.js"></script>
+<script src="../../../drawing-kit/diagram/diagram.js"></script>
+<script src="../../../drawing-kit/charts/charts.js"></script>
+<script src="../../../figure-kit/figure.js"></script>
+<script src="../../figures/example-steps/example-steps.js"></script>
+<script src="../../../deck-kit/widgets/badge.js"></script>
+<script src="../../../deck-kit/widgets/wash.js"></script>
+<script src="../../../deck-kit/widgets/timeline.js"></script>
+<script src="../../../deck-kit/figure-import.js"></script>
+<script src="../../../deck-kit/deck.js"></script>
+<script src="../../../deck-kit/image.js"></script>
+<script src="../../../deck-kit/templates.js"></script>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   SLIDE DATA — one slide per template, block kind, and widget the core
+   ships, so a core change can be seen without a project.
+
+   ▸ The inline editor rewrites the array between the SLIDES:START /
+     SLIDES:END markers. Keep the markers intact.
+═══════════════════════════════════════════════════════════════ */
+/* === SLIDES:START (edited by the inline editor — do not remove these markers) === */
+const SLIDES = [
+  {
+    "layout": "hero",
+    "background": "Wash",
+    "seed": "core-showcase",
+    "strength": "strong",
+    "badges": [
+      "Core",
+      "Showcase",
+      "TODAY"
+    ],
+    "title": "Core Showcase",
+    "subtitle": "Every slide template, block, and widget the core ships, on one deck.",
+    "byline": "Open it to see a core change without a project."
+  },
+  {
+    "layout": "toc",
+    "title": "What This Deck Covers",
+    "highlight": "Text",
+    "fragments": true,
+    "items": [
+      {
+        "title": "Text",
+        "text": "Columns, text blocks, groups, and highlights"
+      },
+      {
+        "title": "Visuals",
+        "text": "Icons, images, logos, portraits, rows, charts, figures, and formulas"
+      },
+      {
+        "title": "Structure",
+        "text": "Tables, timelines, paired columns, and references"
+      }
+    ]
+  },
+  {
+    "layout": "columns",
+    "title": "Columns, Highlight and Alignment",
+    "lead": "The lead line frames the row. It is on screen with the title and never steps.",
+    "closing": "The closing line ends the slide and steps in last.",
+    "highlight": "Highlighted",
+    "columns": [
+      {
+        "fragment": false,
+        "valign": "center",
+        "blocks": [
+          {
+            "type": "title",
+            "text": "Always On"
+          },
+          {
+            "type": "text",
+            "text": "This column opts out of stepping and sits centred against the row."
+          }
+        ]
+      },
+      {
+        "blocks": [
+          {
+            "type": "title",
+            "text": "Highlighted"
+          },
+          {
+            "type": "text",
+            "text": "Columns share the width equally and step in one by one. The slide's own highlight press then dims every other column."
+          }
+        ]
+      },
+      {
+        "blocks": [
+          {
+            "type": "title",
+            "text": "Third Column"
+          },
+          {
+            "type": "text",
+            "text": "A divider rules every gap unless the slide turns them off. It steps in as usual, then dims with the first."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "layout": "columns",
+    "title": "Text Blocks and Prose Variants",
+    "columns": [
+      {
+        "blocks": [
+          {
+            "type": "title",
+            "text": "Text Blocks"
+          },
+          {
+            "type": "subtitle",
+            "text": "A quieted tagline under the title"
+          },
+          {
+            "type": "text",
+            "text": "Plain prose is a text block."
+          },
+          {
+            "type": "subhead",
+            "text": "A Plain Subhead"
+          },
+          {
+            "type": "text",
+            "text": "A subhead names a part inside the column."
+          },
+          {
+            "type": "subhead",
+            "text": "An Accented Subhead",
+            "accent": true
+          },
+          {
+            "type": "text",
+            "text": "The accent marks subheads that read as a set."
+          }
+        ]
+      },
+      {
+        "blocks": [
+          {
+            "type": "title",
+            "text": "Prose Variants"
+          },
+          {
+            "type": "quote",
+            "text": "A pulled quote is ruled in the column's own accent."
+          },
+          {
+            "type": "note",
+            "text": "A note is the quiet follow-up line."
+          },
+          {
+            "type": "text",
+            "text": "A list after a paragraph hugs it:"
+          },
+          {
+            "type": "bullets",
+            "items": [
+              "First item",
+              "Second item",
+              "Third item"
+            ]
+          },
+          {
+            "type": "source",
+            "text": "Source: a citation, set small for the PDF handout"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "layout": "columns",
+    "title": "Bracketed Groups",
+    "columns": [
+      {
+        "enter": "fade",
+        "highlight": "Second Part",
+        "blocks": [
+          {
+            "type": "title",
+            "text": "Fade and Highlight"
+          },
+          {
+            "type": "subtitle",
+            "text": "Each bracketed group is one press"
+          },
+          [
+            {
+              "type": "subhead",
+              "text": "First Part"
+            },
+            {
+              "type": "text",
+              "text": "Faded groups show the shape of the list before it arrives."
+            }
+          ],
+          [
+            {
+              "type": "subhead",
+              "text": "Second Part"
+            },
+            {
+              "type": "text",
+              "text": "The last press dims every group except this one."
+            }
+          ],
+          [
+            {
+              "type": "subhead",
+              "text": "Third Part"
+            },
+            {
+              "type": "text",
+              "text": "Titles and subtitles outside a group stay on screen."
+            }
+          ]
+        ]
+      },
+      {
+        "blocks": [
+          {
+            "type": "title",
+            "text": "Hidden Entry"
+          },
+          {
+            "type": "subtitle",
+            "text": "The default way a group enters"
+          },
+          [
+            {
+              "type": "text",
+              "text": "A group slides up from nothing on its press."
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "text": "Groups in the next column follow in page order."
+            }
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "layout": "toc",
+    "highlight": "Visuals"
+  },
+  {
+    "layout": "columns",
+    "title": "Icons",
+    "fragments": false,
+    "columns": [
+      {
+        "blocks": [
+          {
+            "type": "subhead",
+            "text": "House icons"
+          },
+          {
+            "type": "image",
+            "padding": true,
+            "columns": 6,
+            "cellWidth": 48,
+            "cellHeight": 48,
+            "items": [
+              {
+                "icon": "person",
+                "name": "Person"
+              },
+              {
+                "icon": "robot",
+                "name": "Robot"
+              },
+              {
+                "icon": "globe",
+                "name": "Globe"
+              },
+              {
+                "icon": "doc",
+                "name": "Document"
+              },
+              {
+                "icon": "code",
+                "name": "Code"
+              },
+              {
+                "icon": "calendar",
+                "name": "Calendar"
+              },
+              {
+                "icon": "chat",
+                "name": "Chat"
+              },
+              {
+                "icon": "window",
+                "name": "Window"
+              },
+              {
+                "icon": "search",
+                "name": "Search"
+              },
+              {
+                "icon": "graph",
+                "name": "Graph"
+              },
+              {
+                "icon": "check",
+                "name": "Check"
+              },
+              {
+                "icon": "lock",
+                "name": "Lock"
+              },
+              {
+                "icon": "unlock",
+                "name": "Unlock"
+              },
+              {
+                "icon": "ann",
+                "name": "Neural network"
+              },
+              {
+                "icon": "toolbox",
+                "name": "Toolbox"
+              },
+              {
+                "icon": "key",
+                "name": "Key"
+              },
+              {
+                "icon": "chip",
+                "name": "Chip"
+              },
+              {
+                "icon": "magnet",
+                "name": "Magnet"
+              },
+              {
+                "icon": "compass",
+                "name": "Compass"
+              },
+              {
+                "icon": "ship",
+                "name": "Ship"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "blocks": [
+          {
+            "type": "subhead",
+            "text": "Flat icons on a wash"
+          },
+          {
+            "type": "image",
+            "padding": true,
+            "columns": 2,
+            "height": 210,
+            "stretch": true,
+            "tint": "background-plain",
+            "wash": {
+              "seed": "showcase",
+              "variant": "blobs",
+              "strength": "strong"
+            },
+            "items": [
+              {
+                "icon": "domain-knowledge",
+                "name": "Domain knowledge"
+              },
+              {
+                "icon": "systems-engineering",
+                "name": "Systems engineering"
+              },
+              {
+                "icon": "compliance-and-regulations",
+                "name": "Compliance and regulations"
+              },
+              {
+                "icon": "open-solutions",
+                "name": "Open solutions"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "layout": "columns",
+    "title": "Images, Portraits and Rows",
+    "columns": [
+      {
+        "blocks": [
+          {
+            "type": "title",
+            "text": "A Row"
+          },
+          {
+            "type": "row",
+            "blocks": [
+              {
+                "type": "image",
+                "src": "../../visuals/assets/picture.svg",
+                "alt": "A placeholder landscape"
+              },
+              {
+                "type": "text",
+                "text": "A row lays its blocks side by side in equal halves."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "blocks": [
+          {
+            "type": "image",
+            "fit": "cover",
+            "stretch": true,
+            "src": "../../visuals/assets/picture.svg",
+            "alt": "A placeholder landscape",
+            "cellHeight": 120,
+            "widthPercent": 80,
+            "caption": "Cropped to a fixed box"
+          }
+        ]
+      },
+      {
+        "halign": "center",
+        "blocks": [
+          {
+            "type": "image",
+            "src": "../../visuals/assets/portrait.svg",
+            "alt": "A placeholder portrait",
+            "surface": "portrait",
+            "cellWidth": 140,
+            "caption": "A portrait"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "layout": "columns",
+    "title": "Logos",
+    "columns": [
+      {
+        "blocks": [
+          {
+            "type": "title",
+            "text": "Plain Slots"
+          },
+          {
+            "type": "subtitle",
+            "text": "no equalize"
+          },
+          {
+            "type": "image",
+            "surface": "soft",
+            "padding": true,
+            "columns": 2,
+            "cellWidth": 90,
+            "cellHeight": 60,
+            "items": [
+              {
+                "name": "Wide wordmark",
+                "src": "../../visuals/assets/wide-mark.svg"
+              },
+              {
+                "name": "Square mark",
+                "src": "../../visuals/assets/mark.svg"
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": "Each logo fills its slot, so the square one looks heavier."
+          }
+        ]
+      },
+      {
+        "blocks": [
+          {
+            "type": "title",
+            "text": "Equal Area"
+          },
+          {
+            "type": "subtitle",
+            "text": "equalize"
+          },
+          {
+            "type": "image",
+            "surface": "soft",
+            "padding": true,
+            "columns": 2,
+            "cellWidth": 90,
+            "cellHeight": 60,
+            "equalize": true,
+            "items": [
+              {
+                "name": "Wide wordmark",
+                "src": "../../visuals/assets/wide-mark.svg"
+              },
+              {
+                "name": "Square mark",
+                "src": "../../visuals/assets/mark.svg"
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": "Both cover the same area, so they carry the same weight."
+          }
+        ]
+      },
+      {
+        "blocks": [
+          {
+            "type": "title",
+            "text": "Weighted by Ink"
+          },
+          {
+            "type": "subtitle",
+            "text": "equalize with cover and optical 0.5"
+          },
+          {
+            "type": "image",
+            "surface": "soft",
+            "padding": true,
+            "columns": 2,
+            "cellWidth": 90,
+            "cellHeight": 90,
+            "equalize": true,
+            "optical": 0.5,
+            "items": [
+              {
+                "name": "Solid mark",
+                "src": "../../visuals/assets/solid-mark.png",
+                "cover": 0.968
+              },
+              {
+                "name": "Outline mark",
+                "src": "../../visuals/assets/outline-mark.png",
+                "cover": 0.273
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": "The outline puts down less ink. Each cover comes from mark-coverage.js, so the solid mark shrinks until the two weigh the same."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "layout": "columns",
+    "title": "Meters and Code",
+    "columns": [
+      {
+        "blocks": [
+          {
+            "type": "title",
+            "text": "Easy"
+          },
+          {
+            "type": "meter",
+            "level": 1,
+            "text": "Difficulty"
+          }
+        ]
+      },
+      {
+        "blocks": [
+          {
+            "type": "title",
+            "text": "Harder"
+          },
+          {
+            "type": "meter",
+            "level": 3,
+            "text": "Difficulty"
+          }
+        ]
+      },
+      {
+        "blocks": [
+          {
+            "type": "title",
+            "text": "Code"
+          },
+          {
+            "type": "code",
+            "text": "{<br>&nbsp;&nbsp;\"key\": \"value\",<br>&nbsp;&nbsp;\"enabled\": true<br>}"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "layout": "columns",
+    "title": "Charts",
+    "columns": [
+      {
+        "blocks": [
+          {
+            "type": "title",
+            "text": "Scatter"
+          },
+          {
+            "type": "chart",
+            "kind": "scatter",
+            "maxHeight": 260,
+            "x": {
+              "title": "Release date",
+              "from": "2025-01",
+              "to": "2026-12",
+              "ticks": "year"
+            },
+            "y": {
+              "title": "Score",
+              "unit": "%",
+              "min": 0,
+              "max": 100
+            },
+            "series": [
+              {
+                "label": "Series A",
+                "points": [
+                  {
+                    "label": "A1",
+                    "x": "2025-03",
+                    "y": 20
+                  },
+                  {
+                    "label": "A2",
+                    "x": "2025-11",
+                    "y": 45
+                  }
+                ]
+              },
+              {
+                "label": "Series B",
+                "points": [
+                  {
+                    "label": "B1",
+                    "x": "2026-02",
+                    "y": 60
+                  },
+                  {
+                    "label": "B2",
+                    "x": "2026-08",
+                    "y": 72
+                  }
+                ]
+              },
+              {
+                "label": "Others",
+                "muted": true,
+                "points": [
+                  {
+                    "x": "2025-06",
+                    "y": 30
+                  },
+                  {
+                    "x": "2026-05",
+                    "y": 40
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "blocks": [
+          {
+            "type": "title",
+            "text": "Legend"
+          },
+          {
+            "type": "text",
+            "text": "A legend chart keys several charts drawn with their own legend off."
+          },
+          {
+            "type": "chart",
+            "kind": "legend",
+            "items": [
+              "Series A",
+              "Series B",
+              {
+                "label": "Others",
+                "muted": true
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "layout": "columns",
+    "title": "Imported Figures",
+    "lead": "A whole figure module placed on the slide. Each press is one of its steps.",
+    "columns": [
+      {
+        "blocks": [
+          {
+            "type": "figure",
+            "module": "ExampleStepsFigure",
+            "maxHeight": 260
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "layout": "columns",
+    "title": "Formulas",
+    "lead": "LaTeX between dollar signs is drawn as vector paths. While editing, the source shows instead.",
+    "columns": [
+      {
+        "blocks": [
+          {
+            "type": "title",
+            "text": "Inline"
+          },
+          {
+            "type": "text",
+            "text": "Write $E = mc^2$ or $\\sum_{i=1}^{n} x_i$ inside a sentence; it sits on the text baseline."
+          }
+        ]
+      },
+      {
+        "blocks": [
+          {
+            "type": "title",
+            "text": "Display"
+          },
+          {
+            "type": "text",
+            "text": "Double dollar signs centre a formula on its own line: $$\\int_0^\\infty e^{-x^2}\\,dx = \\frac{\\sqrt{\\pi}}{2}$$"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "layout": "columns",
+    "title": "Missing Media",
+    "columns": [
+      {
+        "blocks": [
+          {
+            "type": "text",
+            "text": "A picture or clip that cannot load shows this stand-in with its alt text. The paths on this slide are broken on purpose."
+          }
+        ]
+      },
+      {
+        "blocks": [
+          {
+            "type": "video",
+            "src": "../../visuals/assets/missing-clip.mp4",
+            "alt": "A clip that cannot load",
+            "maxHeight": 150
+          }
+        ]
+      },
+      {
+        "blocks": [
+          {
+            "type": "image",
+            "src": "../../visuals/assets/missing-picture.png",
+            "alt": "A picture that cannot load",
+            "maxHeight": 150
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "layout": "columns",
+    "title": "Tables",
+    "columns": [
+      {
+        "blocks": [
+          {
+            "type": "text",
+            "text": "Any number of columns, optional widths, and an emphasis flag that lifts a row. Every header and cell is editable."
+          },
+          {
+            "type": "table",
+            "columns": [
+              "Phase",
+              "Deliverable",
+              "Owner",
+              "Due"
+            ],
+            "widths": [
+              18,
+              46,
+              18,
+              18
+            ],
+            "rows": [
+              {
+                "cells": [
+                  "Start",
+                  "Kick-off workshop",
+                  "Everyone",
+                  "1 Mar"
+                ],
+                "emphasis": true
+              },
+              {
+                "cells": [
+                  "Draft",
+                  "First draft of the report",
+                  "Authors",
+                  "15 Apr"
+                ]
+              },
+              {
+                "cells": [
+                  "Review",
+                  "Comments from partners",
+                  "Partners",
+                  "20 May"
+                ]
+              },
+              {
+                "cells": [
+                  "Close",
+                  "Final report",
+                  "Lead",
+                  "30 Jun"
+                ],
+                "emphasis": true
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "layout": "columns",
+    "title": "Timeline",
+    "columns": [],
+    "timeline": {
+      "title": "A Project Year",
+      "items": [
+        {
+          "date": "Jan",
+          "text": "Start",
+          "milestone": true
+        },
+        {
+          "date": "Mar",
+          "text": "First draft"
+        },
+        {
+          "date": "Jun",
+          "text": "Review"
+        },
+        {
+          "date": "Sep",
+          "future": true,
+          "src": "../../visuals/assets/picture.svg",
+          "alt": "A placeholder landscape",
+          "height": 56
+        },
+        {
+          "date": "Dec",
+          "text": "Final report",
+          "future": true,
+          "milestone": true
+        }
+      ]
+    }
+  },
+  {
+    "layout": "columns",
+    "title": "Paired Columns",
+    "halign": "center",
+    "fragments": false,
+    "dividers": [
+      false,
+      true,
+      false
+    ],
+    "columns": [
+      {
+        "blocks": [
+          {
+            "type": "image",
+            "src": "../../visuals/assets/picture.svg",
+            "alt": "A placeholder landscape"
+          }
+        ]
+      },
+      {
+        "blocks": [
+          {
+            "type": "title",
+            "text": "Field Study"
+          },
+          {
+            "type": "text",
+            "text": "The cover on the left belongs to this text. No rule splits them."
+          }
+        ]
+      },
+      {
+        "blocks": [
+          {
+            "type": "image",
+            "src": "../../visuals/assets/picture.svg",
+            "alt": "A placeholder landscape"
+          }
+        ]
+      },
+      {
+        "blocks": [
+          {
+            "type": "title",
+            "text": "Market Survey"
+          },
+          {
+            "type": "text",
+            "text": "A second cover and its text. The one rule falls between the two pairs."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "layout": "references",
+    "title": "References",
+    "groups": [
+      {
+        "title": "Slide Engine",
+        "items": [
+          {
+            "name": "The slide framework this deck runs on",
+            "title": "Reveal.js",
+            "href": "https://revealjs.com"
+          }
+        ]
+      },
+      {
+        "title": "Runtime",
+        "items": [
+          {
+            "name": "Optional live-reload server",
+            "title": "Bun",
+            "href": "https://bun.sh"
+          }
+        ]
+      }
+    ]
+  }
+];
+/* === SLIDES:END === */
+
+/* Render this deck. storageKey namespaces the editor draft + file handle. */
+Deck.mount({
+  slides:     SLIDES,
+  storageKey: 'core-showcase',
+  logo:       '../../visuals/assets/logo.svg',
+  templates:  window.Templates,
+});
+
+</script></body></html>

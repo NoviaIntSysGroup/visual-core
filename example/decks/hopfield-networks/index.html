@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hopfield Networks</title>
+
+  <!-- Reveal.js core -->
+  <link rel="stylesheet" href="../../../deck-kit/reveal/reveal.css">
+
+  <!-- The core example sits one level deeper than a project's decks, so core
+       paths are ../../../ here where a project writes ../../core/. -->
+  <link rel="stylesheet" href="../../../theme/theme.css">
+  <link rel="stylesheet" href="../../visuals/brand.css">
+  <link rel="stylesheet" href="../../../deck-kit/deck.css">
+  <link rel="stylesheet" href="../../../theme/chrome.css">
+  <link rel="stylesheet" href="../../../drawing-kit/icons/icons.css">
+  <link rel="stylesheet" href="../../../drawing-kit/diagram/diagram.css">
+  <link rel="stylesheet" href="../../../drawing-kit/charts/charts.css">
+  <link rel="stylesheet" href="../../../figure-kit/figure.css">
+  <link rel="stylesheet" href="../../figures/hopfield-heart-equations/hopfield-heart-equations.css">
+  <link rel="stylesheet" href="../../../deck-kit/widgets/badge.css">
+  <link rel="stylesheet" href="../../../deck-kit/widgets/wash.css">
+  <link rel="stylesheet" href="../../../deck-kit/widgets/timeline.css">
+  <link rel="stylesheet" href="../../visuals/backgrounds/hopfield-background.css">
+  <link rel="stylesheet" href="../../../deck-kit/figure-import.css">
+  <link rel="stylesheet" href="../../../deck-kit/image.css">
+  <link rel="stylesheet" href="../../../deck-kit/templates.css">
+</head>
+<body>
+
+<div class="reveal">
+  <div class="slides" id="slides-root">
+    <!-- Slides injected by the deck kit from the SLIDES data below. -->
+  </div>
+</div>
+
+<!-- Reveal.js + shared kit (classic scripts, so this works over file:// too) -->
+<script src="../../../deck-kit/reveal/reveal.js"></script>
+<script src="../../../math/math.js"></script>
+<script src="../../../math/tex-svg.js"></script>
+<script src="../../../theme/config.js"></script>
+<script src="../../../drawing-kit/units.js"></script>
+<script src="../../../drawing-kit/icons/icons.js"></script>
+<script src="../../../drawing-kit/diagram/diagram.js"></script>
+<script src="../../../drawing-kit/charts/charts.js"></script>
+<script src="../../../figure-kit/figure.js"></script>
+<script src="../../figures/hopfield-state/hopfield-state.js"></script>
+<script src="../../figures/hopfield-landscape/hopfield-landscape.js"></script>
+<script src="../../figures/hopfield-heart-equations/hopfield-heart-equations.js"></script>
+<script src="../../../deck-kit/widgets/badge.js"></script>
+<script src="../../../deck-kit/widgets/wash.js"></script>
+<script src="../../../deck-kit/widgets/timeline.js"></script>
+<script src="../../visuals/backgrounds/hopfield-background.js"></script>
+<script src="../../../deck-kit/figure-import.js"></script>
+<script src="../../../deck-kit/deck.js"></script>
+<script src="../../../deck-kit/image.js"></script>
+<script src="../../../deck-kit/templates.js"></script>
+
+<script>
+/* === SLIDES:START (edited by the inline editor — do not remove these markers) === */
+const SLIDES = [
+  {
+    "layout": "hero",
+    "background": "HopfieldBackground",
+    "badges": [
+      "Example",
+      "Neural Networks",
+      "TODAY"
+    ],
+    "title": "Hopfield Networks",
+    "subtitle": "How a neural network of simple units stores memories as the states it settles into",
+    "byline": "Move the cursor over the network to erase, or hold Shift to draw, then watch it recover"
+  },
+  {
+    "layout": "columns",
+    "title": "What the Network Looks Like",
+    "columns": [
+      {
+        "fragment": false,
+        "blocks": [
+          {
+            "type": "figure",
+            "module": "HopfieldStateFigure"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "layout": "columns",
+    "title": "Memory as a Steady State",
+    "columns": [
+      {
+        "fragment": false,
+        "blocks": [
+          {
+            "type": "figure",
+            "module": "HopfieldLandscapeFigure"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "layout": "columns",
+    "title": "The Network in Three Equations",
+    "closing": "Storing shapes the landscape, energy sets its height, updating moves down it.",
+    "columns": [
+      {
+        "blocks": [
+          {
+            "type": "title",
+            "text": "Storing Images"
+          },
+          {
+            "type": "text",
+            "text": "The weight $w_{ij}$ is positive if two neurons agree, negative if not.$$\\vphantom{\\left(\\sum_{j \\neq i} w_{ij} s_j\\right)} w_{ij} = \\sum_{\\mu} \\xi_i^{\\mu} \\xi_j^{\\mu}, \\quad w_{ii} = 0$$<span class=\"deck-note\">$w_{ij}$: weight of neurons $i$ and $j$.<br>$\\xi_i^{\\mu}$: pixel $i$ of stored image $\\mu$.</span>"
+          },
+          {
+            "type": "figure",
+            "module": "HopfieldHeartWeightFigure"
+          }
+        ]
+      },
+      {
+        "blocks": [
+          {
+            "type": "title",
+            "text": "The Energy of a State"
+          },
+          {
+            "type": "text",
+            "text": "Pairs that fit their weight lower $E$, pairs that clash raise it.$$\\vphantom{\\left(\\sum_{j \\neq i} w_{ij} s_j\\right)} E = -\\frac{1}{2} \\sum_{i \\neq j} w_{ij} s_i s_j$$<span class=\"deck-note\">$E$: energy of the state.<br>$s_i$: value of neuron $i$, either $+1$ or $-1$.</span>"
+          },
+          {
+            "type": "figure",
+            "module": "HopfieldHeartEnergyFigure"
+          }
+        ]
+      },
+      {
+        "blocks": [
+          {
+            "type": "title",
+            "text": "The Update Rule"
+          },
+          {
+            "type": "text",
+            "text": "Neuron $i$ sums the votes $w_{ij}s_j$ of all others and takes the sign.$$\\vphantom{\\left(\\sum_{j \\neq i} w_{ij} s_j\\right)} s_i = \\mathrm{sign}\\left(\\sum_{j \\neq i} w_{ij} s_j\\right)$$<span class=\"deck-note\">$s_i$: new value of neuron $i$.<br>$j$: every other neuron.</span>"
+          },
+          {
+            "type": "figure",
+            "module": "HopfieldHeartUpdateFigure"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "layout": "columns",
+    "title": "Limits and the Modern Version",
+    "columns": [
+      {
+        "blocks": [
+          {
+            "type": "title",
+            "text": "Classic Limits"
+          },
+          {
+            "type": "bullets",
+            "items": [
+              "About $0.14N$ random patterns fit in $N$ units",
+              "Past that, recall breaks down",
+              "Blends of patterns form additional valleys"
+            ]
+          }
+        ]
+      },
+      {
+        "blocks": [
+          {
+            "type": "title",
+            "text": "Modern Networks"
+          },
+          {
+            "type": "text",
+            "text": "A steeper energy function sharpens the valleys, so one pattern wins and many more fit. The cover uses continuous units and a softmax energy."
+          }
+        ]
+      }
+    ],
+    "timeline": {
+      "items": [
+        {
+          "date": "1982",
+          "text": "Hopfield's paper",
+          "milestone": true
+        },
+        {
+          "date": "1985",
+          "text": "Capacity analysed"
+        },
+        {
+          "date": "2016",
+          "text": "Dense memory"
+        },
+        {
+          "date": "2020",
+          "text": "Modern form"
+        },
+        {
+          "date": "2024",
+          "text": "Nobel Prize",
+          "milestone": true
+        }
+      ]
+    }
+  },
+  {
+    "layout": "columns",
+    "title": "Why a Nobel Prize in Physics?",
+    "columns": [
+      {
+        "blocks": [
+          [
+            {
+              "type": "title",
+              "text": "A Prize for a Model Nobody Uses?"
+            },
+            {
+              "type": "text",
+              "text": "Hopfield networks are barely used today. The prize rewards inventing a powerful way of thinking, not a successful architecture."
+            },
+            {
+              "type": "text",
+              "text": "Hopfield showed that computation and memory can emerge from the collective dynamics of simple interacting units."
+            }
+          ],
+          [
+            {
+              "type": "bullets",
+              "items": [
+                "Simple rules, complex behaviour: each unit only sums its neighbours' votes, yet together they recall whole images."
+              ]
+            }
+          ],
+          [
+            {
+              "type": "bullets",
+              "items": [
+                "A gentle push is enough, as when a hint brings back a word on the tip of your tongue."
+              ]
+            }
+          ],
+          [
+            {
+              "type": "bullets",
+              "items": [
+                "As in the landscape: push the state over the hill into the right valley, and running the network carries it all the way down."
+              ]
+            }
+          ]
+        ]
+      },
+      {
+        "fragment": false,
+        "blocks": [
+          {
+            "type": "title",
+            "text": "The 2024 Prize"
+          },
+          {
+            "type": "image",
+            "columns": 2,
+            "cellWidth": 130,
+            "cellHeight": 170,
+            "items": [
+              {
+                "src": "https://www.nobelprize.org/images/165779-portrait-medium.jpg",
+                "alt": "Portrait of John J. Hopfield",
+                "caption": "John J. Hopfield"
+              },
+              {
+                "src": "https://www.nobelprize.org/images/165768-portrait-medium.jpg",
+                "alt": "Portrait of Geoffrey Hinton",
+                "caption": "Geoffrey Hinton"
+              }
+            ]
+          },
+          {
+            "type": "quote",
+            "text": "for foundational discoveries and inventions that enable machine learning with artificial neural networks"
+          },
+          {
+            "type": "source",
+            "text": "nobelprize.org/prizes/physics/2024/summary · Photos © Nobel Prize Outreach (Nanaka Adachi, Clément Morin)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "layout": "references",
+    "title": "References",
+    "groups": [
+      {
+        "title": "The Classic Network",
+        "items": [
+          {
+            "name": "The original Hopfield network (1982)",
+            "title": "Neural networks and physical systems with emergent collective computational abilities",
+            "href": "https://doi.org/10.1073/pnas.79.8.2554"
+          },
+          {
+            "name": "How many patterns it can store (1985)",
+            "title": "Storing infinite numbers of patterns in a spin-glass model of neural networks",
+            "href": "https://doi.org/10.1103/PhysRevLett.55.1530"
+          }
+        ]
+      },
+      {
+        "title": "Modern Versions",
+        "items": [
+          {
+            "name": "Steeper energy, far more memories (2016)",
+            "title": "Dense Associative Memory for Pattern Recognition",
+            "href": "https://arxiv.org/abs/1606.01164"
+          },
+          {
+            "name": "Continuous units and a softmax energy (2020)",
+            "title": "Hopfield Networks is All You Need",
+            "href": "https://arxiv.org/abs/2008.02217"
+          }
+        ]
+      },
+      {
+        "title": "Recognition",
+        "items": [
+          {
+            "name": "Nobel Prize to Hopfield and Hinton (2024)",
+            "title": "The Nobel Prize in Physics 2024",
+            "href": "https://www.nobelprize.org/prizes/physics/2024/summary/"
+          },
+          {
+            "name": "Why the prize reaches neuroscience (2024)",
+            "title": "Nobel honors for John Hopfield, who ushered attractor dynamics into neuroscience",
+            "href": "https://doi.org/10.1016/j.neuron.2024.11.002"
+          },
+          {
+            "name": "How both laureates' ideas built modern AI (2025)",
+            "title": "Profile of John Hopfield and Geoffrey Hinton: 2024 Nobel laureates in Physics",
+            "href": "https://doi.org/10.1073/pnas.2423094122"
+          }
+        ]
+      }
+    ]
+  }
+];
+/* === SLIDES:END === */
+
+Deck.mount({
+  slides:     SLIDES,
+  storageKey: 'core-hopfield-networks',
+  logo:       '../../visuals/assets/logo.svg',
+  templates:  window.Templates,
+});
+
+</script></body></html>

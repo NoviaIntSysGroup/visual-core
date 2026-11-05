@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Core Example</title>
+  <meta name="description" content="A showcase deck with every template, block, and widget, and one stepped figure.">
+
+  <link rel="stylesheet" href="../theme/theme.css">
+  <link rel="stylesheet" href="visuals/brand.css">
+  <link rel="stylesheet" href="../landing/landing.css">
+</head>
+<body>
+  <!-- Template: replace the logo, title, copy, preview, cards, and footer with the project's own. -->
+  <div class="landing-bar">
+    <a href="#top" aria-label="Core Example, top of page"><img src="visuals/assets/logo.svg" alt=""></a>
+    <nav aria-label="Page sections">
+      <a href="#gallery">Decks &amp; Figures</a>
+      <a href="#about">About</a>
+      <!-- Public repo: <a href="https://github.com/<org>/<repo>">GitHub</a> -->
+    </nav>
+  </div>
+
+  <header class="landing-hero" id="top">
+    <div>
+      <p class="landing-eyebrow">Example project</p>
+      <h1>Decks and Figures From One Set of Parts</h1>
+      <p class="landing-lead">Slide decks you edit on the slides, and publication figures that
+         export at 600 dpi. A diagram drawn once looks identical in a talk and in a paper.</p>
+      <div class="landing-actions">
+        <a class="landing-button is-primary" href="decks/hopfield-networks/index.html">Open the Hopfield deck</a>
+        <a class="landing-button" href="#gallery">Browse everything</a>
+      </div>
+    </div>
+    <a class="card" href="decks/hopfield-networks/index.html" aria-label="Open the Hopfield Networks deck">
+      <span class="thumb">
+        <iframe src="decks/hopfield-networks/index.html?thumb" tabindex="-1" aria-hidden="true" title=""></iframe>
+      </span>
+    </a>
+  </header>
+
+  <main class="landing">
+    <section class="landing-section" id="gallery">
+      <h2>Decks &amp; Figures</h2>
+
+      <nav class="tabs" role="tablist" aria-label="Content type">
+        <button class="tab is-active" data-tab="decks" role="tab" aria-selected="true">Decks</button>
+        <button class="tab" data-tab="figures" role="tab" aria-selected="false">Figures</button>
+      </nav>
+
+      <div class="panel is-active" data-panel="decks">
+        <div class="card-grid" aria-label="Available decks">
+          <a class="card" href="decks/hopfield-networks/index.html">
+            <span class="thumb">
+              <iframe data-src="decks/hopfield-networks/index.html?thumb" loading="lazy" tabindex="-1" aria-hidden="true" title=""></iframe>
+            </span>
+            <span class="meta">
+              <h3>Hopfield Networks</h3>
+              <p data-deck-meta>A short deck with a live network on its cover</p>
+            </span>
+          </a>
+          <a class="card" href="decks/showcase/index.html">
+            <span class="thumb">
+              <iframe data-src="decks/showcase/index.html?thumb" loading="lazy" tabindex="-1" aria-hidden="true" title=""></iframe>
+            </span>
+            <span class="meta">
+              <h3>Core Showcase</h3>
+              <p data-deck-meta>Every template, block, and widget</p>
+            </span>
+          </a>
+        </div>
+      </div>
+
+      <div class="panel" data-panel="figures">
+        <div class="card-grid" aria-label="Available figures">
+          <a class="card" href="figures/hopfield-landscape/index.html">
+            <span class="thumb">
+              <iframe data-src="figures/hopfield-landscape/index.html?thumb" loading="lazy" tabindex="-1" aria-hidden="true" title=""></iframe>
+            </span>
+            <span class="meta">
+              <h3>Hopfield Landscape</h3>
+              <p data-figure-meta>Publication figure</p>
+            </span>
+          </a>
+          <a class="card" href="figures/hopfield-heart-weight/index.html">
+            <span class="thumb">
+              <iframe data-src="figures/hopfield-heart-weight/index.html?thumb" loading="lazy" tabindex="-1" aria-hidden="true" title=""></iframe>
+            </span>
+            <span class="meta">
+              <h3>Hopfield Heart Weight</h3>
+              <p data-figure-meta>Publication figure</p>
+            </span>
+          </a>
+          <a class="card" href="figures/hopfield-heart-energy/index.html">
+            <span class="thumb">
+              <iframe data-src="figures/hopfield-heart-energy/index.html?thumb" loading="lazy" tabindex="-1" aria-hidden="true" title=""></iframe>
+            </span>
+            <span class="meta">
+              <h3>Hopfield Heart Energy</h3>
+              <p data-figure-meta>Publication figure</p>
+            </span>
+          </a>
+          <a class="card" href="figures/hopfield-heart-update/index.html">
+            <span class="thumb">
+              <iframe data-src="figures/hopfield-heart-update/index.html?thumb" loading="lazy" tabindex="-1" aria-hidden="true" title=""></iframe>
+            </span>
+            <span class="meta">
+              <h3>Hopfield Heart Update</h3>
+              <p data-figure-meta>Publication figure</p>
+            </span>
+          </a>
+          <a class="card" href="figures/hopfield-state/index.html">
+            <span class="thumb">
+              <iframe data-src="figures/hopfield-state/index.html?thumb" loading="lazy" tabindex="-1" aria-hidden="true" title=""></iframe>
+            </span>
+            <span class="meta">
+              <h3>Hopfield State</h3>
+              <p data-figure-meta>Publication figure</p>
+            </span>
+          </a>
+          <a class="card" href="figures/example-steps/index.html">
+            <span class="thumb">
+              <iframe data-src="figures/example-steps/index.html?thumb" loading="lazy" tabindex="-1" aria-hidden="true" title=""></iframe>
+            </span>
+            <span class="meta">
+              <h3>Example Steps</h3>
+              <p data-figure-meta>Publication figure</p>
+            </span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="landing-section landing-about" id="about">
+      <h2>About This Project</h2>
+      <p>The core's own example: two decks and six figures, built only from shared parts. Open it to
+         see a change to the core without a project, or copy this page to start a new one.</p>
+      <div class="landing-points">
+        <div>
+          <h3>Present</h3>
+          <p>Reveal.js decks with shared templates, an on-slide editor, and PDF export.</p>
+        </div>
+        <div>
+          <h3>Publish</h3>
+          <p>Figures on a centimetre canvas, exported as SVG, 600 dpi PNG, or vector PDF.</p>
+        </div>
+        <div>
+          <h3>Reuse</h3>
+          <p>A figure drops onto a slide or into another figure unchanged.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="landing-footer">Core Example</footer>
+
+  <script src="../landing/landing.js"></script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+/* Default appearance for the node/edge diagram kit (core/drawing-kit/diagram/diagram.js).
+   Geometry comes from JS; this file only styles, via theme tokens. Each token
+   falls back to a standalone default when no theme is loaded. Components
+   restyle by mapping these to their own vocabulary or overriding the tokens. */
+
+.diagram {
+  --diagram-edge-color: var(--edges, currentColor);
+  --diagram-edge-width: var(--line-width-strong, 1px);
+  --diagram-node-fill: var(--graphic-soft, transparent);
+  --diagram-node-stroke: var(--border, currentColor);
+  --diagram-node-stroke-width: var(--line-width-strong, 1px);
+  --diagram-node-opacity: 1;
+  --diagram-label-color: var(--text, currentColor);
+  /* The figure font, unconditionally — NOT var(--f-body). A label's width is
+     geometrically coupled to the box it sits in, so the typeface has to be the
+     same wherever the drawing is placed; a diagram that read Arial in a figure
+     and system-ui on a slide would lay out differently on the two surfaces.
+     Published by config.js; the fallback is for a page without a theme. */
+  --diagram-label-font: var(--f-figure, Arial, Helvetica, "Liberation Sans", sans-serif);
+  --diagram-icon-primary: var(--graphic-primary, #4477AA);
+  --diagram-icon-secondary: var(--graphic-secondary, #EE6677);
+  --diagram-icon-surface: var(--diagram-node-fill);
+  --diagram-icon-detail: var(--diagram-label-color);
+  --diagram-icon-person: var(--text, currentColor);
+  --diagram-icon-person-opacity: 0.4;
+
+  /* Width is set inline by the kit (the viewBox width in pt), so a diagram is
+     portable/exact in figures and exports. Decks scale it up to fill the slide
+     via a deck-scoped override (see deck.css). Only height/display here. */
+  height: auto;
+  display: block;
+}
+
+.diagram-edge {
+  stroke: var(--diagram-edge-color);
+  stroke-width: var(--diagram-edge-width);
+  fill: none;
+}
+
+.diagram-edge.diagram-ruler {
+  stroke-width: var(--line-width, 0.5px);
+  opacity: 0.55;
+}
+
+/* ---- Debug frames -------------------------------------------------------
+   Debug frames: bounds outlines the kits always emit. Hidden here until the figure
+   chrome's Debug button puts `.debug-on` on <body>; figure.js strips them from every
+   export. Three levels, each with its own hue and dash. */
+.debug-frame {
+  display: none;
+}
+
+body.debug-on .debug-frame {
+  display: block;
+  fill: none;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;   /* same weight at every nesting depth */
+}
+
+body.debug-on .debug-frame--page      { stroke: var(--graphic-primary, #4477AA);   stroke-dasharray: 6 4; }
+body.debug-on .debug-frame--nest      { stroke: var(--graphic-tertiary, #228833);  stroke-dasharray: 4 4; }
+body.debug-on .debug-frame--component { stroke: var(--graphic-secondary, #EE6677); stroke-dasharray: 2 3; }
+
+.diagram-arrowhead {
+  fill: var(--diagram-edge-color);
+}
+
+.diagram-node {
+  opacity: var(--diagram-node-opacity);
+}
+
+.diagram-node-frame {
+  fill: var(--diagram-node-fill);
+  stroke: var(--diagram-node-stroke);
+  stroke-width: var(--diagram-node-stroke-width);
+}
+
+/* Font SIZE is emitted inline by the kit (from Diagram.defaults.fontSize, kept
+   linked to lineHeight); only family + colour are styled here. */
+.diagram-node-label {
+  fill: var(--diagram-label-color);
+  font-family: var(--diagram-label-font);
+}
+
+.diagram-node-icon {
+  --icon-primary: var(--diagram-icon-primary);
+  --icon-secondary: var(--diagram-icon-secondary);
+  --icon-surface: var(--diagram-icon-surface);
+  --icon-detail: var(--diagram-icon-detail);
+  --icon-person: var(--diagram-icon-person);
+  --icon-person-opacity: var(--diagram-icon-person-opacity);
+}

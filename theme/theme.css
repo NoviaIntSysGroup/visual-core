@@ -1,0 +1,105 @@
+/* ═══════════════════════════════════════════════════════════
+   THEME · one visual source of truth for decks, figures, the landing page and the chrome.
+   Colours and fonts are neutral defaults that visuals/brand.css, loaded after, overrides; every
+   other token is the core's. JS-side settings live in config.js.
+═══════════════════════════════════════════════════════════ */
+
+:root {
+  /* Semantic color usage. */
+  /* Text: generic copy colors; soft is for subtitles, captions, and quiet chrome. */
+  --text:          #222222;
+  --text-soft:     color-mix(in srgb, var(--text) 80%, transparent);
+  /* Background: slide/page canvas only, not panels or graphic shapes. */
+  --background:    #FAFAFA;
+  --background-plain: #FFFFFF;
+  /* Lines: borders frame boxes; edges connect diagram, graph, and ruler elements. */
+  --border:        #9A9A9A;
+  --edges:         #9A9A9A;
+  --line-width:    0.5px;
+  --line-width-strong: 1px;
+  /* Accent: one brand hue with default/strong variants. */
+  --accent:        #5F87B0;
+  --accent-strong: #43678D;
+  /* Graphics: surfaces, icons, and other visual elements. */
+  --graphic-primary:   #7FA4C9;
+  --graphic-secondary: #8CC3AB;
+  --graphic-tertiary:  #E2B07E;
+  --graphic-neutral:   #DDDDDD;
+  --graphic-soft:      #FFFFFF;
+  /* Graphic tints: the faint fill of a surface carrying its own hue, blended into the
+     canvas rather than transparency, since PowerPoint mishandles exported rgba().
+     Never re-derive one at the call site. A decorative wash (widgets/wash.css) has
+     its own closed scale of strengths, so retuning it never repaints a diagram box. */
+  --tint-strength:             20%;
+  --wash-strength:             30%;
+  --wash-strength-strong:      50%;
+  --wash-strength-very-strong: 70%;
+  --graphic-primary-tint:   color-mix(in srgb, var(--graphic-primary)   var(--tint-strength), var(--background));
+  --graphic-secondary-tint: color-mix(in srgb, var(--graphic-secondary) var(--tint-strength), var(--background));
+  --graphic-tertiary-tint:  color-mix(in srgb, var(--graphic-tertiary)  var(--tint-strength), var(--background));
+  /* Shadows: interactive elements such as buttons and cards. */
+  --shadow:        0 var(--s2) var(--s5) color-mix(in srgb, black 10%, transparent);
+  --shadow-hover:  0 var(--s3) var(--s6) color-mix(in srgb, black 20%, transparent);
+  /* Dimmed: content stepped back from the spotlight, or a control switched off. */
+  --opacity-dim:   0.45;
+
+  /* Typography */
+  --f-display: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+               'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+  --f-body:    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+               'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+  --f-mono:    ui-monospace, 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace;
+
+  /* Type scale in points (1 canvas unit = 1pt on the 960×540 page; written in px
+     because CSS px == our point), for deck slides and the figures' own CSS. Figure
+     native text uses Config.figure.type instead. --t-base (16pt) is the slide floor;
+     --t-sm/--t-xs are for handout-only text. See SLIDE-STYLE.md. */
+  --t-xs:   10px;
+  --t-sm:   12px;
+  --t-base: 16px;
+  --t-md:   20px;
+  --t-lg:   24px;
+  --t-xl:   28px;
+
+  /* Font weights, named by role: medium for headings and quiet standalone lines;
+     semibold for labels that name rather than speak (caption, th, toc number,
+     chrome); bold for strong emphasis and figure titles. */
+  --w-medium:   500;
+  --w-semibold: 600;
+  --w-bold:     700;
+
+  /* Spacing (4pt grid) */
+  --s1:  4px;
+  --s2:  8px;
+  --s3:  12px;
+  --s4:  16px;
+  --s5:  20px;
+  --s6:  24px;
+  --s8:  32px;
+  --s10: 40px;
+  --s12: 48px;
+
+  /* Icon system — absolute stroke widths, in the same point space as the line
+     widths above (1.4x the strong line, so icons stay legible at diagram size).
+     Icons.place() divides them by the placement scale, so an icon renders at
+     exactly these widths whatever size it is placed at. */
+  --icon-stroke: 1.4px;
+  --icon-stroke-thin: 1.15px;
+  --icon-detail-stroke: 0.95px;
+
+  /* Scale of a drawing imported onto a slide, and of the figure page's preview:
+     a 10pt label reads 15pt. */
+  --diagram-scale: 1.5;
+
+  /* Chrome UI — the toolbar (chrome.css) and the figure page around it (figure.css).
+     Non-scaled surfaces, so literal screen px here, not the point-valued scale above. */
+  --chrome-text:   14px;
+  --chrome-radius: 8px;
+  --chrome-font:   var(--w-semibold) var(--chrome-text)/1 var(--f-body);
+
+  /* Motion */
+  --ease:     cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --dur-fast: 200ms;
+  --dur-mid:  400ms;
+  --dur-slow: 600ms;
+}

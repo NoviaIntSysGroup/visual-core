@@ -1,0 +1,198 @@
+/* Image — appearance of the `image` block (image.js); geometry arrives as custom
+   properties. Reading order: the grid, the item, picture sizing, then slot sizing and
+   what a slot holds. */
+.deck-image {
+  display: grid;
+  grid-template-columns: repeat(var(--image-cols, 1), minmax(0, 1fr));
+  gap: var(--s2);
+  margin: 0;
+}
+
+/* One item: the picture or slot, and the caption under it, centred on one axis. */
+.deck-image-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+}
+
+/* A caption fills its item's width but never widens it: `contain` gives it no
+   intrinsic width of its own, so a long caption wraps under its picture instead
+   of growing a fixed-width slot's track. */
+.deck-image-item > .deck-caption {
+  width: 100%;
+  contain: inline-size;
+}
+
+/* ── Picture sizing ───────────────────────────────────────────────────────────
+   A picture takes its natural size, capped at its share of the column.
+   `maxHeight` caps how tall it may stand; `contain` turns the cap into a scale
+   instead of a squash, and since CSS then shrinks the width too, auto margins
+   keep the picture on its caption's axis. */
+.deck-image-picture {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: var(--image-max-height, none);
+  object-fit: contain;
+  margin-inline: auto;
+}
+
+/* ── Slot sizing ──────────────────────────────────────────────────────────────
+   The slot an item sits in, with its content centred on both axes. It fills its
+   track's width and is square, so "the same size" needs no number until the
+   slide wants one. `overflow: hidden`
+   clips a `cover` picture to the slot, and a surface's rounded corners with it. */
+.deck-image-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 1;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* `surface: 'soft'`: a filled, rounded slot — what makes a row of vendor artwork
+   read as a set, when the files arrive with wildly different padding and
+   backgrounds. The rule is a hairline whose quiet comes from its VALUE: the slot
+   takes --graphic-neutral, the decorative-line token, so the edge is found
+   rather than announced and the fill carries the grouping. */
+.deck-image-soft .deck-image-cell {
+  border-radius: var(--s2);
+  background: var(--graphic-soft);
+  border: var(--line-width) solid var(--graphic-neutral);
+}
+
+/* `surface: 'portrait'`: a face photo, round, bordered and cropped to fill, with
+   `cellWidth` as its diameter. The fill shows while the file loads, or if it never
+   does. The bottom margin gives the curved edge room above what follows. */
+.deck-image-portrait {
+  margin-bottom: var(--s3);
+}
+
+.deck-image-portrait .deck-image-cell {
+  display: block;
+  border-radius: 50%;
+  background: var(--graphic-neutral);
+  border: var(--line-width) solid var(--border);
+}
+
+.deck-image-portrait .deck-image-mark {
+  object-fit: cover;
+}
+
+/* ...but no margin inside a row, where the column's block gap already separates the
+   row from what follows. */
+.deck-block-row-cell > .deck-image-portrait {
+  margin-bottom: 0;
+}
+
+/* `padding: true`: inset the content from the slot's edge. */
+.deck-image-padded .deck-image-cell {
+  padding: var(--s2);
+}
+
+/* `cellWidth` / `cellHeight` (points): every slot a fixed box instead of filling
+   its 1fr track. Fixed tracks replace the fluid ones so the grid itself shrinks
+   to its content. Either may be given alone: the track sizes to `max-content`
+   when `cellWidth` is unset, which — because `aspect-ratio` contributes to a
+   box's intrinsic size — resolves to the width `cellHeight` and the ratio imply. */
+.deck-image-fixed {
+  width: fit-content;
+  grid-template-columns: repeat(var(--image-cols, 1), var(--image-cell-width, max-content));
+}
+
+.deck-image-fixed .deck-image-cell {
+  width: var(--image-cell-width, auto);
+  height: var(--image-cell-height, auto);
+}
+
+/* `width` / `height` (points): the GRID a fixed box, split evenly across its
+   columns and rows. `aspect-ratio` moves to the grid, filling in whichever of
+   the two is missing; slots need not come out square. */
+.deck-image-boxed {
+  width: var(--image-width, auto);
+  height: var(--image-height, auto);
+  aspect-ratio: 1;
+  grid-template-columns: repeat(var(--image-cols, 1), 1fr);
+  grid-template-rows: repeat(var(--image-rows, 1), 1fr);
+}
+
+.deck-image-boxed .deck-image-item {
+  min-height: 0;
+}
+
+.deck-image-boxed .deck-image-cell {
+  flex: 1 1 auto;
+  min-height: 0;
+  aspect-ratio: auto;
+}
+
+/* `stretch`: the stated height stays, and the width is whatever the column has
+   spare instead of being derived from the ratio — a row of wordmark logos,
+   where the slide budgets a height and wants the marks as wide as it allows. */
+.deck-image-fixed.deck-image-stretch {
+  width: auto;
+  grid-template-columns: repeat(var(--image-cols, 1), minmax(0, 1fr));
+}
+
+.deck-image-fixed.deck-image-stretch .deck-image-cell {
+  aspect-ratio: auto;
+  width: 100%;
+}
+
+.deck-image-boxed.deck-image-stretch {
+  width: auto;
+  aspect-ratio: auto;
+}
+
+/* A picture in a slot. `contain` by default: a trademark may be scaled but not
+   cut, and the mark touches the slot's nearer edges whatever its file size,
+   which the equal-area pass assumes. `--image-mark-scale` (that pass, in
+   image.js) then shrinks it on both axes, on `transform` alone so it layers
+   over every fit the same way. */
+.deck-image-mark {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform: scale(var(--image-mark-scale, 1));
+}
+
+/* `fit: 'cover'`: fill the slot and clip the overflow, centred — for a source
+   picture with empty margin baked in. Never for a logo. */
+.deck-image-cover .deck-image-mark {
+  object-fit: cover;
+}
+
+/* An inline icon fills its slot: Icons.svg() already normalizes it within a square
+   frame. --icon-primary carries the block's `tint`, defaulting to
+   --graphic-primary. */
+.deck-image-cell .icon {
+  display: block;
+  width: 100%;
+  height: 100%;
+  --icon-primary: var(--image-tint, var(--graphic-primary));
+}
+
+/* The stand-in for a picture with no file yet. It takes .deck-caption's size and
+   weight: it is the label OF a slot, read off it the way a caption
+   is. Quieted, so a grid of names never
+   outweighs the column's own text. */
+.reveal .deck-image-placeholder {
+  margin: 0;
+  color: var(--text-soft);
+}
+
+/* `widthPercent` (0-100): the whole block's width as a percent of the column, centred,
+   and its pictures filling that width. Last, so it wins over the sizing modes. */
+.deck-image.deck-image-narrowed {
+  width: var(--image-width-percent);
+  margin-inline: auto;
+}
+
+.deck-image-narrowed .deck-image-picture {
+  width: 100%;
+}

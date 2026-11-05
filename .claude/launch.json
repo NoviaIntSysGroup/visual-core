@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "deck-preview",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["run", "tools/serve.js"],
+      "port": 8100,
+      "autoPort": true
+    }
+  ]
+}

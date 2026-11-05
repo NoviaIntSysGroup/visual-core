@@ -1,0 +1,29 @@
+/* Figure import — the `figure` block: an imported figure page plus the markers
+   that step it.
+   The figure's SIZE is not set here: it comes from the deck's one import rule
+   (`.reveal .figure` in deck.css), the same rule that scales a placed
+   chart. This file only centres the result. */
+
+.figure-import {
+  width: 100%;
+  /* Set inline by figure-import.js from the block's `maxHeight`. No !important:
+     capping this container shrinks what the svg's inline `max-width:100%` resolves
+     against. */
+  max-width: var(--figure-import-max-width, none);
+  margin: 0 auto;
+}
+
+/* A centred columns grid (`align: "center"`) shrink-wraps its items. That would
+   leave the import rule's `min(100%, …)` resolving against a max-content box and
+   silently collapse the figure to its authored size — a 1.0x render that looks
+   plausible rather than broken. Stretch the column holding a figure so the
+   percentage always has a definite track to measure against. */
+.deck-columns-grid > *:has(.figure-import) {
+  justify-self: stretch;
+}
+
+/* .figure is already display:block (figure.css), so auto margins centre it at
+   whatever width the import rule resolved to. */
+.figure-import-host svg {
+  margin: 0 auto;
+}

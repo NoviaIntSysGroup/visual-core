@@ -1,0 +1,586 @@
+/* Shared slide templates. */
+
+/* Hero cover. */
+.hero-slide {
+  padding: var(--s6);
+  background: var(--background);
+  color: var(--text);
+}
+
+.hero-panel {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  border-radius: var(--s4);
+  overflow: hidden;
+  border: var(--line-width) solid var(--border);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  width: 70%;
+  padding: 0 var(--s12) var(--s12);
+}
+
+/* The cover's subtitle takes the h2 size while staying a `p` — it is supporting
+   prose, not a section heading, on the only slide read with nothing else
+   competing for attention (SLIDE-STYLE.md). */
+.hero-content p {
+  margin-top: var(--s4);
+  max-width: calc(var(--s12) * 12);
+  font-size: var(--t-md);
+  color: var(--text-soft);
+}
+
+/* The byline is the speaker, not the pitch: back down to the slide floor so it
+   sits below the subtitle in the hierarchy. */
+.hero-content .hero-byline {
+  margin-top: var(--s2);
+  font-size: var(--t-base);
+  font-weight: var(--w-medium);
+  color: var(--text);
+}
+
+/* The content-slide frame, shared by the columns and toc layouts: centred in the
+   canvas, with one gap between the slide title and whatever follows it. The two
+   layouts had drifted to different gaps (--s4 and --s8) for no reason; they are
+   the same relationship, so they get one rule. */
+.deck-columns-slide,
+.deck-toc-slide,
+.deck-references-slide {
+  justify-content: center;
+  padding: var(--s5) var(--s6);
+  gap: var(--s8);
+  background: var(--background);
+  font-family: var(--f-body);
+  color: var(--text);
+}
+
+.deck-columns-slide > h1,
+.deck-toc-slide > h1,
+.deck-references-slide > h1 {
+  text-align: center;
+}
+
+/* The columns slide's lead-in: a centred row over the grid, at full strength. It sits
+   a tighter --s5 from the title, in place of the slide's --s8 gap; the gap below it
+   stays --s8. */
+.reveal .deck-slide-lead {
+  margin-top: calc(var(--s5) - var(--s8));
+  max-width: calc(var(--s12) * 14);
+  align-self: center;
+  text-align: center;
+}
+
+/* The columns slide's closing line: a centred, quieted row under the grid. It sits a
+   tighter --s5 from the row above, in place of the slide's --s8 gap. */
+.reveal .deck-slide-closing {
+  margin-top: calc(var(--s5) - var(--s8));
+  text-align: center;
+  color: var(--text-soft);
+}
+
+.deck-columns-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--deck-columns-count), minmax(0, 1fr));
+  align-items: stretch;
+}
+
+.deck-columns-grid[data-halign="center"] {
+  justify-items: center;
+}
+
+.deck-columns-grid > * {
+  padding: 0 var(--s3);
+}
+
+/* The accent inside a column (a quote's rule, a subhead). One hue across all columns,
+   so colour doesn't suggest meaning by position. A hue that carries meaning stays
+   explicit: see .deck-accent. */
+.deck-columns-grid > * {
+  --column-accent: var(--accent);
+}
+
+/* Dividers between columns: a border-left on every column after the first, so a
+   divider steps in with the column on its right. Where that column is already on
+   screen (`fragment: false`), the stepping column on the left carries it as a
+   border-right: a divider belongs to whichever of its two columns appears last. */
+.deck-columns-grid[data-dividers="true"] > * + * {
+  border-left: var(--line-width) solid var(--edges);
+}
+
+.deck-columns-grid[data-dividers="true"] > .fragment:has(+ :not(.fragment)) {
+  border-right: var(--line-width) solid var(--edges);
+}
+
+/* ...and the always-on column on its right must then not draw one too, or the
+   boundary would carry two rules. */
+.deck-columns-grid[data-dividers="true"] > .fragment:has(+ :not(.fragment)) + * {
+  border-left: 0;
+}
+
+/* Per-gap dividers (`"dividers": [false, true, false]`): the template marks the
+   columns that carry a left rule. Drawn flat — none of the fragment-flip above —
+   for a row shown all at once, e.g. one that pairs a cover with its text and
+   wants a rule only between the pairs. */
+.deck-columns-grid > [data-divider="true"] {
+  border-left: var(--line-width) solid var(--edges);
+}
+
+/* A plain (non-figure) column: one vertical rhythm for whatever it stacks.
+   Flex so a column can be aligned within the row (a portrait card centred
+   against text columns, say) without the deck reaching for a layout of its own. */
+.deck-column-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.deck-column-content > * + * {
+  margin-top: var(--s5);
+}
+
+/* Centred against the row rather than hanging from its top edge — for a column
+   that is a card, not a stack of prose. Columns of text must start on a shared
+   baseline, so this is opt-in per column, never the default. */
+.deck-column-content[data-valign="center"] {
+  justify-content: center;
+}
+
+/* The horizontal twin: the column's content pushed to its inner edge instead of
+   hanging on the outer one. Two equal tracks put a portrait at the far left and
+   the details that belong to it at the far right, with the width of the canvas
+   between them; leaning the left column inward closes that gap without either
+   of them leaving its column. */
+.deck-column-content[data-halign="end"] {
+  align-items: flex-end;
+}
+
+/* `halign: center`, for a row that reads as cards: `align-items` centres the blocks
+   in the column, `text-align` centres the lines inside a block. */
+.deck-column-content[data-halign="center"] {
+  align-items: center;
+  text-align: center;
+}
+
+/* A `video` block: the clip fills its share of the column at its own aspect.
+   A `maxHeight` cap shrinks it whole, centred in its share, like a capped image. */
+.deck-video {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: var(--video-max-height, none);
+  object-fit: contain;
+}
+
+/* A side-by-side pair inside one column: an image next to the text about it,
+   where the column's default stack would give the picture the full width and
+   push the words below the fold. Two equal halves, centred against each other —
+   unequal tracks are what the slide's own column grid is for. Full width so the
+   pair still spans its column when the column itself is centred. */
+.deck-block-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s4);
+  width: 100%;
+}
+
+/* ...unless the row asks to hang from its top edge. Centring is right for the
+   usual row — a picture beside the words about it, where two blocks of unlike
+   height read as a pair only when they share a middle. It is wrong for a row of
+   pictures: there the pictures are the line the eye follows, and a caption that
+   wraps to two lines would push its own picture up off that line. */
+.deck-block-row[data-valign="top"] {
+  align-items: flex-start;
+}
+
+/* The half itself. It is a cell rather than the block, so that a block which
+   cannot be stretched — a portrait, whose width and height are one diameter —
+   still gets a half of the row and simply sits at the start of it, on the same
+   edge as the rest of the column's blocks. Blocks that DO fill their width
+   (an image, a paragraph) fill the cell and nothing changes for them. */
+.deck-block-row-cell {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* Groups stacked in one cell keep the same gap as blocks inside a group. */
+.deck-block-row-cell > .deck-block-group + .deck-block-group {
+  margin-top: var(--s5);
+}
+
+/* The label under a visual, inside the wrapper its block renders: centred, smaller
+   than prose, and semibold to stay legible at that size. `margin-top` is the
+   picture-to-label gap for every captioned block. */
+.reveal .deck-caption {
+  margin-top: var(--s1);
+  text-align: center;
+  font-size: var(--t-sm);
+  font-weight: var(--w-semibold);
+}
+
+/* ── Prose variants ──────────────────────────────────────────────────────────
+   Presentation only: each is a `p` at the tag's --t-base from deck.css, except
+   .deck-source, which states its own smaller size. They compose with either
+   column kind. */
+
+/* A tagline under a heading: supporting prose, so it stays a `p` and is quieted
+   rather than promoted. Hugs the heading above it. */
+.reveal .deck-column-subtitle {
+  margin-top: var(--s1);
+  color: var(--text-soft);
+}
+
+/* A named part inside a column that already has a heading: the `h3` tier, in plain
+   --text because most subheads are a name. Air above and none below binds it to what
+   it introduces. */
+.reveal .deck-column-subhead {
+  margin-top: var(--s6);
+  color: var(--text);
+}
+
+/* ...unless the subhead really is one of a set (`"accent": true`), where the
+   column's accent binds the parts together. Colour only — the rules above still
+   apply, which is why this is a modifier and not a class of its own. */
+.reveal .deck-column-subhead.deck-subhead-accent {
+  color: var(--column-accent, var(--accent));
+}
+
+/* No gap at all: the subhead's own line box already gives the prose leading, so
+   what follows reads as the next line rather than a new block. Matched both as
+   a direct child of the column and one level down inside a `.deck-block-group`
+   (see below), since a bracketed group is the other place a subhead pairs
+   tightly with the block it opens. */
+.deck-column-content > .deck-column-subhead + *,
+.deck-block-group > .deck-column-subhead + * {
+  margin-top: 0;
+}
+
+/* Unless it opens the column: then there is nothing above to separate from, and
+   the extra air would push it off the baseline its neighbouring columns start
+   on. Columns in a row must begin together. */
+.deck-column-content > h2 + .deck-column-subhead {
+  margin-top: var(--s5);
+}
+
+/* A bracketed group of blocks in a column's `blocks` array. As a flex item, its `> *
+   + *` margin does not collapse with a leading subhead's, so the two would add up.
+   Zero the group's margin when a subhead leads it. */
+.deck-column-content > .deck-block-group:has(> .deck-column-subhead:first-child) {
+  margin-top: 0;
+}
+
+.deck-block-group > * + * {
+  margin-top: var(--s5);
+}
+
+/* `column.enter` picks how a stepping group looks before its press: `hidden` starts
+   from nothing, `fade` dimmed. Hand-rolled rather than `.fade-up`, so their
+   specificity stays below the dimming rule further down. */
+.deck-block-group.deck-block-group-enter-hidden {
+  opacity: 0;
+  transition: opacity var(--dur-mid) var(--ease);
+}
+
+.deck-block-group.deck-block-group-enter-fade {
+  opacity: var(--opacity-dim);
+  transition: opacity var(--dur-mid) var(--ease);
+}
+
+.deck-block-group.deck-block-group-enter-hidden.visible,
+.deck-block-group.deck-block-group-enter-fade.visible {
+  opacity: 1;
+}
+
+/* `column.highlight`'s spotlight: the column's trailing marker is always its last
+   press. Once visible, every group marked `.deck-block-group-dim` dims. The doubled
+   `.deck-block-group` keeps this rule above the enter rules, so a group that already
+   entered still dims. */
+.deck-column-content:has(> .deck-fragment-marker.visible) > .deck-block-group.deck-block-group-dim {
+  opacity: var(--opacity-dim);
+  transition: opacity var(--dur-mid) var(--ease);
+}
+
+/* `slide.highlight`'s spotlight: the slide's trailing marker is the one press
+   past the closing line. Once it is visible, the contents of every column tagged
+   data-dim (all but the named one) dim. Contents, not the column itself: the
+   dividers are the columns' own borders and must stay at full strength. */
+.deck-columns-slide:has(> .deck-fragment-marker.visible) .deck-columns-grid > [data-dim="true"] > * {
+  opacity: var(--opacity-dim);
+  transition: opacity var(--dur-mid) var(--ease);
+}
+
+/* A bulleted list. A hanging indent holds the marker, so a wrapped line aligns under
+   the text and formulas and inline markup stay in the line. `margin: 0` comes after the
+   column's `> * + *` gap at equal specificity, so a list sits tight against prose above
+   it; under a column title it takes the same gap as any other block. */
+.deck-column-list {
+  margin: 0;
+}
+
+.deck-column-content > h2 + .deck-column-list {
+  margin-top: var(--s5);
+}
+
+.deck-column-list li {
+  position: relative;
+  padding-left: var(--s4);
+}
+
+/* The marker is punctuation, not a signal: it takes the text colour it inherits.
+   An accented bullet would put emphasis on every item equally, which is the same
+   as putting it on none of them, while competing with the accents that do carry
+   meaning elsewhere in the column. */
+.deck-column-list li::before {
+  content: "\2022";
+  position: absolute;
+  left: 0;
+}
+
+/* A pulled quote, ruled in the column's own accent. */
+.reveal .deck-quote {
+  padding-left: var(--s3);
+  border-left: var(--s1) solid var(--column-accent, var(--accent));
+  font-style: italic;
+}
+
+/* The quiet follow-up under a quote or a block of prose — the "so what" line.
+   Quieted by colour, never by shrinking below the floor. */
+.reveal .deck-note {
+  color: var(--text-soft);
+}
+
+/* The `meter` block: three ascending bars, the first `level` lit in the primary
+   hue, beside a plain-text label. Bar heights are the ramp; the rest are grey. */
+.deck-meter {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+}
+
+.deck-meter-bars {
+  display: flex;
+  align-items: flex-end;
+  flex: none;
+  gap: var(--s1);
+  height: var(--s8);
+}
+
+.deck-meter-bar {
+  width: var(--s3);
+  border-radius: var(--s1);
+  background: var(--graphic-neutral);
+}
+
+.deck-meter-bar:nth-child(1) { height: 40%; }
+.deck-meter-bar:nth-child(2) { height: 70%; }
+.deck-meter-bar:nth-child(3) { height: 100%; }
+
+.deck-meter-bar[data-on] {
+  background: var(--graphic-primary);
+}
+
+/* The `table` block: quiet --text-soft cells under a semibold header, with
+   only two rules — under the header row and along the bottom. */
+.deck-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.deck-table th,
+.deck-table td {
+  padding: var(--s2) var(--s3);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.deck-table thead th,
+.deck-table tbody tr:last-child td {
+  border-bottom: var(--line-width) solid var(--border);
+}
+
+.deck-table th {
+  color: var(--text);
+  font-weight: var(--w-semibold);
+}
+
+.deck-table td {
+  color: var(--text-soft);
+}
+
+/* An `emphasis` row: full --text, one weight step up, still below the header. */
+.deck-table-emphasis td {
+  color: var(--text);
+  font-weight: var(--w-medium);
+}
+
+/* A citation — the repo, paper, or URL behind something on the slide. The one
+   prose block that IS shrunk: it exists for
+   the reader of the exported PDF, not for the room, and at body size it competes
+   with the content it is only the provenance of. Quieted to match, and never
+   reach for it to make body copy fit. */
+.reveal .deck-source {
+  font-size: var(--t-sm);
+  color: var(--text-soft);
+}
+
+/* A framed code/config snippet: its own boxed surface on the plain background,
+   so it reads as evidence rather than prose. Whitespace preserved and wrapped, since
+   the author's indentation is the point. Weight bumped to --w-medium because
+   monospace strokes at --t-sm blur under the canvas's scale-up more than the
+   body face does. */
+.reveal .deck-code {
+  margin: 0;
+  padding: var(--s3);
+  border: var(--line-width) solid var(--border);
+  border-radius: var(--s2);
+  background: var(--background-plain);
+  box-shadow: none;
+  width: auto;
+  font-family: var(--f-mono);
+  font-size: var(--t-sm);
+  font-weight: var(--w-medium);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  text-align: left;
+}
+
+/* Tighter than .deck-column-content's default var(--s5) gap, matching the
+   box's own internal padding rather than the wider prose-to-prose rhythm. */
+.deck-column-content > * + .deck-code {
+  margin-top: var(--s3);
+}
+
+/* Inline emphasis on a word carrying a *meaning* hue (agent = secondary), the
+   slide twin of the figure kit's .fig-accent. Not positional — this hue means
+   the same thing in every column. */
+.reveal .deck-accent {
+  color: var(--graphic-secondary);
+  font-weight: var(--w-bold);
+}
+
+/* Table of contents. */
+.deck-toc-list {
+  margin: 0 auto;
+  width: 100%;
+  /* Wide enough that a section's one-line description stays on one line, narrow
+     enough that the numbers still read as a column rather than the list
+     spanning the full 960pt page. */
+  max-width: calc(var(--s12) * 14);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s5);
+}
+
+.deck-toc-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
+  column-gap: var(--s5);
+  padding-left: var(--s4);
+  /* Transparent by default so the accented entry doesn't shift the list. */
+  border-left: var(--s1) solid transparent;
+  transition: opacity var(--dur-mid) var(--ease),
+              border-left-color var(--dur-mid) var(--ease);
+}
+
+/* A display enumerator read down the list's left edge, not prose. */
+.reveal .deck-toc-num {
+  font-family: var(--f-display);
+  font-size: var(--t-lg);
+  font-weight: var(--w-semibold);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--graphic-primary);
+  transition: color var(--dur-mid) var(--ease);
+}
+
+.deck-toc-title {
+  margin: 0;
+}
+
+.deck-toc-desc {
+  margin: var(--s1) 0 0;
+  color: var(--text-soft);
+}
+
+/* Section-divider variant: `active: <index>` accents one entry, quiets the rest.
+   Gated on the marker, so a `fragments: true` list holds its neutral state until
+   the first forward step. Reveal marks every fragment `visible` when fragments
+   are off, so outside fullscreen the highlighted state simply shows. */
+.deck-fragment-marker.visible + .deck-toc-list .deck-toc-item[data-state="active"] {
+  border-left-color: var(--accent);
+}
+
+.deck-fragment-marker.visible + .deck-toc-list .deck-toc-item[data-state="active"] .deck-toc-num {
+  color: var(--accent-strong);
+}
+
+.deck-fragment-marker.visible + .deck-toc-list .deck-toc-item[data-state="dim"] {
+  opacity: var(--opacity-dim);
+}
+
+.deck-fragment-marker.visible + .deck-toc-list .deck-toc-item[data-state="dim"] .deck-toc-num {
+  color: var(--text-soft);
+}
+
+/* References: a printout page, with print-sized text below its h1. One list fills
+   each of three divided columns to --deck-references-fill (a fraction of the
+   slide's content height) before moving to the next. A heading stays with its first
+   entry, an entry never splits; the bottom padding clears the footer logo. */
+.deck-references-slide {
+  --deck-references-fill: 0.8;
+  padding-bottom: var(--s12);
+}
+
+.reveal .deck-references-slide h2 { font-size: var(--t-sm); line-height: 1.3; }
+.reveal .deck-references-slide p,
+.reveal .deck-references-slide li { font-size: var(--t-xs); line-height: 1.3; }
+
+.deck-references-flow {
+  flex: none;
+  height: calc(var(--deck-references-fill) * 100%);
+  column-count: 3;
+  column-fill: auto;
+  column-gap: var(--s8);
+  column-rule: var(--line-width) solid var(--edges);
+}
+
+.deck-references-group + .deck-references-group {
+  margin-top: var(--s8);
+}
+
+/* A theme heading: accent colour over a thin rule spanning the column. */
+.deck-references-group > h2 {
+  break-after: avoid;
+  color: var(--accent);
+  padding-bottom: var(--s1);
+  border-bottom: var(--line-width) solid var(--border);
+}
+
+.deck-references-list > li {
+  margin-top: var(--s3);
+  break-inside: avoid;
+}
+
+.reveal .deck-reference {
+  color: var(--text-soft);
+}
+
+.reveal .deck-reference b {
+  font-weight: var(--w-semibold);
+  color: var(--text);
+}
+
+/* The source title keeps the entry's quiet colour; a thin underline marks it as clickable. */
+.reveal .deck-reference a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--border);
+  text-underline-offset: 0.15em;
+}

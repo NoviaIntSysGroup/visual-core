@@ -1,0 +1,55 @@
+/* Appearance for the chart kit (core/drawing-kit/charts/charts.js). Geometry comes from
+   JS; this file only styles. Each variable reads the project's theme token and
+   falls back to a standalone default when no theme is loaded: lines and text
+   to currentColor, fills to transparent, series to the kit's own three hues. */
+
+.chart {
+  --chart-axis-color: var(--edges, currentColor);
+  --chart-axis-width: var(--line-width-strong, 1px);
+  --chart-grid-width: var(--line-width, 0.5px);
+  --chart-grid-opacity: 0.35;
+  --chart-label-color: var(--text, currentColor);
+  --chart-tick-color: var(--text-soft, currentColor);
+  --chart-font: var(--f-figure, Arial, Helvetica, "Liberation Sans", sans-serif);
+  /* Paul Tol's "bright" scheme: colour-blind safe, used only without a theme. */
+  --chart-series-0: var(--graphic-primary, #4477AA);
+  --chart-series-1: var(--graphic-secondary, #EE6677);
+  --chart-series-2: var(--graphic-tertiary, #228833);
+  /* A muted series: context that takes no hue — a pale fill, outlined. */
+  --chart-muted-fill: var(--graphic-neutral, transparent);
+  --chart-muted-stroke: var(--edges, currentColor);
+
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.chart text {
+  font-family: var(--chart-font);
+  fill: var(--chart-label-color);
+}
+
+.chart .chart-tick {
+  fill: var(--chart-tick-color);
+}
+
+.chart-axis {
+  stroke: var(--chart-axis-color);
+  stroke-width: var(--chart-axis-width);
+}
+
+.chart-grid {
+  stroke: var(--chart-axis-color);
+  stroke-width: var(--chart-grid-width);
+  opacity: var(--chart-grid-opacity);
+}
+
+.chart-series-0 { fill: var(--chart-series-0); }
+.chart-series-1 { fill: var(--chart-series-1); }
+.chart-series-2 { fill: var(--chart-series-2); }
+
+.chart-series-muted {
+  fill: var(--chart-muted-fill);
+  stroke: var(--chart-muted-stroke);
+  stroke-width: var(--chart-grid-width);
+}

@@ -1,0 +1,19 @@
+/* Reusable pill badge. Consumes theme tokens only; no template coupling. */
+.badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+  margin-bottom: var(--s4);
+}
+
+/* Below the slide's size floor: the badge row is the funder/credit/date strip. */
+.badge {
+  font-family: var(--f-body);
+  font-size: var(--t-sm);
+  color: var(--text);
+  background: color-mix(in srgb, var(--graphic-soft) 50%, transparent);
+  border: var(--line-width) solid color-mix(in srgb, var(--border) 50%, transparent);
+  border-radius: calc(var(--s12) * 10);
+  padding: var(--s1) var(--s2);
+  backdrop-filter: blur(calc(var(--s1) * 0.5));
+}

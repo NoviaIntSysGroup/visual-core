@@ -1,0 +1,149 @@
+/* Timeline: one axis through the middle, entries evenly spaced on it, each
+   label in a band above or below on a stem from its circle. The track is solid
+   through the past and dashed into the future; future circles are hollow. Extra
+   air above sets it apart from the row it sits under. */
+.timeline-section {
+  --timeline-line: 2px;
+  --timeline-dot: 12px;
+  --timeline-reach: var(--s10);
+  --timeline-label-gap: var(--s2);
+  --timeline-label-height: 44px;
+  margin-top: var(--s5);
+}
+
+/* A picture makes both label bands taller; --timeline-image-height, the
+   tallest picture, is set by timeline.js. */
+.timeline-with-images {
+  --timeline-label-height: calc(var(--timeline-image-height) + 30px);
+}
+
+.reveal .timeline-title {
+  margin-bottom: var(--s3);
+}
+
+.timeline {
+  position: relative;
+  height: calc(2 * (var(--timeline-reach) + var(--timeline-label-gap) + var(--timeline-label-height)));
+}
+
+.timeline-track {
+  position: absolute;
+  top: calc(50% - var(--timeline-line) / 2);
+  left: 0;
+  right: 0;
+  border-top: var(--timeline-line) solid var(--edges);
+}
+
+.timeline-track-future {
+  border-top-style: dashed;
+}
+
+.reveal .timeline-entries {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+}
+
+/* Every entry spans the whole timeline, so its stem, circle and label step
+   in together; only the label takes clicks, for the editor. */
+.timeline-entry {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.timeline-stem {
+  position: absolute;
+  left: calc(var(--x) - var(--timeline-line) / 2);
+  height: var(--timeline-reach);
+  border-left: var(--timeline-line) solid var(--edges);
+}
+
+.timeline-above .timeline-stem { bottom: 50%; }
+.timeline-below .timeline-stem { top: 50%; }
+
+.timeline-dot {
+  position: absolute;
+  top: calc(50% - var(--timeline-dot) / 2);
+  left: calc(var(--x) - var(--timeline-dot) / 2);
+  box-sizing: border-box;
+  width: var(--timeline-dot);
+  height: var(--timeline-dot);
+  border: var(--timeline-line) solid var(--edges);
+  border-radius: 50%;
+  background: var(--edges);
+}
+
+.timeline-future .timeline-dot {
+  background: var(--background);
+}
+
+.timeline-milestone .timeline-dot {
+  border-color: var(--graphic-primary);
+  background: var(--graphic-primary);
+}
+
+.timeline-milestone.timeline-future .timeline-dot {
+  background: var(--background);
+}
+
+.timeline-milestone .timeline-stem {
+  border-left-color: var(--graphic-primary);
+}
+
+/* The date sits next to the axis on both sides, so the bands mirror. */
+.timeline-label {
+  position: absolute;
+  left: calc(var(--x) - var(--timeline-label-width) / 2);
+  display: flex;
+  flex-direction: column;
+  width: var(--timeline-label-width);
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: auto;
+}
+
+/* The end labels align to the axis ends instead of hanging past them. */
+.timeline-first .timeline-label {
+  left: 0;
+  text-align: left;
+}
+
+.timeline-last .timeline-label {
+  left: auto;
+  right: 0;
+  text-align: right;
+}
+
+.timeline-above .timeline-label {
+  flex-direction: column-reverse;
+  bottom: calc(50% + var(--timeline-reach) + var(--timeline-label-gap));
+}
+
+.timeline-below .timeline-label {
+  top: calc(50% + var(--timeline-reach) + var(--timeline-label-gap));
+}
+
+.reveal .timeline-entry p {
+  margin: 0;
+}
+
+.reveal .timeline-date {
+  font-size: var(--t-md);
+  font-weight: var(--w-semibold);
+  color: var(--text);
+}
+
+.reveal .timeline-text {
+  color: var(--text-soft);
+}
+
+.timeline-image {
+  display: block;
+  margin: var(--s1) auto 0;
+}
+
+.timeline-above .timeline-image { margin: 0 auto var(--s1); }
+
+.timeline-first .timeline-image { margin-left: 0; }
+.timeline-last .timeline-image { margin-right: 0; }

@@ -1,0 +1,56 @@
+/* ═══════════════════════════════════════════════════════════
+   CHROME · the one toolbar look, on deck and figure pages
+   Renders outside Reveal's scale transform, so sizes are literal screen px.
+   Where the toolbar sits is the surface's own: deck.css and figure.css.
+═══════════════════════════════════════════════════════════ */
+.chrome {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--f-body);
+  font-size: var(--chrome-text);
+}
+
+.chrome button,
+.chrome-status {
+  color: var(--text-soft);
+  border: 1px solid var(--border);
+  padding: 8px 16px;
+  border-radius: var(--chrome-radius);
+  box-shadow: var(--shadow);
+}
+
+.chrome button {
+  cursor: pointer;
+  background: var(--graphic-soft);
+  font: var(--chrome-font);
+  transition:
+    transform var(--dur-fast) var(--ease),
+    box-shadow var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease);
+}
+
+.chrome button:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-hover);
+  color: var(--text);
+}
+
+.chrome button:active {
+  transform: translateY(1px);
+}
+
+/* After hover and active, so a disabled button does not react to them. */
+.chrome button[disabled] {
+  cursor: not-allowed;
+  color: var(--text-soft);
+  opacity: var(--opacity-dim);
+  transform: none;
+  box-shadow: none;
+}
+
+.chrome button[aria-pressed="true"] {
+  color: var(--text);
+  border-color: var(--graphic-primary);
+  box-shadow: none;
+}
