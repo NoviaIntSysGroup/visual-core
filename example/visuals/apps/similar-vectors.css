@@ -1,0 +1,124 @@
+/* Similar vectors app: the vectors and the histogram side by side, each under its caption; the
+   template and view buttons under the vectors, the slider under the histogram, its track on the histogram's axis.
+   Shown at its own size, never scaled: each panel is as wide as its plot, whose size the script sets.
+   The panels share the grid's rows, so the two plots line up under captions of different heights. */
+.similar-vectors {
+  display: grid;
+  grid-template-columns: repeat(2, min-content);
+  grid-template-rows: repeat(3, auto);
+  grid-auto-flow: column;
+  justify-content: center;
+  gap: var(--s2) var(--s8);
+}
+.reveal .similar-vectors p { margin: 0; }
+.similar-vectors-panel { display: contents; }
+.similar-vectors-legend { align-self: end; }
+/* The count on a line of its own, its digits one width, so moving the range never rewraps the caption. */
+.similar-vectors [data-shows="count"] { display: block; font-variant-numeric: tabular-nums; }
+.similar-vectors-plot { display: block; }
+.similar-vectors-key {
+  display: inline-block;
+  width: var(--s5);
+  height: 3px;
+  margin-right: var(--s2);
+  vertical-align: middle;
+  border-radius: 2px;
+  background: var(--similar-vectors-hue);
+}
+.similar-vectors-key.is-x { margin-left: var(--s1); }
+/* With the vectors as images, each key is a pixel. */
+.similar-vectors-legend[data-view="image"] .similar-vectors-key { width: var(--s3); height: var(--s3); border-radius: 0; }
+
+/* One hue per vector, the dot-product app's: w's line and image, x's lines, images, bars, and the slider. */
+.similar-vectors .is-w { --similar-vectors-hue: var(--graphic-primary); }
+.similar-vectors .is-x { --similar-vectors-hue: var(--graphic-tertiary); }
+
+.similar-vectors-axis { stroke: var(--edges); stroke-width: var(--line-width-strong); }
+.similar-vectors-text {
+  fill: var(--text);
+  font-size: var(--t-sm);
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+.similar-vectors-text.is-end { text-anchor: end; }
+
+.similar-vectors-line path { fill: none; stroke: var(--similar-vectors-hue); stroke-linejoin: round; }
+.similar-vectors-line circle { fill: var(--similar-vectors-hue); }
+.similar-vectors-line.is-w path { stroke-width: 3; }
+.similar-vectors-line.is-x path { stroke-width: 1.25; }
+.similar-vectors-line.is-x { opacity: 0.85; }
+
+.similar-vectors-pixel { fill: var(--graphic-neutral); opacity: 0.4; }
+.similar-vectors-ink { fill: var(--similar-vectors-hue); }
+
+.similar-vectors-bar { fill: var(--graphic-neutral); }
+.similar-vectors-bar.is-x { fill: var(--similar-vectors-hue); }
+.similar-vectors-strip { fill: transparent; cursor: pointer; }
+
+.similar-vectors-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s2) var(--s5);
+}
+.similar-vectors-choices {
+  display: flex;
+  gap: var(--s1);
+}
+/* The view buttons sit at the far right, apart from the template buttons. */
+.similar-vectors-choices + .similar-vectors-choices { margin-left: auto; }
+
+/* The template and view buttons: quiet framed boxes, the current choice filled. */
+.similar-vectors button {
+  padding: var(--s1) var(--s3);
+  border: var(--line-width-strong) solid var(--border);
+  border-radius: var(--s2);
+  background: var(--graphic-soft);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--t-sm);
+  cursor: pointer;
+}
+.similar-vectors button.is-on {
+  border-color: var(--accent-strong);
+  background: var(--accent-strong);
+  color: var(--background-plain);
+}
+
+/* A thin neutral track, x's hue only over the picked range (its ends set inline as fractions of
+   the thumb's travel), and a thumb in x's hue. The script sets its width and left edge. */
+.similar-vectors-slider {
+  --similar-vectors-range: linear-gradient(to right,
+    var(--graphic-neutral) calc(var(--s4) / 2 + var(--similar-vectors-from) * (100% - var(--s4))),
+    var(--similar-vectors-hue) calc(var(--s4) / 2 + var(--similar-vectors-from) * (100% - var(--s4))),
+    var(--similar-vectors-hue) calc(var(--s4) / 2 + var(--similar-vectors-to) * (100% - var(--s4))),
+    var(--graphic-neutral) calc(var(--s4) / 2 + var(--similar-vectors-to) * (100% - var(--s4))));
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  height: var(--s4);
+  margin: 0;
+  background: transparent;
+}
+.similar-vectors-slider::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--similar-vectors-range);
+}
+.similar-vectors-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: var(--s4);
+  height: var(--s4);
+  margin-top: -6px;
+  border: none;
+  border-radius: 50%;
+  background: var(--similar-vectors-hue);
+}
+.similar-vectors-slider::-moz-range-track { height: 4px; border-radius: 2px; background: var(--similar-vectors-range); }
+.similar-vectors-slider::-moz-range-thumb {
+  width: var(--s4);
+  height: var(--s4);
+  border: none;
+  border-radius: 50%;
+  background: var(--similar-vectors-hue);
+}

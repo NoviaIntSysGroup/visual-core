@@ -1,5 +1,5 @@
-/* Hopfield background. Fills its parent with a wash and holds the open network on the right. */
-.hopfield-background {
+/* Hopfield network app. Fills its parent with a wash and holds the open network on the right. */
+.hopfield-network {
   position: absolute;
   inset: 0;
   border-radius: inherit;
@@ -11,9 +11,32 @@
 }
 
 /* On a hero, the title block centres vertically and its text wraps clear of the network. */
-.hero-panel:has(.hopfield-background) { justify-content: center; }
-.hero-panel:has(.hopfield-background) .hero-content { padding-bottom: 0; }
-.hero-panel:has(.hopfield-background) .hero-content p { max-width: calc(var(--s12) * 9); }
+.hero-panel:has(.hopfield-network) { justify-content: center; }
+.hero-panel:has(.hopfield-network) .hero-content { padding-bottom: 0; }
+.hero-panel:has(.hopfield-network) .hero-content p { max-width: calc(var(--s12) * 9); }
+
+/* With a note, the title block goes back to the bottom, leaving the top for the note. */
+.hero-panel:has(.hopfield-note) { justify-content: flex-end; }
+.hero-panel:has(.hopfield-note) .hero-content { padding-bottom: var(--s12); }
+
+/* A note written by hand, top left above the title block, slightly tilted; the same hand as
+   the unit-circle app's. System handwriting fonts: Windows, then macOS, then generic cursive. */
+.hopfield-note {
+  position: absolute;
+  left: var(--s12);
+  top: var(--s10);
+  z-index: 3;
+  transform: rotate(-2deg);
+  font-family: 'Segoe Print', 'Ink Free', 'Bradley Hand', 'Noteworthy', 'Chalkboard SE', cursive;
+  font-size: var(--t-md);
+  line-height: 1.3;
+  color: var(--text-soft);
+}
+.hopfield-note p { margin: 0; }
+.hopfield-note .hopfield-question {
+  margin-top: var(--s3);
+  color: var(--accent-strong);
+}
 
 .hopfield-net {
   position: relative;

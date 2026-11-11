@@ -16,9 +16,9 @@ recipe and the resulting file under the project's `visuals/assets/generated/`.
 
 It is a sibling of the drawing skills, and the *last* thing to reach for:
 
-- [`diagrams`](DIAGRAM-STYLE.md) — node/edge diagrams drawn in code.
-- [`figures`](FIGURE-STYLE.md) — publication figures composed from those.
-- [`slide-decks`](SLIDE-STYLE.md) — placing any of it on a slide.
+- [`diagrams`](../diagrams/SKILL.md) — node/edge diagrams drawn in code.
+- [`figures`](../figures/SKILL.md) — publication figures composed from those.
+- [`slide-decks`](../slide-decks/SKILL.md) — placing any of it on a slide.
 - **`illustrations` (this) — generated pictures.**
 
 ## When to use this
@@ -28,7 +28,7 @@ It is a sibling of the drawing skills, and the *last* thing to reach for:
 
 **Not** for anything structural. If the content is a process, a relationship, a
 comparison, or a hierarchy, it is a diagram — build it with
-[`diagrams`](DIAGRAM-STYLE.md), which stays editable, exports as vector, and
+[`diagrams`](../diagrams/SKILL.md), which stays editable, exports as vector, and
 recolours with the theme. An illustration earns its place only as a single
 evocative, human beat — a metaphor a diagram would flatten. Use them sparingly;
 one per stretch of deck, standing alone on its own slide.
@@ -129,7 +129,7 @@ Check the returned image before it goes into the repo:
 
 Then save it as `visuals/assets/generated/<kebab-case-name>.png` — named for what
 it *means* (`tool-no-manual.png`), not what it depicts — and place it on its own
-slide ([`slide-decks`](SLIDE-STYLE.md)):
+slide ([`slide-decks`](../slide-decks/SKILL.md)):
 
 ```json
 {

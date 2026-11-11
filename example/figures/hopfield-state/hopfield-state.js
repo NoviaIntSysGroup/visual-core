@@ -18,7 +18,7 @@
   };
 
   /* ---- Type --------------------------------------------------------------- */
-  var TEXT = { label: TYPE.label.size, body: TYPE.slideBody.size };
+  var TEXT = { label: TYPE.slideBody.size, body: TYPE.slideBody.size };
   var ROW  = { title: TEXT.body * 1.7, body: TEXT.body * 1.3, math: TEXT.body * 2 };
 
   /* ---- Colour ------------------------------------------------------------- */
@@ -171,7 +171,7 @@
     if (s.form === 'state') stateStrip(d);
     fig.place(d.render('hopfield-state-' + step), { x: 0, y: 0, w: PAGE.w });
 
-    fig.text(s.title, { x: g.textX, y: g.titleY, align: 'start', role: 'title' });
+    fig.text(s.title, { x: g.textX, y: g.titleY, align: 'start', role: 'slideBody', weight: 700 });
     fig.text(s.body, {
       x: g.textX, y: g.titleY + ROW.title, w: g.textW, align: 'start', role: 'slideBody', wrap: true, lineHeight: ROW.body
     });

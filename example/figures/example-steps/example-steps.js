@@ -16,7 +16,7 @@
 
   /* ---- Type --------------------------------------------------------------- */
   var TEXT = {
-    label:   TYPE.label.size,
+    label:   TYPE.slideBody.size,
     caption: TYPE.slideBody.size
   };
 

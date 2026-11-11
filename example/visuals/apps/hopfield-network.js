@@ -1,7 +1,8 @@
-/* Hopfield background for the hero cover: a live modern Hopfield network on a wash. It settles into one
-   of its stored shapes. Moving the cursor erases units, holding Shift draws them, and entering the
-   scramble box scrambles it once.
-   Exposes window.HopfieldBackground.render(slide), a hero `background`, and starts one loop. */
+/* Hopfield network, a project app: a live modern Hopfield network on a wash. It settles into one
+   of its stored shapes. Moving the cursor or a finger erases units, holding Shift draws them, and
+   entering the scramble box scrambles it once.
+   Exposes window.HopfieldNetwork.render(slide), placed as a hero `background`, and starts one loop;
+   a slide's `work` (lines) and `question` are written by hand top left. */
 (function () {
   var COLS = 35;
   var SIZE = COLS * COLS;
@@ -287,7 +288,7 @@
     last = now;
     var steps = Math.floor(carry / STEP);
     carry -= steps * STEP;
-    document.querySelectorAll('.hopfield-background').forEach(function (el) {
+    document.querySelectorAll('.hopfield-network').forEach(function (el) {
       var net = netFor(el);
       if (!STILL && !el.closest('section.present')) return;
       for (var s = 0; !STILL && s < steps; s++) {
@@ -299,23 +300,37 @@
     });
   }
 
-  function render() {
+  function note(slide) {
+    if (!slide.work && !slide.question) return '';
+    return '<div class="hopfield-note">'
+      + (slide.work || []).map(function (line) { return '<p>' + line + '</p>'; }).join('')
+      + (slide.question ? '<p class="hopfield-question">' + slide.question + '</p>' : '')
+      + '</div>';
+  }
+
+  function render(slide) {
     return ''
-      + '<div class="hopfield-background">'
+      + '<div class="hopfield-network">'
       +   window.Wash.render({ seed: 'hopfield-networks' })
       +   '<div class="hopfield-net">'
-      +     '<div class="hopfield-frame"><canvas class="hopfield-grid" aria-hidden="true"></canvas></div>'
+      +     '<div class="hopfield-frame" data-prevent-swipe><canvas class="hopfield-grid" aria-hidden="true"></canvas></div>'
       +     '<p class="hopfield-name">Hopfield Network</p>'
       +     '<p class="hopfield-status"></p>'
       +     '<p class="hopfield-scramble">Move the cursor here to scramble</p>'
       +   '</div>'
+      +   note(slide)
       + '</div>';
   }
 
   window.addEventListener('keydown', function (e) { if (e.key === 'Shift') cursor.drawing = true; });
   window.addEventListener('keyup', function (e) { if (e.key === 'Shift') cursor.drawing = false; });
   window.addEventListener('blur', function () { cursor.drawing = false; });
-  document.addEventListener('mousemove', function (e) {
+  /* A finger has no position between touches, so a touch starts from where it lands. */
+  document.addEventListener('pointerdown', function (e) {
+    cursor.x = e.clientX;
+    cursor.y = e.clientY;
+  });
+  document.addEventListener('pointermove', function (e) {
     cursor.drawing = e.shiftKey;
     cursor.dx += e.clientX - cursor.x;
     cursor.dy += e.clientY - cursor.y;
@@ -324,5 +339,5 @@
   });
   requestAnimationFrame(frame);
 
-  window.HopfieldBackground = { render: render };
+  window.HopfieldNetwork = { render: render };
 })();

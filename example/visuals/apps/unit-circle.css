@@ -1,0 +1,51 @@
+/* Unit circle app. Fills its parent with a wash and holds the circle on the right; the plane's
+   own look is the dot-product app's, in dot-product.css. */
+.unit-circle {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: var(--s8);
+}
+
+/* On a hero, the title block centres vertically and its text wraps clear of the circle. */
+.hero-panel:has(.unit-circle) { justify-content: center; }
+.hero-panel:has(.unit-circle) .hero-content { padding-bottom: 0; }
+.hero-panel:has(.unit-circle) .hero-content p { max-width: calc(var(--s12) * 9); }
+
+/* With a note, the title block goes back to the bottom, leaving the top for the note. */
+.hero-panel:has(.unit-circle-note) { justify-content: flex-end; }
+.hero-panel:has(.unit-circle-note) .hero-content { padding-bottom: var(--s12); }
+
+/* A dot product worked by hand, top left above the title block, slightly tilted.
+   System handwriting fonts: Windows, then macOS, then the browser's generic cursive. */
+.unit-circle-note {
+  position: absolute;
+  left: var(--s12);
+  top: var(--s10);
+  z-index: 3;
+  transform: rotate(-2deg);
+  font-family: 'Segoe Print', 'Ink Free', 'Bradley Hand', 'Noteworthy', 'Chalkboard SE', cursive;
+  font-size: var(--t-md);
+  line-height: 1.3;
+  color: var(--text-soft);
+}
+.unit-circle-note p { margin: 0; }
+.unit-circle-note .unit-circle-question {
+  margin-top: var(--s3);
+  color: var(--accent-strong);
+}
+
+/* Shown at its own size, never scaled: the script sets it, and draws the plane to fill it. */
+.unit-circle-plane {
+  position: relative;
+}
+
+.unit-circle-ring {
+  fill: none;
+  stroke: var(--edges);
+  stroke-width: var(--line-width-strong);
+}

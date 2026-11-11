@@ -1,0 +1,31 @@
+/* Hubel and Wiesel app: screen, cat, electrode, speaker, and oscilloscope, framed and hued as the
+   receptive-field figure; the bar takes the input hue, every spike the accent, the trace the
+   integrate-and-fire app's. */
+/* Shown at its own size, never scaled: the script sets the plot's width and height from its viewBox.
+   Over the screen the bar is the cursor. */
+.hubel-wiesel-plot { display: block; user-select: none; }
+.hubel-wiesel-hit { fill: transparent; cursor: none; }
+
+.hubel-wiesel-box { fill: var(--graphic-soft); stroke: var(--edges); stroke-width: var(--line-width-strong); }
+.hubel-wiesel-part,
+.hubel-wiesel-cat { fill: var(--graphic-soft); stroke: var(--edges); stroke-width: var(--line-width-very-strong); }
+.hubel-wiesel-line { fill: none; stroke: var(--edges); stroke-width: var(--line-width-strong); }
+.hubel-wiesel-line.is-ink { stroke: var(--text); }
+.hubel-wiesel-ink { fill: var(--text); }
+.hubel-wiesel-sight { fill: none; stroke: var(--edges); stroke-width: var(--line-width-strong); stroke-dasharray: 3.4 3.4; }
+.hubel-wiesel-probe { stroke: var(--text); stroke-width: var(--line-width-very-strong); }
+.hubel-wiesel-cable,
+.hubel-wiesel-sound { fill: none; stroke: var(--edges); stroke-width: var(--line-width-very-strong); }
+
+.hubel-wiesel-bar { fill: var(--graphic-tertiary); }
+.hubel-wiesel-neuron { fill: var(--accent-strong); }
+.hubel-wiesel-flash { fill: none; stroke: var(--accent-strong); stroke-width: 1.5; }
+
+.hubel-wiesel-trace { fill: none; stroke: var(--graphic-primary); stroke-width: 1.2; stroke-linejoin: round; }
+
+.hubel-wiesel-text {
+  fill: var(--text);
+  font-size: var(--t-sm);
+  text-anchor: middle;
+  dominant-baseline: central;
+}

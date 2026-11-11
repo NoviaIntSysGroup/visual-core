@@ -27,3 +27,10 @@
 .figure-import-host svg {
   margin: 0 auto;
 }
+
+/* The toolbar's notice that a figure is scaled below its intended size (figure-import.js). */
+#figure-scale-status {
+  background: var(--background);
+  border-color: var(--accent-strong);
+  cursor: help;
+}

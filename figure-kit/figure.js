@@ -271,7 +271,7 @@
   }
 
   function loadBytes(href) {
-    if (!window.fetch) return Promise.resolve(null);
+    if (!window.DEV_SERVER) return Promise.resolve(null);   // file:// forbids fetch
     return fetch(href).then(function (res) {
       if (!res.ok) return null;
       return res.blob().then(function (blob) {
@@ -282,7 +282,7 @@
           fr.readAsDataURL(blob);
         });
       });
-    }).catch(function () { return null; });   // file:// — the export suffers, the page doesn't
+    }).catch(function () { return null; });   // unreadable: the export is disabled, the page still renders
   }
 
   /* Resolve every href once. NEVER rejects: a figure whose bytes didn't come back
@@ -546,7 +546,8 @@
     var fig = opts.figure, name = opts.name || 'figure';
     var root = document.body;
     var meta = metadata(fig, opts, name);
-    window.FigureMeta = meta;
+    // Send the landing-page card its title and size; postMessage also crosses file:// origins.
+    if (window.parent !== window) window.parent.postMessage({ landingMeta: meta }, '*');
 
     /* Step support: opts.steps (total count) + opts.redraw(step) -> fig | string.
        When steps > 1 the chrome grows a Back / Next controller. */
@@ -578,10 +579,6 @@
     chrome.className = 'figure-chrome';
     chrome.innerHTML = '<h1>' + esc(meta.title) + '</h1>'
       + '<span class="figure-size">' + meta.sizeLabel + '</span>'
-      /* Only ever shown for a figure whose artwork couldn't be read for
-         embedding — see the exports check below. */
-      + '<span class="figure-note" hidden>Images need the dev server to embed — '
-      + 'bun run core/tools/serve.js</span>'
       + '<div class="chrome">'
       + stepHtml
       + '<button type="button" data-export="svg">Export SVG</button>'
@@ -608,12 +605,13 @@
 
     /* A figure whose images have no bytes cached can't produce a self-contained
        export, so it must not offer one that would quietly ship without them.
-       Disable the three exports and say why — the page itself renders fine, which
-       is exactly why a silent failure here would go unnoticed. */
+       Disable the three exports and say why on hover — the page itself renders fine,
+       which is exactly why a silent failure here would go unnoticed. */
     if (!embeddable(svg)) {
-      chrome.querySelector('.figure-note').hidden = false;
       ['svg', 'png', 'pdf'].forEach(function (kind) {
-        chrome.querySelector('[data-export="' + kind + '"]').disabled = true;
+        var btn = chrome.querySelector('[data-export="' + kind + '"]');
+        btn.disabled = true;
+        btn.title = 'Images need the dev server to embed — bun run core/tools/serve.js';
       });
     }
 
@@ -672,12 +670,6 @@
       if (stepped) M.draw(fig, step); else fig.nest({ x: 0, y: 0 }, M.draw);
       return fig;
     }
-
-    /* Publish the metadata BEFORE awaiting anything. The landing page reads
-       FigureMeta on the thumbnail iframe's `load`, which an image preload can
-       easily lose the race to — and the size label never depended on the
-       artwork anyway. mount() sets the same value again when it gets there. */
-    window.FigureMeta = metadata(M, { title: M.title }, M.name || 'figure');
 
     return preload(M.images).then(function () {
       return mount({

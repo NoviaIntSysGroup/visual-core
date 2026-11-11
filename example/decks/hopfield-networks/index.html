@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="../../../deck-kit/widgets/badge.css">
   <link rel="stylesheet" href="../../../deck-kit/widgets/wash.css">
   <link rel="stylesheet" href="../../../deck-kit/widgets/timeline.css">
-  <link rel="stylesheet" href="../../visuals/backgrounds/hopfield-background.css">
+  <link rel="stylesheet" href="../../visuals/apps/hopfield-network.css">
   <link rel="stylesheet" href="../../../deck-kit/figure-import.css">
   <link rel="stylesheet" href="../../../deck-kit/image.css">
   <link rel="stylesheet" href="../../../deck-kit/templates.css">
@@ -50,7 +50,7 @@
 <script src="../../../deck-kit/widgets/badge.js"></script>
 <script src="../../../deck-kit/widgets/wash.js"></script>
 <script src="../../../deck-kit/widgets/timeline.js"></script>
-<script src="../../visuals/backgrounds/hopfield-background.js"></script>
+<script src="../../visuals/apps/hopfield-network.js"></script>
 <script src="../../../deck-kit/figure-import.js"></script>
 <script src="../../../deck-kit/deck.js"></script>
 <script src="../../../deck-kit/image.js"></script>
@@ -61,7 +61,7 @@
 const SLIDES = [
   {
     "layout": "hero",
-    "background": "HopfieldBackground",
+    "background": "HopfieldNetwork",
     "badges": [
       "Example",
       "Neural Networks",
@@ -69,7 +69,13 @@ const SLIDES = [
     ],
     "title": "Hopfield Networks",
     "subtitle": "How a neural network of simple units stores memories as the states it settles into",
-    "byline": "Move the cursor over the network to erase, or hold Shift to draw, then watch it recover"
+    "byline": "Move the cursor over the network to erase, or hold Shift to draw, then watch it recover",
+    "work": [
+      "Nobel Prize in Physics 2024",
+      "\"for foundational discoveries …\"",
+      "Hopfield network: 1982"
+    ],
+    "question": "Why have I never heard of it?"
   },
   {
     "layout": "columns",
@@ -104,7 +110,7 @@ const SLIDES = [
   {
     "layout": "columns",
     "title": "The Network in Three Equations",
-    "closing": "Storing shapes the landscape, energy sets its height, updating moves down it.",
+    "closing": "These three simple equations give rise to all of the network's complex behaviour.",
     "columns": [
       {
         "blocks": [
@@ -230,7 +236,9 @@ const SLIDES = [
             {
               "type": "text",
               "text": "Hopfield networks are barely used today. The prize rewards inventing a powerful way of thinking, not a successful architecture."
-            },
+            }
+          ],
+          [
             {
               "type": "text",
               "text": "Hopfield showed that computation and memory can emerge from the collective dynamics of simple interacting units."
@@ -256,7 +264,7 @@ const SLIDES = [
             {
               "type": "bullets",
               "items": [
-                "As in the landscape: push the state over the hill into the right valley, and running the network carries it all the way down."
+                "Once you have coded a Hopfield network yourself and seen its amazing dynamics first hand, it changes how you see the world."
               ]
             }
           ]

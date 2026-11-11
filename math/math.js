@@ -1,6 +1,8 @@
 /* Tex: LaTeX to inline SVG through MathJax (tex-svg.js, loaded after this file).
    Glyphs are drawn as paths in currentColor, so slides and exported figures stay
-   vector. `Tex.ready` resolves once MathJax can render; rendering is synchronous after. */
+   vector. `Tex.ready` resolves once MathJax can render; rendering is synchronous after.
+   The bundle holds only the TeX packages base, ams, newcommand, configmacros and noundefined.
+   A command from any other package fails, its file is not shipped: use \pmb, not \boldsymbol. */
 (function () {
   var resolveReady;
   var Tex = {

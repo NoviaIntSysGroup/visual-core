@@ -28,7 +28,7 @@
 
 /* The cover's subtitle takes the h2 size while staying a `p` — it is supporting
    prose, not a section heading, on the only slide read with nothing else
-   competing for attention (SLIDE-STYLE.md). */
+   competing for attention (the slide-decks skill). */
 .hero-content p {
   margin-top: var(--s4);
   max-width: calc(var(--s12) * 12);
@@ -212,6 +212,10 @@
   margin-top: var(--s5);
 }
 
+/* An app block's wrapper only carries `data-prevent-swipe`; the app lays out as if
+   it were not there. */
+.deck-app { display: contents; }
+
 /* The label under a visual, inside the wrapper its block renders: centred, smaller
    than prose, and semibold to stay legible at that size. `margin-top` is the
    picture-to-label gap for every captioned block. */
@@ -264,6 +268,13 @@
    on. Columns in a row must begin together. */
 .deck-column-content > h2 + .deck-column-subhead {
   margin-top: var(--s5);
+}
+
+/* A subhead that opens the column itself, alone or leading its first group, takes
+   no air at all, so it starts on the line a neighbouring column's title does. */
+.deck-column-content > .deck-column-subhead:first-child,
+.deck-column-content > .deck-block-group:first-child > .deck-column-subhead:first-child {
+  margin-top: 0;
 }
 
 /* A bracketed group of blocks in a column's `blocks` array. As a flex item, its `> *

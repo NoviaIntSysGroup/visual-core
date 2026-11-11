@@ -4,8 +4,7 @@ description: >-
   Build or edit node/edge diagrams on this repo's shared diagram kit
   (`window.Diagram`, `core/drawing-kit/diagram/`). Use when drawing a new diagram
   inside a figure module (`figures/<name>/`), editing an existing one, or changing
-  the diagram kit or its sibling chart kit (`core/drawing-kit/charts/`). NOT for
-  placing an existing figure onto a slide — that is the `slide-decks` skill. A new
+  the diagram kit or its sibling chart kit (`core/drawing-kit/charts/`). A new
   diagram is a new figure, and a kit change is a `core/` change: both are discussed
   with the user first.
 ---
@@ -15,10 +14,10 @@ description: >-
 This skill governs how to **construct** diagrams and composed SVG figures with
 the shared kit so they stay simple and consistent. Authoring slide *content* (and
 merely placing an existing figure onto a slide) is the
-[`slide-decks`](SLIDE-STYLE.md) skill.
+[`slide-decks`](../slide-decks/SKILL.md) skill.
 
-The kit is [`core/drawing-kit/diagram/diagram.js`](../drawing-kit/diagram/diagram.js)
-(`window.Diagram`) + [`core/drawing-kit/diagram/diagram.css`](../drawing-kit/diagram/diagram.css).
+The kit is [`core/drawing-kit/diagram/diagram.js`](../../drawing-kit/diagram/diagram.js)
+(`window.Diagram`) + [`core/drawing-kit/diagram/diagram.css`](../../drawing-kit/diagram/diagram.css).
 It builds diagrams the way TikZ does: declare named boxes, connect them by name,
 let the layout fall out — instead of hand-tuning coordinate offsets.
 
@@ -29,8 +28,14 @@ let the layout fall out — instead of hand-tuning coordinate offsets.
 - Changing the kit (`core/drawing-kit/diagram/diagram.js` / `.css`).
 
 Just importing an existing figure into a deck (`{ type: 'figure', module }`)
-needs none of this — see [`slide-decks`](SLIDE-STYLE.md). A diagram that a deck or
-another figure reuses is always a figure; see [`figures`](FIGURE-STYLE.md).
+needs none of this — see [`slide-decks`](../slide-decks/SKILL.md). A diagram that a deck or
+another figure reuses is always a figure; see [`figures`](../figures/SKILL.md).
+
+Reference files, read when the task needs them:
+
+- [variants.md](variants.md) — several variants of one diagram, and their shared viewBox.
+- [charts.md](charts.md) — data charts on the chart kit.
+- [kits.md](kits.md) — changing the diagram or chart kit, once agreed.
 
 ## Golden rule: ask first, geometry in JS, appearance in CSS
 
@@ -38,12 +43,9 @@ another figure reuses is always a figure; see [`figures`](FIGURE-STYLE.md).
   every deck, the landing page, and the editor/export chrome share the kit.
   Discuss either with the user before building. Reshape content into existing
   figures when you can.
-- **`file://` must keep working.** Pure SVG-string output, classic scripts, no ES
-  modules/`fetch`. The kit also runs under Reveal's scale transform and in
-  `?thumb` / `?print-pdf`.
 - **Geometry is JS; appearance is CSS.** SVG path coordinates can't read CSS
   `var()`, so positions/sizes/gaps live in JS as numbers. Colours, strokes,
-  fonts, and weights come from [`diagram.css`](../drawing-kit/diagram/diagram.css) and
+  fonts, and weights come from [`diagram.css`](../../drawing-kit/diagram/diagram.css) and
   the figure's own CSS via semantic theme tokens. There are **no font metrics at build
   time** (see [Sizing](#sizing--no-wrapping)).
 - **Points are the unit.** Geometry numbers are points — the deck canvas is
@@ -209,7 +211,7 @@ Keep a composed illustration's top-level variables in the order a maintainer
 would tune the figure. Put **user-tunable knobs first**, then derived geometry.
 Every non-obvious variable should carry a short same-line comment saying what it
 moves, sizes, or controls. The same maintainer-first ordering governs figure
-**composition modules** under `figures/` (see [`figures`](FIGURE-STYLE.md)
+**composition modules** under `figures/` (see [`figures`](../figures/SKILL.md)
 "Ordering a composition module") — the principle is shared; only the converters
 differ.
 
@@ -224,7 +226,7 @@ content above, derived geometry below.
 Recommended order:
 
 1. **ViewBox** — `VB_W`, `VB_H`. (No debug toggle: the kit draws every
-   diagram's frame itself — see [Debug frame](#naming--metadata).)
+   diagram's frame itself — see [Debug frames](../figures/figure-api.md#debug-frames).)
 2. **`DIAGRAM` config** — kit-level metric overrides only when this whole figure
    needs them.
 3. **Coordinate helpers** — `x(v)`, `y(v)`, and `s(v)` if needed.
@@ -330,6 +332,11 @@ pitch are not kit features — they are patterns you build from nodes and edges:
   If the token you need doesn't exist, that is the signal to **stop and add it
   to `theme.css`** (ask-first) — not to compute it here. Deriving locally is how
   an off-palette hue and three different box fills got into this repo.
+- **Line widths are the theme's three, nothing between.** A stroke a figure draws itself (an edge,
+  a ring, an arrow, a frame) is `var(--line-width)`, `var(--line-width-strong)`, or
+  `var(--line-width-very-strong)`, never a literal such as `1.4`; an exception needs the user's
+  explicit request. See
+  [`figures`](../figures/SKILL.md#the-composition-module-template).
 - **Default first — no extra CSS.** Start with kit defaults and add nothing
   unless a visual distinction is explicitly required. Do not add colour, opacity,
   font, or stroke overrides speculatively. When a distinction is needed, prefer
@@ -340,7 +347,7 @@ pitch are not kit features — they are patterns you build from nodes and edges:
   `Diagram.create`), never on a slide-only wrapper such as a card `<div>`. A
   diagram must be **self-contained** so the figure that draws it can be placed on
   a slide or nested into another figure with no wrapper around it
-  ([`figures`](FIGURE-STYLE.md)); a palette stranded on a wrapper makes the
+  ([`figures`](../figures/SKILL.md)); a palette stranded on a wrapper makes the
   placed SVG render black.
 - **A placed figure draws the diagram, never the words around it.** No `card()`-style
   helper emitting a title/subtitle/description: that text belongs to whoever places
@@ -362,13 +369,13 @@ pitch are not kit features — they are patterns you build from nodes and edges:
   - **One diagram:** `DIAGRAM.ariaLabel` is a string, passed straight
     through — `create({ ariaLabel: DIAGRAM.ariaLabel, … })`.
   - **Several variants:** the accessible name lives in the per-variant registry
-    (see [Variants of one diagram](#variants-of-one-diagram)), not under
+    (see [Variants of one diagram](variants.md#variants-of-one-diagram)), not under
     `DIAGRAM`. The registry passes each variant's `ariaLabel` to its builder, so
     a builder never names its own variant key.
 - **Debug frame: write nothing.** A diagram does **not** declare a debug
   toggle or draw its own outline. `Diagram.render()` emits every diagram's
   viewBox frame automatically, and
-  [`diagram.css`](../drawing-kit/diagram/diagram.css) hides it until the figure chrome's
+  [`diagram.css`](../../drawing-kit/diagram/diagram.css) hides it until the figure chrome's
   **Debug** button puts `.debug-on` on `<body>` — which is what makes one toggle
   reveal a figure *and* every diagram inside it at once. `figure.js` strips the
   frames from every export, so they can never ship. **Never restyle
@@ -400,7 +407,7 @@ as:
   sub-groups, plus a `LEGEND`); derive shared rows/buses from them; let builders
   consume only those named values. This is *spatial* geometry only.
 - **Font sizes come from `config.js`, never hard-coded.** Label point sizes are the
-  figure type scale in [`config.js`](../theme/config.js) (`Config.figure.type` —
+  figure type scale in [`config.js`](../../theme/config.js) (`Config.figure.type` —
   `body`, `fine`, …), the same scale figures use, so a diagram and the figure that
   embeds it share one rhythm. Read those into the diagram's `TEXT`/`DIAGRAM`
   config (e.g. `fontSize: Config.figure.type.body.size` for the base, stepping a
@@ -436,100 +443,8 @@ var h = Diagram.measureBlock(segments, {
 ### Worked examples
 
 A project lists its own worked diagrams in its README; the core's
-[`example-steps`](../example/figures/example-steps/example-steps.js) figure places
+[`example-steps`](../../example/figures/example-steps/example-steps.js) figure places
 a small one.
-
-## Variants of one diagram
-
-One file can hold **several diagrams as named variants** — a family of workflow
-diagrams built off one row layout, say — each exported as its own figure module
-(see [`figures`](FIGURE-STYLE.md), "Several modules, one file"). Group diagrams
-into one file when **both** hold:
-
-- **They share one viewBox** — same coordinate space, same `x/y/s`, so they render
-  at identical size and rhythm (this is the [one-viewBox](#viewbox-one-per-variant-a-shared-fixed-axis)
-  rule; a diagram needing a different aspect is a separate figure, not a variant).
-- **They are meant to be used together to convey one message** — shown in sequence
-  or side by side as facets of the same idea. In practice they usually share a
-  layout, but a shared layout is the *symptom*, not the test: the test is that they
-  belong to the same message. Two unrelated figures that merely happen to share a
-  `500×500` viewBox do **not** belong in one file.
-
-When both hold, expose the types through **one variant registry** — the single home
-for everything that differs per type. Bind each build function to its canvas width
-and accessible name, one figure module per entry:
-
-```js
-/* One figure module per variant: its canvas is the diagram's, drawn 1:1. */
-function variantFigure(name, width, build, ariaLabel) {
-  return { width: width, height: VB_H, name: name, ariaLabel: ariaLabel, …,
-           draw: function (fig) { fig.place(build(ariaLabel), { x: 0, y: 0, w: width }); } };
-}
-
-var VARIANT = {
-  current: variantFigure('current-workflow', WIDTH.square, currentDiagram, 'Current workflow: …'),
-  future:  variantFigure('future-workflow',  WIDTH.wide,   futureDiagram,  'Future workflow: …')
-};
-
-window.CurrentWorkflowFigure = VARIANT.current;
-window.FutureWorkflowFigure = VARIANT.future;
-```
-
-Rules that keep the structure enforceable:
-
-- **One registry, keyed by variant id.** Adding a type is a single-entry edit.
-  Don't scatter parallel maps (a separate `BUILD` map *and* a separate `ariaLabel`
-  map drift apart — keep them in one table).
-- **Builders never name their own variant key.** A builder takes `(ariaLabel)`
-  and passes the label straight to `diagram(...)`; it must not read
-  `VARIANT.current` or an ariaLabel literal. Central resolution is what stops the
-  accessible name from drifting between the three places it could live.
-- **Keep per-type data to dispatch, width, and accessible name.** The registry
-  holds the build function, canvas width, and `ariaLabel`. Authored geometry and content stay in the
-  builders and the shared geometry groups (`POS`, `SIZE`, `ROW`, …) — variants are
-  *facets of one layout*, so most of their substance is shared, not per-entry.
-
-## ViewBox: one per variant, a shared fixed axis
-
-A diagram is drawn in **one viewBox** — one coordinate space — and its on-screen
-size is always a CSS concern (`max-width: 100%`, scale *down* only), never the
-viewBox. The intrinsic aspect ratio belongs to the figure, not the page.
-
-A single diagram owns exactly one viewBox. A file of **variants**
-(see [Variants of one diagram](#variants-of-one-diagram)) may, however,
-host variants of **different widths** — provided they share the fixed (height /
-short-side) axis and authoring stays normalized: square variants and a wide one
-sharing `VB_H`/`VB_S = cm(6)` and differing only in canvas width
-(`WIDTH.square = cm(6)` vs `WIDTH.wide = cm(9)`).
-
-A **different aspect ratio is only a reason to split** when the variants would
-*not* share that fixed axis, or when folding them in would force builders to
-re-base their sizes on the variable width. If a candidate variant keeps the shared
-axis, prefer a variant over a second figure — duplicating the whole control-
-variable table across two files is the worse outcome.
-
-The mechanism that makes per-variant width safe is **keeping the fixed-axis
-converters width-independent and threading width only through placement**:
-
-- **Width-independent sizing.** `y(v) = v · VB_H` and `s(v) = v · VB_S` key off the
-  shared axis, so every size, row, and pod-internal offset is identical across
-  variants regardless of canvas width. A repeated sub-figure (a "pod", a card)
-  renders at the same size and rhythm in every variant.
-- **Width-explicit placement.** Horizontal placement uses `x(width, v) = v · width`
-  bound to the active variant's canvas, and `create(...)` takes that width
-  (`diagram(width, opts)`). Do **not** re-base module-internal widths on the wider
-  canvas, or a module distorts when the width changes — author panel/pod widths in
-  `s()` (or `x(width, …)` only for genuinely canvas-relative spans like pod
-  separation).
-- **Keep the shared axis equal across *figures* too.** A separate diagram that
-  wants to sit beside these at a matching size simply reuses the same fixed axis
-  (`VB_H = cm(6)`, and the wide `cm(9)` canvas).
-
-A wide variant is the worked shape: it sets `WIDTH.wide = cm(9)` but shares
-`VB_H = VB_S = cm(6)` with the square variants, authors each repeated pod with
-`s()`/`y()` (so one pod is dimensionally identical to a square variant), and
-threads `WIDTH.wide` only through `x(width, v)` to place the pod centers across
-the wide canvas.
 
 ## Defaults & override tiers
 
@@ -547,87 +462,9 @@ arrowhead size, and the block-label `padding` and `lineHeight` — all from
 `Diagram.defaults`. The kit emits the default label
 **font size** inline (`fontSize`); pass a per-node/segment `fontSize` to
 override one label. **Source those point sizes from the `config.js` type scale**
-(`Config.figure.type` — `slideBody`, `body`, `fine`, …) rather than literals, so
+(`Config.figure.type` — `slideBody`, `slideDetail`, `body`, …) rather than literals, so
 diagrams and the figures that embed them share one scale. Base a diagram on
-`body` (8 pt) when it is publication-first and on `slideBody` (10 pt) when it is
-built for a slide — see [SLIDE-STYLE.md](SLIDE-STYLE.md#imported-drawings-have-their-own-floor). **`lineHeight` defaults to
+`body` (8 pt) when it is publication-first and on `slideBody` (10.6 pt, with `slideDetail`
+for secondary text) when it is built for a slide — see [`figures`](../figures/SKILL.md#importing-a-figure-onto-a-slide). **`lineHeight` defaults to
 `fontSize`** (kept linked), so the label size lives in one place; it stays an
 absolute point value and only the font *family*/colour are CSS.
-
-## Standalone kits
-
-`diagram` and `charts` are sibling kits. Each works with no other file loaded,
-and each takes on the project's look when the theme is loaded:
-
-| Setting | Kit default | Project override |
-|---|---|---|
-| Geometry | `Diagram.defaults` / `Charts.defaults` (JS) | options the caller passes |
-| Type size, font | the kit's JS default; a CSS fallback for the family | `Config.figure` ([`config.js`](../theme/config.js)) |
-| Units | points | the caller uses `Units.cm()` |
-| Colour | the fallbacks below | theme tokens ([`theme.css`](../theme/theme.css)) |
-
-Colour fallbacks live in each kit's one block of local variables (`--diagram-*`,
-`--chart-*`), and answer "the plainest rendering that keeps the meaning", not
-"a copy of the theme":
-
-- lines and text (`--edges`, `--border`, `--text`, `--text-soft`) → `currentColor`;
-- decorative fills (`--graphic-soft`, `--graphic-neutral`) → `transparent`;
-- widths and weights → a plain value (`1px`, `0.5px`);
-- category hues (`--graphic-primary/secondary/tertiary`) → the kit's own
-  `#4477AA`, `#EE6677`, `#228833` (Paul Tol's colour-blind-safe "bright").
-
-Derived tokens (`--graphic-*-tint`, accent shades) get **no** fallback — they are
-derived in `theme.css`, and repeating the `color-mix` in a kit is a second owner.
-The project palette still lives only in `visuals/brand.css`; these fallbacks apply only
-when no theme is loaded. Figures (`figures/`) are project pieces and use theme
-tokens directly, without fallbacks.
-
-## Charts
-
-[`core/drawing-kit/charts/charts.js`](../drawing-kit/charts/charts.js) (`window.Charts`) draws data
-charts. Unlike a diagram, a chart's marks are placed by **scales from data**, not
-by named nodes, so it does not use `Diagram.create`. It follows the same
-diagram conventions otherwise: classic IIFE, geometry in JS, appearance in
-[`charts.css`](../drawing-kit/charts/charts.css), a `role="img"` + `aria-label` root
-(written from the data unless `spec.ariaLabel` is given), an intrinsic viewBox
-that only scales down, and `--viewbox-width` for the deck's import rule.
-
-`Charts.render(spec)` dispatches on `spec.kind` and returns `{ svg, width, height }`
-in points. A slide places it with one `chart` block (SLIDE-STYLE.md); a figure
-with `fig.place(Charts.render(spec).svg, { x, y, w })`. Adding a kind is an entry
-in the kit's `KINDS` table and its builder — no template change.
-
-| `kind` | Fields |
-|---|---|
-| `scatter` | `x: { title, from, to, ticks }` (points at `"YYYY-MM"` or `"YYYY-MM-DD"`; ticks every quarter, or `ticks: "year"` for a tick at each new year with the year centred over its span), `y: { title, unit, min, max, ticks }` (`ticks` lists the values to mark, e.g. `[0, 1]`; default four even steps; `grid: false` drops the gridlines), `series: [{ label, muted, points: [{ label, labelPos, x, y, size }] }]`, `size: { max }`, `legend` (`false` to leave it to a shared `legend`), `width`, `height` |
-| `legend` | `items: [label \| { label, muted }]` — a row of series keys in hue order, for charts that share it |
-
-Rules:
-
-- **An axis is named by its `title`** (plus `unit` in brackets), drawn on the
-  chart. Leave a title out only where the tick labels already say what the axis
-  is — years on a release-date axis — and the chart is the tighter for it.
-- **One hue per series, in fixed order, at most three** — the three category
-  hues. A fourth series is a different chart, never a generated hue.
-- **Grey is context, colour is the story.** A `muted` series takes no hue: a
-  pale neutral dot, outlined, never labelled on the plot, drawn beneath the
-  coloured points. The coloured series keep the hues in order, so muting one never
-  repaints the others.
-- **Size is area.** A point's `size` (a model's parameter count, say) sets its
-  dot's area, up to `Charts.defaults.dotMax` radius at `size.max`. Charts that
-  sit side by side share one `size.max` so equal sizes draw equal dots.
-- **A legend only for two or more series.** A single series is named by the
-  title placed around the chart (a slide column title, a figure's `fig.text`).
-  Charts that share one key (same series, same order) each set `legend: false`
-  and one `legend` chart is placed beside them, so a hue means one thing.
-- **Labels never collide by luck.** A scatter label sits right of its dot by
-  default; `labelPos` (`left`, `above`, `below`) moves one that would overlap.
-  The plot narrows itself so every right-hand label stays on the canvas.
-- Label size is `Config.figure.type.slideBody` (10 pt, 15 pt on a slide).
-
-## Out of scope (ask first)
-
-Curved `out`/`in`/`bend` edges, arbitrary node shapes, auto-routing around
-obstacles, a first-class bus/manifold primitive, and resolving theme tokens to px
-in JS. Extending the kit is a `core/` change — golden
-rule.

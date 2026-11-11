@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════
-   LANDING · the index page listing a project's decks and figures: top bar, hero, tabs, cards,
+   LANDING · the index page listing a project's decks and figures: top bar, hero, tabs, card groups, cards,
    about, footer, and the bare h1/h2/h3/p sizes. Reaches no deck or figure. Sizes are literal
    screen px, because this page renders outside Reveal's canvas transform.
 ═══════════════════════════════════════════════════════════ */
@@ -177,6 +177,40 @@ button:focus-visible {
   gap: 24px;
 }
 
+/* Group: a collapsible <details> of cards; the summary holds a name and a short note. */
+.card-group + .card-group { margin-top: 40px; }
+
+.card-group > summary {
+  cursor: pointer;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 20px;
+  list-style: none;
+  font: var(--w-semibold) 19px/1.3 var(--f-display);
+}
+
+.card-group > summary::-webkit-details-marker { display: none; }
+
+.card-group > summary::before {
+  content: '';
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid var(--text-soft);
+  border-bottom: 2px solid var(--text-soft);
+  transform: translateY(-3px) rotate(45deg);
+  transition: transform var(--dur-fast) var(--ease);
+}
+
+.card-group:not([open]) > summary { margin-bottom: 0; }
+.card-group:not([open]) > summary::before { transform: rotate(-45deg); }
+
+.card-group > summary span {
+  font: 15px/1.3 var(--f-body);
+  color: var(--text-soft);
+}
+
 .card {
   display: block;
   overflow: hidden;
@@ -270,5 +304,5 @@ button:focus-visible {
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .card, .landing-button, .tab { transition: none; }
+  .card, .landing-button, .tab, .card-group > summary::before { transition: none; }
 }

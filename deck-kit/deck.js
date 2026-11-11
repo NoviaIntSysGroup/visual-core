@@ -11,13 +11,13 @@
       edit: 'Edit',
       done: 'Done',
       exportPDF: 'Export PDF',
+      fullscreen: 'Fullscreen',
     },
   };
 
   const SLIDES_START_MARK = '/* === SLIDES:START';
   const SLIDES_END_MARK = '/* === SLIDES:END === */';
   const PRINT_DELAY_MS = 800, FULLSCREEN_REFRESH_DELAYS_MS = [80, 360, 720];
-  const HANDLE_DB = 'deck-editor', HANDLE_STORE = 'kv';
 
   const Deck = {
     config: { logo: null, total: 0 },
@@ -43,8 +43,8 @@
     window.open(location.pathname + '?print-pdf');
   }
 
-  // Publish deck title + slide count for the landing-page card, mirroring
-  // Figure.mount's window.FigureMeta. Title comes from the first slide that
+  // Deck title + slide count for the landing-page card, mirroring
+  // Figure.mount's metadata. Title comes from the first slide that
   // carries one (the hero), falling back to the document <title>.
   function metadata(ctx) {
     const titled = ctx.slides.find(s => s && s.title);
@@ -72,11 +72,12 @@
     // dividers inherit the deck's section list from the one slide that carries
     // it — resolve it through here, the same channel as `logo` and `total`.
     Deck.config.slides = ctx.slides;
-    window.DeckMeta = metadata(ctx);   // set before the thumb branch so the landing-page card can read it
+    // Send the landing-page card its title and slide count; postMessage also crosses file:// origins.
+    if (window.parent !== window) window.parent.postMessage({ landingMeta: metadata(ctx) }, '*');
     // Formulas can only be drawn once MathJax has started, so rendering waits for it.
     (window.Tex ? Tex.ready : Promise.resolve()).then(() => {
       if (!ctx.isThumb) initChrome();
-      if (!ctx.isThumb) applyLocalEdits(ctx);
+      if (!ctx.isThumb && window.DEV_SERVER) applyLocalEdits(ctx);
       initMediaFallback();
       renderSlides(ctx);
       initReveal(ctx);
@@ -111,7 +112,6 @@
       originalHTML: authoredHTML(),
       draftKey: 'deck-draft:' + storageKey + ':v1',
       draftRestored: false,
-      handleKey: 'fileHandle:' + storageKey,
       isPrintPDF: window.location.search.indexOf('print-pdf') !== -1,
       isThumb: new URLSearchParams(location.search).has('thumb'),
     };
@@ -183,8 +183,15 @@
         '<span id="edit-status" class="chrome-status"></span>' +
         '<button id="edit-toggle">' + labels.edit + '</button>' +
         '<button id="export-btn">' + labels.exportPDF + '</button>' +
+        '<button id="fullscreen-btn">' + labels.fullscreen + '</button>' +
       '</div>');
     document.getElementById('export-btn').addEventListener('click', exportPDF);
+    // The same element Reveal's F key takes fullscreen; the button is for touch devices without a keyboard.
+    const page = document.documentElement;
+    const enter = page.requestFullscreen || page.webkitRequestFullscreen;
+    const fullscreen = document.getElementById('fullscreen-btn');
+    if (enter) fullscreen.addEventListener('click', () => enter.call(page));
+    else { fullscreen.disabled = true; fullscreen.title = "This browser can't show a page fullscreen"; }
   }
 
   function initPresentationMode() {
@@ -223,15 +230,55 @@
     const holdHidden = video => {
       if (video.closest('.fragment:not(.visible)')) video.pause();
     };
-    document.addEventListener('play', e => holdHidden(e.target), true);
-    // A clip in an `enter: "none"` group plays only while its press is the
-    // current one; stepping back onto it makes Reveal play it from 0 again.
+    // A clip with a `start` shows that frame, plays from there rather than Reveal's 0,
+    // and loops back to it. Media events don't bubble, so these listen in the capture phase.
+    const startAt = video => {
+      const start = Number(video.dataset.start);
+      if (start && video.currentTime < start) video.currentTime = start;
+    };
+    document.addEventListener('loadedmetadata', e => startAt(e.target), true);
+    document.addEventListener('play', e => { holdHidden(e.target); startAt(e.target); }, true);
+    document.addEventListener('ended', e => {
+      if (!e.target.dataset || !e.target.dataset.start) return;
+      e.target.currentTime = Number(e.target.dataset.start);
+      if (!e.target.hasAttribute('data-press') || pressed(e.target)) play(e.target);
+    }, true);
+    // A clip the browser refuses to start with sound, outside a tap, plays muted instead.
+    const play = video => video.play().catch(error => {
+      if (error.name !== 'NotAllowedError' || video.muted) return;
+      video.muted = true;
+      video.play();
+    });
+    // A `play: "press"` clip plays only while its start press is the current one.
+    const pressed = video => video.parentElement.querySelector('.deck-video-start').classList.contains('current-fragment');
+    // A clip in an `enter: "none"` group plays only while its press is the current one;
+    // stepping back onto it makes Reveal play it from 0 again.
     const pausePassedClips = () => {
       document.querySelectorAll('.reveal .deck-block-group-enter-none:not(.current-fragment) video')
         .forEach(video => video.pause());
+      document.querySelectorAll('.reveal video[data-press]').forEach(video => {
+        if (!pressed(video)) video.pause();
+        else if (video.paused) play(video);
+      });
     };
     Reveal.addEventListener('fragmentshown', pausePassedClips);
     Reveal.addEventListener('fragmenthidden', pausePassedClips);
+    // Safari on iPhone and iPad starts a clip with sound only from a tap, and a swipe is not
+    // one. A clip started during the page's first tap may be started by code from then on,
+    // so that tap unmutes every one, starts it, keeps those that should play, pauses the rest.
+    let soundUnlocked = false;
+    const unlockSound = () => {
+      if (soundUnlocked) return;
+      soundUnlocked = true;
+      document.querySelectorAll('.reveal video:not([muted])').forEach(video => {
+        video.muted = false;
+        if (!video.paused) return;
+        video.play().catch(() => {});
+        if (!video.closest('section.present') || !video.hasAttribute('data-autoplay')) video.pause();
+      });
+      pausePassedClips();
+    };
+    ['touchend', 'click', 'keydown'].forEach(type => document.addEventListener(type, unlockSound, true));
 
     const syncFragments = () => {
       const fs = isFullscreen();
@@ -326,13 +373,18 @@
   function initEditor(ctx) {
     const toggle = document.getElementById('edit-toggle');
     const status = document.getElementById('edit-status');
-    const supportsFS = ('showOpenFilePicker' in window);
     const labels = DEFAULTS.chromeLabels;
-    const handleStore = supportsFS ? createFileHandleStore(ctx.handleKey) : null;
     let editing = false;
     let dirty = false;
-    let fileHandle = null;
     const setStatus = msg => { status.textContent = msg; };
+
+    // Saving writes through the dev server, so without it Edit is offered but disabled.
+    if (!window.DEV_SERVER) {
+      toggle.disabled = true;
+      toggle.title = 'Editing needs the dev server — bun run core/tools/serve.js';
+      return;
+    }
+
     const stopRevealKeys = e => e.stopPropagation();
 
     function onInput(e) {
@@ -360,9 +412,7 @@
       toggle.textContent = labels.done;
       syncEditable(true);
       Reveal.configure({ keyboard: false });
-      setStatus(window.DEV_SERVER || supportsFS
-        ? 'Click any text to edit. Press Done to save to the deck file.'
-        : "Click any text to edit. Press Done to download an updated .html (this browser can't write files directly).");
+      setStatus('Click any text to edit. Press Done to save to the deck file.');
     }
 
     function disable() {
@@ -381,88 +431,21 @@
 
     function clearDraft() { try { localStorage.removeItem(ctx.draftKey); } catch (e) {} }
 
-    async function getHandle() {
-      if (fileHandle) return fileHandle;
-      try { fileHandle = await handleStore.get(); } catch (e) {}
-      if (!fileHandle) {
-        [fileHandle] = await window.showOpenFilePicker({
-          id: 'deck-index-html',
-          types: [{ description: 'HTML', accept: { 'text/html': ['.html', '.htm'] } }],
-        });
-        try { await handleStore.put(fileHandle); } catch (e) {}
-      }
-      return fileHandle;
-    }
-
-    async function ensureWritable(handle) {
-      const opts = { mode: 'readwrite' };
-      if ((await handle.queryPermission(opts)) === 'granted') return true;
-      return (await handle.requestPermission(opts)) === 'granted';
-    }
-
-    function downloadUpdated() {
-      const blob = new Blob([buildUpdatedHTML(ctx)], { type: 'text/html' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'index.html';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(a.href);
-    }
-
     async function save() {
       setStatus('Saving...');
       try {
-        const updated = buildUpdatedHTML(ctx);
-        // Only reached on the dev server, so file:// never calls fetch.
-        if (window.DEV_SERVER) {
-          const response = await fetch(location.pathname, { method: 'PUT', body: updated });
-          if (!response.ok) throw new Error('the dev server answered ' + response.status);
-          dirty = false;
-          clearDraft();
-          setStatus('Saved at ' + new Date().toLocaleTimeString() + '. Commit & push to publish.');
-          return true;
-        }
-        if (!supportsFS) {
-          downloadUpdated();
-          dirty = false;
-          clearDraft();
-          setStatus('Downloaded index.html — replace the file in your repo, then push.');
-          return true;
-        }
-        const handle = await getHandle();
-        if (!(await ensureWritable(handle))) {
-          setStatus('Write permission denied — press Done again to retry.');
-          return false;
-        }
-        let writable;
-        try {
-          writable = await handle.createWritable();
-        } catch (e) {
-          fileHandle = null;
-          try { await handleStore.put(null); } catch (_) {}
-          throw new Error("Couldn't open the saved file — press Done to pick it again.");
-        }
-
-        await writable.write(updated);
-        await writable.close();
+        const response = await fetch(location.pathname, { method: 'PUT', body: buildUpdatedHTML(ctx) });
+        if (!response.ok) throw new Error('the dev server answered ' + response.status);
         dirty = false;
         clearDraft();
-        setStatus('Saved to ' + handle.name + ' at ' + new Date().toLocaleTimeString() + '. Commit & push to publish.');
+        setStatus('Saved at ' + new Date().toLocaleTimeString() + '. Commit & push to publish.');
         return true;
       } catch (e) {
-        if (e && e.name === 'AbortError') {
-          setStatus('Save cancelled — your edits are still here.');
-          return false;
-        }
         console.error(e);
         setStatus('Save failed: ' + e.message);
         return false;
       }
     }
-
-    if (supportsFS) handleStore.get().then(h => { if (h) fileHandle = h; }).catch(() => {});
 
     toggle.addEventListener('click', async () => {
       if (!editing) { enable(); return; }
@@ -492,33 +475,6 @@
     const last = keys.pop();
     const target = keys.reduce((o, k) => o[k], obj);
     target[last] = value;
-  }
-
-  function createFileHandleStore(key) {
-    function request(method, value) {
-      return new Promise((resolve, reject) => {
-        const open = indexedDB.open(HANDLE_DB, 1);
-        open.onupgradeneeded = () => open.result.createObjectStore(HANDLE_STORE);
-        open.onerror = () => reject(open.error);
-        open.onsuccess = () => {
-          try {
-            const db = open.result;
-            const txMode = method === 'get' ? 'readonly' : 'readwrite';
-            const store = db.transaction(HANDLE_STORE, txMode).objectStore(HANDLE_STORE);
-            const req = method === 'get' ? store.get(key) : store.put(value, key);
-            req.onsuccess = () => resolve(req.result);
-            req.onerror = () => reject(req.error);
-          } catch (e) {
-            reject(e);
-          }
-        };
-      });
-    }
-
-    return {
-      get: () => request('get'),
-      put: value => request('put', value),
-    };
   }
 
 })();

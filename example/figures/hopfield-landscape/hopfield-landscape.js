@@ -195,7 +195,7 @@
     fig.path(curvePath(s.stored, false), { fill: 'none', stroke: COLOR.curve, width: 1 });
     fig.place(d.render('hopfield-landscape-' + step), { x: 0, y: 0, w: PAGE.w });
 
-    fig.text(s.title, { x: PLOT.left, y: PAGE.titleY, align: 'start', role: 'title' });
+    fig.text(s.title, { x: PLOT.left, y: PAGE.titleY, align: 'start', role: 'slideBody', weight: 700 });
     fig.text(s.body, { x: PLOT.left, y: g.bodyY, w: g.plotW, align: 'start', role: 'slideBody', wrap: true, lineHeight: ROW.body });
     fig.text(COPY.energy, { x: PLOT.left + PLOT.stateR, y: PLOT.energyLabelY, align: 'start', role: 'slideBody' });
     fig.text(COPY.states, { x: (PLOT.left + PLOT.right) / 2, y: PLOT.axisY + PLOT.labelGap, role: 'slideBody' });

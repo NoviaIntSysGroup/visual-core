@@ -1,0 +1,3 @@
+/* Neuron Model — inputs in x's hue, weights in w's, as in the deck's dot-product apps. */
+.figure.neuron-model-fig .neuron-model-x { color: var(--graphic-tertiary); }
+.figure.neuron-model-fig .neuron-model-w { color: var(--graphic-primary); }

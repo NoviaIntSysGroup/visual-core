@@ -1,5 +1,5 @@
-/* Landing page: tab toggle, deferred thumbnails, and card titles read from each
-   thumbnail's DeckMeta / FigureMeta. Load at the end of <body>;
+/* Landing page: tab toggle, deferred thumbnails, and card titles each
+   thumbnail posts to this page. Load at the end of <body>;
    no framework, works over file://. */
 (function () {
   var tabs = document.querySelectorAll('.tab');
@@ -53,31 +53,24 @@
   try { saved = sessionStorage.getItem(STORE_KEY); } catch (_) {}
   activate(hasTab(saved) ? saved : 'decks');
 
-  /* Once a card's thumbnail iframe loads, enrich its title + meta line from
-     the iframe document's global (DeckMeta / FigureMeta). Same shape for
-     both panels; only the global, the meta element, and the text format
-     differ. */
-  function wireMeta(panel, globalName, metaSel, format) {
-    document.querySelectorAll('[data-panel="' + panel + '"] .card').forEach(function (card) {
-      var iframe = card.querySelector('iframe');
-      var title = card.querySelector('h3');
-      var metaText = card.querySelector(metaSel);
-      var baseText = metaText ? metaText.textContent : '';
-      iframe.addEventListener('load', function () {
-        try {
-          var meta = iframe.contentWindow && iframe.contentWindow[globalName];
-          if (!meta) return;
-          if (meta.title) title.textContent = meta.title;
-          if (metaText) metaText.textContent = format(meta, baseText);
-        } catch (_) {}
-      });
-    });
-  }
+  /* Each thumbnail posts its metadata to this page once it has mounted; the
+     card whose iframe sent it takes the title and meta line from it.
+     postMessage, not iframe.contentWindow, because file:// gives every
+     document its own origin. */
+  var FORMAT = {
+    deck: function (m, base) { return base + ' · ' + m.slideLabel; },
+    figure: function (m) { return 'Publication figure · ' + m.sizeLabel; }
+  };
 
-  wireMeta('decks', 'DeckMeta', '[data-deck-meta]', function (m, base) {
-    return base + ' · ' + m.slideLabel;
-  });
-  wireMeta('figures', 'FigureMeta', '[data-figure-meta]', function (m) {
-    return 'Publication figure · ' + m.sizeLabel;
+  window.addEventListener('message', function (e) {
+    var meta = e.data && e.data.landingMeta;
+    if (!meta || !FORMAT[meta.kind]) return;
+    document.querySelectorAll('.card').forEach(function (card) {
+      var iframe = card.querySelector('iframe');
+      if (!iframe || iframe.contentWindow !== e.source) return;
+      var metaText = card.querySelector('[data-deck-meta], [data-figure-meta]');
+      if (meta.title) card.querySelector('h3').textContent = meta.title;
+      if (metaText) metaText.textContent = FORMAT[meta.kind](meta, metaText.textContent);
+    });
   });
 })();

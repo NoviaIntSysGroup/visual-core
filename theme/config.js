@@ -8,17 +8,17 @@
          Helvetica is a base-14 PDF font and Arial is metric-compatible. */
       font: 'Arial, Helvetica, "Liberation Sans", sans-serif',
 
-      /* Figure text by role: point size + weight + style. `body` (8 pt) is the
-         publication default; `slideBody` (10 pt) is the default for a slide-bound
-         figure, reading 15 pt at the 1.5x import; `slideDetail` (9 pt) is the
-         half-step under it; `fine` is small detail. fig.text({ role }) reads these;
-         .fig-<role> in figure.css adds only colour. */
+      /* Figure text by role: point size + weight + style. A figure made for slides
+         uses `slideBody` and `slideDetail`: at the 1.5x import they read 15.9 and
+         12 pt, the slide's --t-base and --t-sm. The other roles are for publication
+         figures, where `body` (8 pt) is the default and `fine` small detail.
+         fig.text({ role }) reads these; .fig-<role> in figure.css adds only colour. */
       type: {
         label:       { size: 10, weight: 400, style: 'normal' },
         title:       { size: 10, weight: 700, style: 'normal' },
         subtitle:    { size: 10, weight: 400, style: 'italic' },
-        slideBody:   { size: 10, weight: 400, style: 'normal' },
-        slideDetail: { size: 9,  weight: 400, style: 'normal' },
+        slideBody:   { size: 10.6, weight: 400, style: 'normal' },
+        slideDetail: { size: 8,  weight: 400, style: 'normal' },
         body:        { size: 8,  weight: 400, style: 'normal' },
         legend:      { size: 6,  weight: 400, style: 'normal' },
         fine:        { size: 6,  weight: 400, style: 'normal' }

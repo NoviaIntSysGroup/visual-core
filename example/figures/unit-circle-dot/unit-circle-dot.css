@@ -1,0 +1,4 @@
+/* Unit Circle Dot — a label faded with its guides, while the angle between the vectors is shown. */
+.unit-circle-dot-faded {
+  opacity: 0.35;
+}

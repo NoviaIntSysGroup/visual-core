@@ -1,0 +1,2 @@
+/* Receptive Field — the layer's ⋮, dimmed with the layer once it is approximated away. */
+.figure.receptive-field-fig .receptive-field-dim { opacity: var(--opacity-dim); }

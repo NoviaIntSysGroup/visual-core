@@ -88,16 +88,15 @@ Bun.serve({
     const type = TYPES[ext] || "application/octet-stream";
     const headers = { "content-type": type, "cache-control": "no-store" };
 
-    // Inject the live-reload client at the end of HTML documents — but not into
+    // Inject the live-reload client at the start of <head>, so DEV_SERVER is set
+    // before any page script reads it — but not into
     // `?thumb` previews. Those are landing-page iframes; a poller in each would
     // reload every nested doc independently and add needless requests. The
     // landing page itself carries the snippet, and reloading it re-creates the
     // thumbnail iframes, so thumbnails refresh through the parent.
     if (ext === "html" && !url.searchParams.has("thumb")) {
       let html = await file.text();
-      html = html.includes("</body>")
-        ? html.replace("</body>", RELOAD_SNIPPET + "</body>")
-        : html + RELOAD_SNIPPET;
+      html = html.replace(/<head[^>]*>/i, (head) => head + RELOAD_SNIPPET);
       return new Response(html, { headers });
     }
     return new Response(file, { headers });

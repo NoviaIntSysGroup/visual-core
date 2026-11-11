@@ -14,8 +14,8 @@ This skill governs how to assemble **publication figures**: a chosen physical
 canvas (cm) holding diagram-kit drawings plus captions/labels, exported as a
 self-contained **SVG**, **600 dpi PNG**, or **vector PDF**. It is a sibling of the deck skills:
 
-- [`slide-decks`](SLIDE-STYLE.md) — authoring slides (Reveal).
-- [`diagrams`](DIAGRAM-STYLE.md) — *constructing* diagrams with the kit.
+- [`slide-decks`](../slide-decks/SKILL.md) — authoring slides (Reveal).
+- [`diagrams`](../diagrams/SKILL.md) — *constructing* diagrams with the kit.
 - **`figures` (this) — *composing* them into figures.**
 
 Figures and decks share one engine and **the same figures** — a drawing is
@@ -25,11 +25,16 @@ slides; a figure is one native `<svg>`.
 ## When to use this
 
 - Building a new figure under `figures/<name>/index.html`.
-- Editing the figure kit ([`core/figure-kit/figure.js`](../figure-kit/figure.js) /
-  [`figure.css`](../figure-kit/figure.css)).
+- Editing the figure kit ([`core/figure-kit/figure.js`](../../figure-kit/figure.js) /
+  [`figure.css`](../../figure-kit/figure.css)).
 
-Just placing an existing diagram on a *slide* is [`slide-decks`](SLIDE-STYLE.md);
-*building* a diagram is [`diagrams`](DIAGRAM-STYLE.md).
+Just placing an existing diagram on a *slide* is [`slide-decks`](../slide-decks/SKILL.md);
+*building* a diagram is [`diagrams`](../diagrams/SKILL.md).
+
+Reference files, read when the task needs them:
+
+- [figure-api.md](figure-api.md) — the `Figure` API, `mountModule` and `mount`, and debug frames.
+- [export.md](export.md) — SVG, PNG, and PDF export, and fonts that look identical everywhere.
 
 ## Golden rule: compose, don't extend
 
@@ -49,7 +54,7 @@ which only renders in a browser — that is why figures are a separate front-end
 ## Points are the unit
 
 Geometry is in **points** (1 canvas unit = 1 pt; the deck/figure world is point
-based — see [AGENTS.md](../AGENTS.md)). Author the canvas in cm and convert at the
+based — see [AGENTS.md](../../AGENTS.md)). Author the canvas in cm and convert at the
 boundary with `Units.cm()/mm()/pt()` (`core/drawing-kit/units.js`; `cm(8)` → 226.77 pt). When the exported
 SVG is imported at its authored width, **1 unit renders as exactly 1 pt**, so a
 `role: 'body'` (8 pt) line is 8 pt at that width. See [Font sizing](#font-sizing).
@@ -114,7 +119,7 @@ this one nests**, and the figure's own module last.
 variants on one canvas height, say — one file may export one module per variant
 plus the figure that sets them side by side. Each is an ordinary module: a deck
 imports a variant by its global, and the side-by-side figure nests them.
-[`core/example/figures/example-steps/`](../example/figures/example-steps/) is the worked example.
+[`core/example/figures/example-steps/`](../../example/figures/example-steps/) is the worked example.
 
 ## The composition-module template
 
@@ -132,14 +137,15 @@ never reorder or rename one.
   /* 1 · Imports ------ the same handful of globals in every figure */
   var cm = window.Units.cm, TYPE = window.Config.figure.type, bold = window.Diagram.bold;
 
-  /* 2 · Canvas ------- the page, and the spacings that place its top-level blocks */
+  /* 2 · Canvas ------- the page, and the spacings that place its top-level blocks;
+                        a figure's width is its slot's: see Size a figure for its slot */
   var PAGE = { w: cm(18), h: cm(9), margin: cm(0.5), splitX: cm(11.5) };
 
   /* 3 · Type --------- point sizes AND every line advance, each named once */
   var TEXT = { title: TYPE.title.size, body: TYPE.body.size, fine: TYPE.fine.size };
   var ROW  = { body: TEXT.body * 1.2, caption: TEXT.fine * 1.25 };
 
-  /* 4 · Colour ------- theme tokens only; a hue and its tint side by side */
+  /* 4 · Colour ------- theme tokens only (hues and line widths); a hue and its tint side by side */
   var COLOR = { llm: 'var(--graphic-secondary)', active: 'var(--text)', idle: 'var(--edges)' };
   var TINT  = { llm: 'var(--graphic-secondary-tint)' };
 
@@ -179,6 +185,13 @@ The rules behind the shape:
   `get height() { return GEO().h; }` — a getter, not `height: GEO().h`, so the
   file loads before anything its `GEO()` reads (same reason `GEO()` is a
   function — next bullet), with a comment saying it is derived.
+- **Line widths are theme tokens, never numbers.** A stroke is `'var(--line-width)'` (0.5, the
+  thin one: dividers, frames, and the many lines of a dense drawing) or `'var(--line-width-strong)'`
+  (1: edges, rings, and arrows) or `'var(--line-width-very-strong)'` (1.5: a coloured line whose colour
+  must read at a glance), passed as the `width` option, which lands in the element's `style`.
+  Lit against unlit is told by colour and by thin against strong, never by a width of its own. Any
+  other width is an exception the user must ask for explicitly. Keep them in one `LINE` object
+  in section 5.
 - **Knobs are inputs only.** A key computed from another (`linkY = h / 2`)
   belongs in section 8, so tuning a knob never means hunting through arithmetic.
   Children keep their own intrinsic sizes (`FRAME.width`, `PANEL.width`); a module
@@ -193,42 +206,14 @@ The rules behind the shape:
   function costs one line and makes the cross-module case (a figure that reads
   another figure's exported layout) the same shape as every other figure rather
   than a special case.
-- **No debug toggle.** The kits draw the frames — see [Debug frames](#debug-frames).
+- **No debug toggle.** The kits draw the frames — see [Debug frames](figure-api.md#debug-frames).
 - **Positioning rules are the diagram kit's, unchanged:** one named delta for
   everything in a chain or group, and align borders by reference (`cross()` is
   TikZ's `-|`) rather than typing a similar coordinate twice. See
-  [`diagrams`](DIAGRAM-STYLE.md#positioning-one-rhythm-one-delta-no-near-misses).
+  [`diagrams`](../diagrams/SKILL.md#positioning-one-rhythm-one-delta-no-near-misses).
 
-[`core/example/figures/example-steps/example-steps.js`](../example/figures/example-steps/example-steps.js)
+[`core/example/figures/example-steps/example-steps.js`](../../example/figures/example-steps/example-steps.js)
 is the worked stepped module.
-
-## Debug frames
-
-Turning the debug frame on for a figure turns it on for **everything inside it**.
-There is no flag to set and nothing to write in a figure: press
-**Debug** in the figure chrome.
-
-It works because the frames are always in the DOM and merely hidden.
-`Diagram.render()` emits each diagram's viewBox outline, `Figure.render()` emits
-the page's, and `fig.nestModule()` emits a nested child figure's; `.debug-frame`
-in [`diagram.css`](../drawing-kit/diagram/diagram.css) hides them all until the button
-puts `.debug-on` on `<body>`. Three levels are styled apart — `--page`, `--nest`,
-`--component` (a placed diagram) — because a figure with several placed diagrams
-otherwise reads as a pile of identical rectangles, and the stroke is
-`non-scaling-stroke` so a deeply scaled diagram's frame is not thinner than the page's.
-
-Two consequences worth knowing:
-
-- **The toggle survives stepping.** The class is on `<body>`, not on the `<svg>`
-  the stage replaces on every step, so you can leave it on and click through.
-- **Frames never ship.** `serialize()` deletes them from the export clone, so SVG,
-  PNG and PDF are unaffected whatever state the button is in. It does this
-  *after* the style-inlining pass, which pairs source and clone children by
-  index — removing them earlier would hand every later sibling its neighbour's
-  computed style.
-
-Decks get the same frames free (they load `diagram.css`, and every diagram
-draws its own), waiting on a `.debug-on` toggle in `#deck-chrome`.
 
 ## Stepped figures
 
@@ -314,24 +299,61 @@ per state beyond the first:
 
 Static figures work through the same block (no `steps` → no fragments). The size
 comes from the deck's one import rule, `1.5 × the authored width, or the largest
-value that fits`; a 10pt figure label therefore reads 15pt on a slide — level
-with the slide's own `--t-base` prose.
+value that fits`; a `slideBody` label (10.6pt) therefore reads 15.9pt on a slide — level
+with the slide's own `--t-base` (16pt) prose.
 
 Two consequences worth authoring against:
 
-- **Label at 10pt by default.** A figure destined for a slide should carry its
-  primary labels at the 10pt roles (`slideBody`, `label`, `title`, `subtitle`),
-  which land at 15pt on the slide. Step down to 8pt (`body` — the publication
-  size) only for detail that is deliberately secondary, and to 6pt
-  (`legend`, `fine`) only for genuinely
-  publication-grade fine print — a legend or data annotation that exists for the
-  reader who zooms into the PDF handout, not for the room. A figure whose
-  *primary* labels are 8pt is under-sized for a slide even though it is a correct
-  print figure; a pure print figure keeps its own sizes and simply shouldn't be
-  imported as-is.
+- **A slide figure types its text with `slideBody` and `slideDetail`.** `slideBody` (10.6pt)
+  lands at 15.9pt on the slide, the slide's own `--t-base`, and carries every label meant to be
+  read while you talk. `slideDetail` (8pt) lands at 12pt, the slide's `--t-sm`, for detail that is
+  deliberately secondary. The other roles (`label`, `title`, `subtitle`, `body`, `legend`, `fine`)
+  are the publication scale: a figure made for print keeps them, and shouldn't be imported onto a
+  slide as-is, where they land off the slide's sizes.
 - **The scale default is a slide rule.** Figure-to-figure nesting stays at 1.0
   (`fig.nestModule` with no `scale`), because in print the authored cm size *is*
   the real size. Never carry the 1.5 into a composite.
+
+### Size a figure for its slot
+
+A figure is designed primarily for one place, and that place sets its width.
+
+**For a deck, the column sets it.** The 1.5× holds only while the figure fits. The import rule is
+`min(100%, width × 1.5)`, and a block's `maxHeight` turns into a width cap through the figure's
+aspect ratio. A figure wider than its column, or taller than `maxHeight ÷ 1.5`, is therefore scaled
+below 1.5×: its `slideBody` text falls under the slide floor, and two figures side by side come out at
+different scales. So a slide figure is authored to its slot, in both directions:
+
+- **Width: `PAGE.w` is the column's content width ÷ 1.5.** A columns slide's content is the canvas
+  less its side padding, 960 − 2 × 24 = 912 pt; each column loses its own 2 × 12 pt of padding, and
+  every column after the first a 0.5 pt divider:
+
+  | Columns | Column content | `PAGE.w` at most |
+  |---|---|---|
+  | 1 | 888 pt | 592 pt, `cm(20.8)` |
+  | 2 | 431.5 pt | 287.7 pt, `cm(10.1)` |
+  | 3 | 279.5 pt | 186.3 pt, `cm(6.5)` |
+  | 4 | 203.5 pt | 135.7 pt, `cm(4.7)` |
+
+  Each `cm` figure is rounded down, never to the nearest; use it as the module's width, so the figure fills its column.
+  Figures meant to sit side by side in one slide share it, which is what keeps them one size.
+- **Height: `PAGE.h` is at most the block's `maxHeight` ÷ 1.5.** The decks use `maxHeight: 330`,
+  so 220 pt, `cm(7.7)`. When the height falls out of content (a measured equation stack), tune the
+  gaps and the drawing until it fits; do not raise `maxHeight` to make room, and do not accept a
+  smaller scale.
+
+**For an article, the layout sets it.** A print figure is placed at its authored size, 1:1, so
+`PAGE.w` is the width the article gives it: its column width for a single-column figure, its text
+width for one spanning the page, taken from the layout or the venue's author guidelines, in `cm()`.
+The type is then the publication scale (`body`, 8pt, with `label`, `title`, `subtitle`, `legend`
+and `fine` for the rest), and there is no 1.5 to plan for.
+
+On a deck, a figure that lands below its intended scale is reported as its slide is shown: a console
+warning, and a "figures scaled down" notice in the toolbar whose hover text gives the reason.
+
+Compose the drawing to fill that width: a figure is centred in its slot, so lopsided margins show.
+A figure built for one slot is not reused in the other, or in a slide with a different column
+count, without re-authoring.
 
 An imported figure brings its page margins with it (`PAGE.margin`). A figure made
 to be placed — one diagram, captioned by whoever places it — has no margin: its
@@ -385,96 +407,9 @@ uniformly, exactly like a `place()`d diagram.
 When adding a new figure under `figures/<name>/index.html`, also add a card for
 it to the project's root `index.html` Figures panel. Keep the card's metadata
 paragraph generic (`Publication figure`) and mark it with `data-figure-meta`;
-the landing page reads the live `window.FigureMeta` from the figure's `?thumb`
-iframe, so title and physical size stay in sync with the figure's actual
+the figure's `?thumb` iframe posts its metadata to the landing page, so title and physical size stay in sync with the figure's actual
 `Figure.mount(...)` call. Do not duplicate hand-written dimensions on the
 landing page.
-
-## The `Figure` API
-
-`Figure.create(W, H, opts)` → a figure builder (`opts`: `className`,
-`ariaLabel`). `W`/`H` are points — author them with `cm()/mm()`. Builder methods
-each append native SVG and return the builder:
-
-- **`background(fill)`** — a full-canvas `<rect>` (e.g. `'var(--background)'` to
-  replicate the slide tint; omit for a transparent figure).
-- **`place(svgString, { x, y, w, h? })`** — drop a diagram-kit SVG string
-  (`Diagram.create(…).render()`) at `(x, y)` scaled to width `w` (height follows
-  its aspect unless `h` is given). The drawing is wrapped in a `<g transform>`,
-  used verbatim via its own viewBox.
-- **`image(href, { x, y, w, h })`** — a raster (a partner logo, a photograph) at
-  `(x, y)`, sized `w × h`. `<image>` is native SVG, not `foreignObject`, so it
-  exports and nests like any other element. `href` is the ordinary relative path,
-  rewritten to a data URI on export — see [Raster images](#raster-images).
-- **`math(tex, opts)`** — a LaTeX formula as vector paths (MathJax), so it exports
-  to SVG, PNG and PDF like any other element. `(x, y)` is the formula's baseline,
-  placed per `align`; `size` is the em in pt; `cls` overrides the colour. The page
-  must load `core/math/math.js` then `core/math/tex-svg.js`, before `figure.js`. It is one
-  formula per call and does not wrap.
-- **`text(content, opts)`** — native `<text>`. `content` is a string (auto-wrapped
-  when `opts.wrap` + `opts.w`) or an array of lines; a line is a string or an
-  array of `{ t, cls }` segments for inline styling (e.g. a coloured word).
-  `opts`: `x`, `y`, `w`, `align` (`'start'|'middle'|'end'`, default middle),
-  `role`, `size` (pt), `weight`, `style`, `lineHeight`, `cls`, `wrap`. **`role`**
-  (the SVG parallel of a slide tag) is the normal way to type text:
-  `label | title | subtitle | slideBody | slideDetail | body | legend | fine` pulls
-  **size + weight + style** from the figure type scale in `config.js` and applies the
-  matching `.fig-<role>` class. `body` (8pt) is the default and the publication
-  size; **`slideBody` (10pt) is the one to reach for in a figure destined for a
-  slide** (see [Importing a figure onto a slide](#importing-a-figure-onto-a-slide)),
-  with **`slideDetail` (9pt)** the half-step under it for dense secondary text that
-  will not fit at 10.
-  `size`/`weight`/`style` override the role; `cls` adds classes.
-- **`rule(x1, y1, x2, y2, opts?)`** — a `<line>` (e.g. a column divider), styled
-  by `.figure-rule`. `opts: { stroke, width, opacity, dash, cls }` overrides that
-  for one line — `dash` takes an array (`{ dash: [3.4, 2.8] }`) or a string.
-- **`rect(x, y, w, h, opts)`** — a filled rect: a band, a zebra row, a bar, a
-  colour chip. `opts: { fill, opacity, stroke, width, radius, cls }`.
-- **`path(d, opts)`** — an arbitrary path for shapes the above don't cover (a
-  milestone diamond), same paint options.
-- **`nest({ x, y, scale? }, drawFn)`** — run `drawFn(fig)` and wrap everything it
-  appends in one `<g transform="translate(x y) scale(s)">`, so a child composition
-  authored in local coordinates lands at `(x, y)`. The basis of figure nesting.
-- **`nestModule(M, { x, y, scale?, step? })`** — nest a whole composition
-  **module** instead of a bare `drawFn`. Prefer this: because the module carries
-  its bounds, the child's debug frame can be drawn too, which a bare `drawFn`
-  can never know. `step` fixes a stepped child at one state.
-- **`render()`** → the figure `<svg>` string. **`mount(...)`** usually calls this
-  for you.
-
-Use `rule`/`rect`/`path` rather than building SVG strings by hand with `raw()`.
-They round coordinates the same way the rest of the kit does and keep appearance
-in one place; hand-built markup is how `.toFixed(2)` noise and stray
-`stroke-dasharray` attributes accumulated here before.
-
-Size + weight + style come from the type scale (`Config.figure.type` in
-`config.js`) via `role`; the `.fig-<role>` classes in
-[`figure.css`](../figure-kit/figure.css) add **colour only** —
-`.fig-label`, `.fig-title`, `.fig-subtitle`, `.fig-slideBody`, `.fig-slideDetail`,
-`.fig-body`, `.fig-legend`, `.fig-fine`, plus `.fig-accent` (inline emphasis) and
-`.figure-rule`.
-Put colour there; size/weight/style live in `config.js`.
-
-### `mountModule(M, opts)` — what a figure document calls
-
-`Figure.mountModule(M, { step })` is the whole script in a
-figure document. It builds the canvas from the module's own `width`/`height`,
-paints the background, drops the drawing in (`nest` when static, `draw(fig, step)`
-when stepped), and mounts the chrome — so no document restates a size, a title,
-or a step count. `step` opens the page on a given state (an index or `'last'`).
-
-### `mount(opts)` — the underlying chrome
-
-`Figure.mount({ figure, title, name, steps, step, redraw })` renders a
-figure and injects the toolbar (title, physical size, **Export SVG** / **Export
-PNG** / **Export PDF**, and the **Debug** toggle) — the figure-side equivalent of
-`Deck` injecting `#deck-chrome`. It also exposes `window.FigureMeta` (`name`,
-`title`, `widthCm`, `heightCm`, `sizeLabel`) for landing-page thumbnails and other
-same-origin index surfaces. `name` is the download basename. For stepped figures, `steps` (total
-count) and `redraw(step)` (returns a figure object) grow Back / Next buttons and a
-"Step N of M" counter, and `step` sets the initial state (see [Stepped
-figures](#stepped-figures)). **Call `mountModule` instead** unless a document
-genuinely needs to assemble its own figure object.
 
 ## Raster images
 
@@ -511,7 +446,7 @@ file, and they do not have the same reach:
 That asymmetry is the deliberate trade: `file://` binds the *page*, and paying
 for it with a committed base64 copy of every logo would be worse than asking for
 a server at the moment of export. When the bytes aren't available the chrome
-**disables the three exports and says why** — and `serialize()` throws rather
+**disables the three exports and says why on hover** — and `serialize()` throws rather
 than emitting a figure with the artwork missing, which would look fine to
 whoever exported it and be discovered by whoever opened it next.
 
@@ -527,64 +462,6 @@ per figure before its first draw, so a raster figure imports onto a slide like
 any other. Deck documents are two levels deep as well, so the same
 `../../visuals/assets/...` path resolves from both surfaces.
 
-## Export
-
-The chrome's export buttons call three functions private to `figure.js`, and
-produce **self-contained** files (the source is all native SVG):
-
-- **`download(svgEl, filename)`** — vector SVG with computed styles inlined and a
-  physical `cm` size.
-- **`downloadPng(svgEl, filename)`** — rasterized at 600 dpi with
-  a pHYs chunk tagging the resolution, so it imports at its true physical size.
-- **`printPdf(svgEl, opts)`** — a **vector** PDF via the browser: opens the
-  self-contained SVG at an exact-size `@page` and calls print (choose *Save as
-  PDF*). Text stays vector and selectable; the page is the figure's exact cm size.
-  No external libraries — mirrors how the decks export PDF.
-
-The exporter normalizes four things that break in external consumers — **this is
-the whole reason figures export cleanly, so keep it when extending the export**:
-
-1. **OKLCH → sRGB.** The theme palette is OKLCH; PowerPoint and many tools render
-   `oklch()`/`color-mix()` as **black**. Every colour is converted to sRGB
-   hex/rgba via a 1×1 canvas.
-2. **`dominant-baseline` → `dy`.** The diagram kit centres labels with
-   `dominant-baseline:central`, which PowerPoint ignores (text rides high). The
-   exporter rewrites it to `auto` + `dy="0.32em"`.
-3. **Strips `fill`/`stroke` presentation attributes** that may still carry
-   `var()`/oklch values a naive consumer reads instead of the inlined style.
-4. **Physical `width`/`height` in cm.** A unitless SVG width is read as px@96dpi —
-   0.75× too small, since our units are points (72dpi) — so PowerPoint shows a
-   24cm figure as 18cm. The exported SVG sets `width`/`height` in `cm` (from the
-   viewBox), keeping the viewBox for the coordinate mapping.
-
-PNG bakes fonts, markers (arrowheads), and the baseline into pixels, so it is the
-safest format for consumers with patchy SVG support. Known caveat: PowerPoint's
-SVG importer supports `<marker>` (arrowheads) inconsistently — if arrow tips
-disappear in PowerPoint SVG, use the PNG or emit arrowheads as plain paths.
-
-## Fonts & looking identical everywhere
-
-Figures use **Arial/Helvetica**, in every project: a brand changes the slide fonts,
-never this one. The font is `Config.figure.font`
-in [`config.js`](../theme/config.js), which `config.js` publishes as the CSS custom
-property `--f-figure` (one source of truth, shared with `figure.js`'s text
-measuring). [`figure.css`](../figure-kit/figure.css) maps it onto `--f-body`/
-`--f-display` for the figure subtree, and [`diagram.css`](../drawing-kit/diagram/diagram.css)
-points `--diagram-label-font` straight at `--f-figure`, so **a drawing is Arial
-wherever it is placed — in a figure or on a slide.** That is deliberate, not a
-leak: a label's width is geometrically coupled to the box it sits in, so a
-diagram that read Arial in a figure and system-ui on a slide would lay out
-differently on the two surfaces. Slide *prose* around the drawing is unaffected
-and keeps the deck's `--f-body`. **Helvetica is
-one of the 14 standard PDF fonts and Arial is metric-compatible**, so the SVG and
-the vector PDF render identically on any machine **without embedding a font** —
-that is the whole point of using it here.
-
-If you ever switch figures to a non-standard font, identical rendering is no longer
-free: you must **embed** it (base64 `@font-face` in the SVG, or a PDF that subsets
-it) or **outline** the text to paths (e.g. opentype.js) — otherwise other viewers
-substitute a different font. Stay on Arial/Helvetica to avoid all of that.
-
 ## Reuse contract: a placed figure is the drawing only
 
 A figure made to be placed by a slide or another figure is only reusable if it is
@@ -594,7 +471,7 @@ wrapping HTML element instead and the drawing renders black inside a figure; emi
 the title or description as HTML and a figure can never use it. The surrounding
 prose belongs to whoever places the drawing — a slide writes it as its own
 `title`/`subtitle`/`text` blocks, a figure draws it with `fig.text`. When building
-or editing such a drawing ([`diagrams`](DIAGRAM-STYLE.md)), keep its
+or editing such a drawing ([`diagrams`](../diagrams/SKILL.md)), keep its
 `--diagram-*`/palette tokens on the SVG class and let the caller own the captions.
 
 The contract has a second half, and it binds the **figure kit**: a figure-wide
@@ -639,10 +516,10 @@ the box on the kit's rhythm.
 
 ## Worked example & running it
 
-[`core/example/figures/example-steps/example-steps.js`](../example/figures/example-steps/example-steps.js)
+[`core/example/figures/example-steps/example-steps.js`](../../example/figures/example-steps/example-steps.js)
 is the core's worked figure: a **stepped** module with all nine sections, a
 diagram placed with `fig.place` and a caption drawn with `fig.text`, with
-[`index.html`](../example/figures/example-steps/index.html) the thin shell. The
+[`index.html`](../../example/figures/example-steps/index.html) the thin shell. The
 showcase deck imports it with a `figure` block. A project keeps its own
 list of worked examples (composite, data-driven, raster) in its README.
 

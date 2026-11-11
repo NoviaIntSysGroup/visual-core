@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dot Products</title>
+
+  <!-- Reveal.js core -->
+  <link rel="stylesheet" href="../../../deck-kit/reveal/reveal.css">
+
+  <!-- The core example sits one level deeper than a project's decks, so core
+       paths are ../../../ here where a project writes ../../core/. -->
+  <link rel="stylesheet" href="../../../theme/theme.css">
+  <link rel="stylesheet" href="../../visuals/brand.css">
+  <link rel="stylesheet" href="../../../deck-kit/deck.css">
+  <link rel="stylesheet" href="../../../theme/chrome.css">
+  <link rel="stylesheet" href="../../../drawing-kit/icons/icons.css">
+  <link rel="stylesheet" href="../../../drawing-kit/diagram/diagram.css">
+  <link rel="stylesheet" href="../../../figure-kit/figure.css">
+  <link rel="stylesheet" href="../../figures/unit-circle-dot/unit-circle-dot.css">
+  <link rel="stylesheet" href="../../figures/neuron-model/neuron-model.css">
+  <link rel="stylesheet" href="../../figures/shared-input/shared-input.css">
+  <link rel="stylesheet" href="../../figures/mlp-mnist/mlp-mnist.css">
+  <link rel="stylesheet" href="../../figures/receptive-field/receptive-field.css">
+  <link rel="stylesheet" href="../../figures/learned-fields/learned-fields.css">
+  <link rel="stylesheet" href="../../../deck-kit/widgets/badge.css">
+  <link rel="stylesheet" href="../../../deck-kit/widgets/wash.css">
+  <link rel="stylesheet" href="../../visuals/apps/dot-product.css">
+  <link rel="stylesheet" href="../../visuals/apps/unit-circle.css">
+  <link rel="stylesheet" href="../../visuals/apps/similar-vectors.css">
+  <link rel="stylesheet" href="../../visuals/apps/integrate-and-fire.css">
+  <link rel="stylesheet" href="../../visuals/apps/hubel-wiesel.css">
+  <link rel="stylesheet" href="../../visuals/apps/linear-classifier.css">
+  <link rel="stylesheet" href="../../../deck-kit/figure-import.css">
+  <link rel="stylesheet" href="../../../deck-kit/image.css">
+  <link rel="stylesheet" href="../../../deck-kit/templates.css">
+</head>
+<body>
+
+<div class="reveal">
+  <div class="slides" id="slides-root">
+    <!-- Slides injected by the deck kit from the SLIDES data below. -->
+  </div>
+</div>
+
+<!-- Reveal.js + shared kit (classic scripts, so this works over file:// too) -->
+<script src="../../../deck-kit/reveal/reveal.js"></script>
+<script src="../../../math/math.js"></script>
+<script src="../../../math/tex-svg.js"></script>
+<script src="../../../theme/config.js"></script>
+<script src="../../../drawing-kit/units.js"></script>
+<script src="../../../drawing-kit/icons/icons.js"></script>
+<script src="../../../figure-kit/figure.js"></script>
+<script src="../../figures/unit-circle-dot/unit-circle-dot.js"></script>
+<script src="../../figures/neuron-model/neuron-model.js"></script>
+<script src="../../figures/shared-input/shared-input.js"></script>
+<script src="../../figures/mlp-mnist/mlp-mnist.js"></script>
+<script src="../../figures/receptive-field/receptive-field.js"></script>
+<script src="../../figures/learned-fields/learned-fields.js"></script>
+<script src="../../figures/embedding-space/embedding-space.js"></script>
+<script src="../../../deck-kit/widgets/badge.js"></script>
+<script src="../../../deck-kit/widgets/wash.js"></script>
+<script src="../../visuals/apps/dot-product.js"></script>
+<script src="../../visuals/apps/unit-circle.js"></script>
+<script src="../../visuals/apps/similar-vectors.js"></script>
+<script src="../../visuals/apps/integrate-and-fire.js"></script>
+<script src="../../visuals/apps/hubel-wiesel.js"></script>
+<script src="../../visuals/apps/linear-classifier.js"></script>
+<script src="../../../deck-kit/figure-import.js"></script>
+<script src="../../../deck-kit/deck.js"></script>
+<script src="../../../deck-kit/image.js"></script>
+<script src="../../../deck-kit/templates.js"></script>
+
+<script>
+/* === SLIDES:START (edited by the inline editor — do not remove these markers) === */
+const SLIDES = [
+  {
+    "layout": "hero",
+    "background": "UnitCircle",
+    "seed": "core-dot-products",
+    "badges": [
+      "Example",
+      "Linear Algebra",
+      "TODAY"
+    ],
+    "title": "Dot Products",
+    "subtitle": "From a weighted sum to template matching in neural networks",
+    "byline": "Move the cursor around the circle to turn one arrow, and watch its projection onto the other",
+    "work": [
+      "(2, 1, 3) · (4, −1, 2)",
+      "= 2·4 + 1·(−1) + 3·2",
+      "= 8 − 1 + 6 = 13"
+    ],
+    "question": "Is this really used for anything?"
+  },
+  {
+    "layout": "toc",
+    "title": "What We'll Cover",
+    "highlight": "Understanding the Dot Product",
+    "fragments": true,
+    "items": [
+      {
+        "title": "Understanding the Dot Product",
+        "text": "A mental image of what a dot product is and what it computes."
+      },
+      {
+        "title": "Neurons and Neural Networks",
+        "text": "How dot products approximate biological neurons, and how networks of them become matrix multiplications."
+      },
+      {
+        "title": "Working in Embedding Space",
+        "text": "How embedding vectors let dot products search by meaning and sort items into classes."
+      }
+    ]
+  },
+  {
+    "layout": "columns",
+    "title": "General Notation",
+    "columns": [
+      {
+        "blocks": [
+          [
+            {
+              "type": "subhead",
+              "text": "Vectors"
+            },
+            {
+              "type": "bullets",
+              "items": [
+                "A vector is a list of numbers, written as one column",
+                "Bold lowercase, such as $\\mathbf{a} \\in \\mathbb{R}^n$: a list of $n$ numbers",
+                "$a_i$ is number $i$ in the list, and $\\mathbf{a}^\\top$ is the list as a row",
+                "$\\lVert \\mathbf{a} \\rVert$ is its length, by Pythagoras: $\\sqrt{a_1^2 + \\dots + a_n^2}$"
+              ]
+            },
+            {
+              "type": "text",
+              "text": "$$\\mathbf{a} = \\begin{bmatrix} 2 \\\\ 5 \\\\ -1 \\end{bmatrix} \\in \\mathbb{R}^3, \\quad a_2 = 5, \\quad \\mathbf{a}^\\top = \\begin{bmatrix} 2 & 5 & -1 \\end{bmatrix}$$"
+            }
+          ],
+          [
+            {
+              "type": "subhead",
+              "text": "Matrices"
+            },
+            {
+              "type": "bullets",
+              "items": [
+                "A matrix is a table of numbers, with rows and columns",
+                "Bold uppercase, such as $\\mathbf{A} \\in \\mathbb{R}^{n \\times m}$: $n$ rows and $m$ columns",
+                "Or $m$ column vectors side by side: $\\mathbf{a}_1, \\dots, \\mathbf{a}_m$"
+              ]
+            },
+            {
+              "type": "text",
+              "text": "$$\\mathbf{A} = \\begin{bmatrix} 1 & 0 & 4 \\\\ 3 & 2 & 1 \\end{bmatrix} = \\begin{bmatrix} \\mathbf{a}_1 & \\mathbf{a}_2 & \\mathbf{a}_3 \\end{bmatrix}$$"
+            }
+          ]
+        ]
+      },
+      {
+        "valign": "center",
+        "blocks": [
+          [
+            {
+              "type": "subhead",
+              "text": "The Dot Product"
+            },
+            {
+              "type": "text",
+              "text": "$$\\mathbf{a} \\cdot \\mathbf{b} = \\sum_{i=1}^{n} a_i b_i = \\mathbf{a}^\\top \\mathbf{b}$$"
+            }
+          ],
+          [
+            {
+              "type": "figure",
+              "module": "UnitCircleDotFigure"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "text": "Interestingly, the dot product is connected to the angle between the vectors.<br>$$\\mathbf{a} \\cdot \\mathbf{b} = \\lVert \\mathbf{a} \\rVert \\, \\lVert \\mathbf{b} \\rVert \\cos\\theta$$"
+            }
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "layout": "columns",
+    "title": "Three Ways to See the Dot Product",
+    "lead": "Imagine $\\mathbf{w}$ as a template and $\\mathbf{x}$ as an input.",
+    "columns": [
+      {
+        "blocks": [
+          [
+            {
+              "type": "text",
+              "text": "<b>1. A weighted sum </b>that gets larger when the input $\\mathbf{x}$ matches the template&nbsp;$\\mathbf{w}$.$$\\mathbf{x} \\cdot \\mathbf{w} = \\sum_{i=1}^{n} x_i w_i = \\mathbf{x}^\\top \\mathbf{w}$$"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "text": "<b>2. An alignment measure </b>that indicates whether the input $\\mathbf{x}$&nbsp;points in the same direction as the template $\\mathbf{w}$.$$\\mathbf{x} \\cdot \\mathbf{w} = \\lVert \\mathbf{x} \\rVert \\, \\lVert \\mathbf{w} \\rVert \\cos \\theta \\;\\Rightarrow\\; \\cos \\theta = \\frac{\\mathbf{x} \\cdot \\mathbf{w}}{\\lVert \\mathbf{x} \\rVert \\, \\lVert \\mathbf{w} \\rVert}$$"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "text": "<b>3. A projection</b>&nbsp;of how far the input $\\mathbf{x}$&nbsp;extends along the template $\\mathbf{w}$.$$\\mathbf{x} \\cdot \\mathbf{w} = \\lVert \\mathbf{x} \\rVert \\lVert \\mathbf{w} \\rVert \\cos \\theta \\;\\Rightarrow\\; \\lVert \\mathbf{x} \\rVert \\cos \\theta = \\frac{\\mathbf{x} \\cdot \\mathbf{w}}{\\lVert \\mathbf{w} \\rVert}$$"
+            }
+          ]
+        ]
+      },
+      {
+        "valign": "center",
+        "blocks": [
+          {
+            "type": "app",
+            "module": "DotProduct"
+          }
+        ]
+      }
+    ],
+    "closing": "All three tell how similar the input is to template."
+  },
+  {
+    "layout": "columns",
+    "title": "Similar Vectors in Higher Dimensions",
+    "lead": "Draw a vector as a line or an image of its numbers. A high dot product means a similar shape.",
+    "columns": [
+      {
+        "fragment": false,
+        "blocks": [
+          {
+            "type": "app",
+            "module": "SimilarVectors"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "layout": "toc",
+    "highlight": "Neurons and Neural Networks"
+  },
+  {
+    "layout": "columns",
+    "title": "The Nervous System Is Built From Neurons",
+    "columns": [
+      {
+        "blocks": [
+          {
+            "type": "title",
+            "text": "Nobel Prize in Medicine 1906"
+          },
+          {
+            "type": "row",
+            "blocks": [
+              {
+                "type": "image",
+                "src": "https://www.nobelprize.org/images/cajal-12850-portrait-medium.jpg",
+                "alt": "Portrait of Santiago Ramón y Cajal",
+                "maxHeight": 220,
+                "caption": "Santiago Ramón y Cajal"
+              },
+              {
+                "type": "image",
+                "src": "../../visuals/assets/images/Cajal_Retina.jpg",
+                "alt": "Cajal's drawing of the nerve cells of the retina",
+                "maxHeight": 220,
+                "caption": "His drawing of the retina"
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": "Shared with Camillo Golgi, whose silver stain made single nerve cells visible. In 1887, Cajal used it to show that each nerve cell, a.k.a. a neuron, is an independent unit, and that impulses pass from one cell to the next where they touch."
+          }
+        ]
+      },
+      {
+        "blocks": [
+          [
+            {
+              "type": "subhead",
+              "text": "Biological Neuron"
+            },
+            {
+              "type": "app",
+              "module": "IntegrateAndFire",
+              "play": "press"
+            }
+          ],
+          [
+            {
+              "type": "subhead",
+              "text": "Artificial Neuron"
+            },
+            {
+              "type": "figure",
+              "module": "NeuronModelFigure"
+            }
+          ]
+        ]
+      }
+    ],
+    "closing": "Neural networks model each neuron as a dot product followed by a nonlinearity."
+  },
+  {
+    "layout": "columns",
+    "title": "A Neural Network Is a Lot of Dot Products",
+    "columns": [
+      {
+        "blocks": [
+          {
+            "type": "title",
+            "text": "From One Neuron to a Layer"
+          },
+          {
+            "type": "figure",
+            "module": "SharedInputFigure",
+            "maxHeight": 330
+          }
+        ]
+      },
+      {
+        "blocks": [
+          {
+            "type": "title",
+            "text": "From One Layer to a Network"
+          },
+          {
+            "type": "figure",
+            "module": "MlpMnistFigure",
+            "maxHeight": 330
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "layout": "columns",
+    "title": "A Neuron's Template Shows What It Responds To",
+    "columns": [
+      {
+        "blocks": [
+          [
+            {
+              "type": "subhead",
+              "text": "Learning a Neuron's Template From Data"
+            },
+            {
+              "type": "figure",
+              "module": "ReceptiveFieldFigure",
+              "maxHeight": 330
+            }
+          ],
+          [
+            {
+              "type": "subhead",
+              "text": "Getting the Data From a Real Neuron"
+            },
+            {
+              "type": "app",
+              "module": "HubelWiesel",
+              "play": "press"
+            }
+          ]
+        ]
+      },
+      {
+        "blocks": [
+          [
+            {
+              "type": "subhead",
+              "text": "Hubel and Wiesel, Late 1950s and 1960s"
+            },
+            {
+              "type": "row",
+              "blocks": [
+                {
+                  "type": "video",
+                  "src": "https://www.science.smith.edu/~rolivo/bio300/vision/VisualCortexHiRes.mp4",
+                  "alt": "Hubel and Wiesel's recording from a neuron in a cat's visual cortex",
+                  "maxHeight": 157,
+                  "start": 251,
+                  "sound": true,
+                  "play": "press"
+                },
+                {
+                  "type": "text",
+                  "text": "<b>David H. Hubel and Torsten N. Wiesel</b>, Nobel Prize 1981, “for their discoveries concerning information processing in the visual system”"
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "type": "subhead",
+              "text": "AlexNet, 2012: A Deep Neural Image Classifier"
+            },
+            {
+              "type": "figure",
+              "module": "LearnedFieldsFigure",
+              "maxHeight": 330
+            }
+          ]
+        ]
+      }
+    ],
+    "closing": "This reading is so common that it has its own name: the neuron's receptive field."
+  },
+  {
+    "layout": "toc",
+    "highlight": "Working in Embedding Space"
+  },
+  {
+    "layout": "columns",
+    "title": "Embedding Vectors",
+    "lead": "An embedding model turns text, images, and sound into vectors with far fewer numbers than the input. These have just two dimensions, so we can easily plot where each one lands.",
+    "columns": [
+      {
+        "blocks": [
+          {
+            "type": "figure",
+            "module": "EmbeddingSpaceFigure",
+            "maxHeight": 330
+          }
+        ]
+      }
+    ],
+    "closing": "Similar things get similar vectors, whatever kind of input they came from."
+  },
+  {
+    "layout": "columns",
+    "title": "Searching by Angle: Queries and Keys",
+    "lead": "Embedding models often return unit vectors, $\\lVert\\mathbf{e}\\rVert = 1$.<br>The dot product then becomes the cosine of the angle between the vectors: $\\mathbf{q} \\cdot \\mathbf{k}_i = \\cos\\theta_i$.",
+    "columns": [
+      {
+        "blocks": [
+          {
+            "type": "figure",
+            "module": "EmbeddingSearchFigure",
+            "maxHeight": 330
+          }
+        ]
+      }
+    ],
+    "closing": "Stack the keys as the columns of $\\mathbf{K}$, and one product, $\\mathbf{q}^\\top \\mathbf{K}$, scores the whole collection."
+  },
+  {
+    "layout": "columns",
+    "title": "A Projection Is a Linear Classifier",
+    "lead": "Score each point by its projection onto a template $s = \\mathbf{w} \\cdot \\mathbf{x}$, and you get a linear classifier.<br>Optimize $\\mathbf{w}$ to make the two classes' scores pull apart.",
+    "columns": [
+      {
+        "blocks": [
+          {
+            "type": "subhead",
+            "text": "Turn w to Separate Two Classes"
+          },
+          {
+            "type": "app",
+            "module": "LinearClassifier"
+          }
+        ]
+      },
+      {
+        "blocks": [
+          {
+            "type": "subhead",
+            "text": "The Best w for Cats and Cars"
+          },
+          {
+            "type": "figure",
+            "module": "EmbeddingBestWFigure",
+            "maxHeight": 300
+          }
+        ]
+      }
+    ],
+    "closing": "One dot product scores the embedding of any new picture."
+  },
+  {
+    "layout": "columns",
+    "title": "Summary",
+    "lead": "A neuron is a dot product followed by a nonlinearity, $y = f(\\mathbf{w} \\cdot \\mathbf{x})$.<br>A network is many dot products: a layer computes $\\mathbf{x}^\\top \\mathbf{W}$.",
+    "columns": [
+      {
+        "halign": "center",
+        "blocks": [
+          {
+            "type": "title",
+            "text": "A Weighted Sum"
+          },
+          {
+            "type": "text",
+            "text": "$$\\mathbf{x} \\cdot \\mathbf{w} = \\sum_{i=1}^{n} x_i w_i$$"
+          },
+          {
+            "type": "row",
+            "blocks": [
+              {
+                "type": "figure",
+                "module": "SummaryFieldsFigure"
+              },
+              {
+                "type": "text",
+                "text": "Seeing $\\mathbf{w}$ as weights shows what a neuron responds to."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "halign": "center",
+        "blocks": [
+          {
+            "type": "title",
+            "text": "An Alignment Measure"
+          },
+          {
+            "type": "text",
+            "text": "$$\\cos \\theta = \\frac{\\mathbf{x} \\cdot \\mathbf{w}}{\\lVert \\mathbf{x} \\rVert \\, \\lVert \\mathbf{w} \\rVert}$$"
+          },
+          {
+            "type": "row",
+            "blocks": [
+              {
+                "type": "figure",
+                "module": "SummarySearchFigure"
+              },
+              {
+                "type": "text",
+                "text": "Seeing the dot product as $\\cos \\theta$ lets us search."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "halign": "center",
+        "blocks": [
+          {
+            "type": "title",
+            "text": "A Projection"
+          },
+          {
+            "type": "text",
+            "text": "$$\\lVert \\mathbf{x} \\rVert \\cos \\theta = \\frac{\\mathbf{x} \\cdot \\mathbf{w}}{\\lVert \\mathbf{w} \\rVert}$$"
+          },
+          {
+            "type": "row",
+            "blocks": [
+              {
+                "type": "figure",
+                "module": "SummaryClassifierFigure"
+              },
+              {
+                "type": "text",
+                "text": "Seeing the dot product as a projection lets us classify things."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "layout": "references",
+    "title": "References",
+    "groups": [
+      {
+        "title": "Biological Neurons",
+        "items": [
+          {
+            "name": "Nobel Prize to Golgi and Cajal (1906)",
+            "title": "The Nobel Prize in Physiology or Medicine 1906",
+            "href": "https://www.nobelprize.org/prizes/medicine/1906/summary/"
+          },
+          {
+            "name": "Receptive fields in the cat's visual cortex (1959)",
+            "title": "Receptive fields of single neurones in the cat's striate cortex",
+            "href": "https://doi.org/10.1113/jphysiol.1959.sp006308"
+          },
+          {
+            "name": "Hubel and Wiesel's own recordings of visual cortex neurons",
+            "title": "Videos of units in visual cortex, digitized film hosted by Smith College",
+            "href": "https://www.science.smith.edu/~rolivo/bio300/h%26w.html"
+          },
+          {
+            "name": "Nobel Prize to Hubel and Wiesel (1981)",
+            "title": "The Nobel Prize in Physiology or Medicine 1981",
+            "href": "https://www.nobelprize.org/prizes/medicine/1981/summary/"
+          }
+        ]
+      },
+      {
+        "title": "Artificial Neural Networks",
+        "items": [
+          {
+            "name": "AlexNet (2012)",
+            "title": "ImageNet classification with deep convolutional neural networks",
+            "href": "https://papers.nips.cc/paper/2012/hash/c399862d3b9d6b76c8436e924a68c45b-Abstract.html"
+          },
+          {
+            "name": "Deep neural networks, reviewed (2015)",
+            "title": "LeCun, Bengio, and Hinton: Deep learning, Nature 521",
+            "href": "https://doi.org/10.1038/nature14539"
+          }
+        ]
+      },
+      {
+        "title": "Embeddings and Classifiers",
+        "items": [
+          {
+            "name": "Images and text in one embedding space: CLIP (2021)",
+            "title": "Learning transferable visual models from natural language supervision",
+            "href": "https://arxiv.org/abs/2103.00020"
+          },
+          {
+            "name": "Images, text, and sound in one embedding space: ImageBind (2023)",
+            "title": "ImageBind: One embedding space to bind them all",
+            "href": "https://arxiv.org/abs/2305.05665"
+          },
+          {
+            "name": "Linear classifiers, chapter 4 (2006)",
+            "title": "Bishop: Pattern recognition and machine learning, free online",
+            "href": "https://www.microsoft.com/en-us/research/publication/pattern-recognition-machine-learning/"
+          }
+        ]
+      }
+    ]
+  }
+];
+/* === SLIDES:END === */
+
+Deck.mount({
+  slides:     SLIDES,
+  storageKey: 'core-dot-products',
+  logo:       '../../visuals/assets/logo.svg',
+  templates:  window.Templates,
+});
+
+</script></body></html>

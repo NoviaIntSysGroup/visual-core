@@ -14,10 +14,22 @@ under `example/`. The fuller editing, running, and publishing workflow is in [`c
 4. Do not preserve backwards compatibility, optimize for the long run.
 5. Comments say what the code does, nothing else. Five lines max, fewer is better.
 6. Compose from existing shared pieces. Anything new is ask-first: plan, agree, then build.
-7. Read the style doc that governs the files you are about to touch, before touching them.
-8. Don't open a browser to check your work. Verifying visually is the user's step.
-9. Never create a git worktree or branch unless asked. Work in the current checkout.
-10. Stay inside the repo. Never search, read, or write outside the working directory, unless the user names a path for the task.
+7. Read the skill that governs the files you are about to touch, before touching them.
+8. Onnly inspect a page visually when asked to do so [`core/README.md`](README.md#checking-pages-headlessly).
+9. Always work in the current checkout, only create a git worktree if explicitly asked to do so.
+10. Stay inside the repo. Never search, read, or write outside the working directory.
+
+## Observing while you work
+
+1. Stay attentive to problems in this repo's instructions and code as you
+   work. A user correction, a failed call, a guess, a workaround, two
+   sources that disagree, or a result that surprised you are signals.
+
+2. A suspicion is enough. On any signal, read
+   [`core/skills/issue-log/SKILL.md`](skills/issue-log/SKILL.md) before deciding
+   it was nothing; it decides whether to log, and how.
+
+3. Then keep working on your original task. Don't patch anything mid-task.
 
 ## Human-first architecture
 
@@ -43,38 +55,33 @@ under `example/`. The fuller editing, running, and publishing workflow is in [`c
 
 ## Working In This Repo
 
-**Ask first (rule 6).** Anything other projects might use — the core's kits, theme, tools, and docs —
+**Ask first (rule 6).** Anything other projects might use — the core's kits, theme, tools, and skills —
 needs a concise plan and the user's agreement before it changes. So does a new deck, figure, slide
-template, block, widget, hero background, icon, or colour. `core/example/` is the exception: change
+template, block, widget, app, icon, or colour. `core/example/` is the exception: change
 it freely. Compose from what already exists unless the user agrees to a new piece.
 
-**Which style doc (rule 7).** These are the authoring skills for this repo, not background
-reading:
+**Which skill (rule 7).** These are the authoring skills for this repo, not background
+reading. Read the skill's `SKILL.md` before the work; it names its reference files, and you open
+one only when the task needs it.
 
-| Style doc | Governs | Read it before |
+| Skill | Governs | Read it before |
 |---|---|---|
-| [`core/docs/SLIDE-STYLE.md`](docs/SLIDE-STYLE.md) (`slide-decks`) | `decks/`, `visuals/backgrounds/`, `core/deck-kit/`, `core/theme/theme.css`, `visuals/brand.css`, `core/landing/` | adding or reordering slides, writing slide copy, building a deck, placing an existing figure on a slide, changing a template, layout, tag, or theme token |
-| [`core/docs/DIAGRAM-STYLE.md`](docs/DIAGRAM-STYLE.md) (`diagrams`) | `core/drawing-kit/diagram/`, `core/drawing-kit/charts/`, and the diagram-kit drawing code inside a figure module | *constructing* a diagram or chart: drawing one with the kit, editing one, or changing a kit |
-| [`core/docs/FIGURE-STYLE.md`](docs/FIGURE-STYLE.md) (`figures`) | `figures/`, `core/figure-kit/` | building or editing a publication figure or the figure kit |
-| [`core/docs/IMAGE-STYLE.md`](docs/IMAGE-STYLE.md) (`illustrations`) | `visuals/image-prompt.md`, `visuals/assets/generated/` | writing an image-generation prompt; only the SCENE block is written fresh |
+| [`core/skills/slide-decks/SKILL.md`](skills/slide-decks/SKILL.md) | `decks/`, `visuals/apps/`, `core/deck-kit/`, `core/theme/theme.css`, `visuals/brand.css`, `core/landing/` | adding or reordering slides, writing slide copy, building a deck, placing an existing figure on a slide, changing a template, layout, tag, or theme token |
+| [`core/skills/diagrams/SKILL.md`](skills/diagrams/SKILL.md) | `core/drawing-kit/diagram/`, `core/drawing-kit/charts/`, and the diagram-kit drawing code inside a figure module | *constructing* a diagram or chart: drawing one with the kit, editing one, or changing a kit |
+| [`core/skills/figures/SKILL.md`](skills/figures/SKILL.md) | `figures/`, `core/figure-kit/` | building or editing a publication figure or the figure kit |
+| [`core/skills/illustrations/SKILL.md`](skills/illustrations/SKILL.md) | `visuals/image-prompt.md`, `visuals/assets/generated/` | writing an image-generation prompt; only the SCENE block is written fresh |
+| [`core/skills/issue-log/SKILL.md`](skills/issue-log/SKILL.md) | `issues/` | as soon as you suspect a problem in the repo's instructions or code (see *Observing while you work*) |
+| [`core/skills/issue-fix/SKILL.md`](skills/issue-fix/SKILL.md) | instructions: skills, `AGENTS.md`, `README.md`, code comments, kit doc headers | changing any instruction, or working through `issues/`, code entries included |
 
 Placing an existing figure onto a slide or into another figure is slides/figures work, not
 diagram work. Anything structural is a diagram, never a generated illustration. Work that spans
 two rows — a figure whose diagram you also change — means reading both.
 
-**Browser validation (rule 8).** For a minor change (slide copy, a token, an existing layout),
-validate in the browser only when explicitly asked. For something new — a deck, slide, figure, or
-widget — ask in the plan whether browser validation is wanted, and only start the preview if
-it is.
-
-**Git (rule 9).** Rule 9 overrides any harness default that suggests isolating background work in
-a worktree.
-
 **The core is a subtree.** In a project, `core/` is ordinary committed files, one project's copy of
 the core. An agreed core change goes in commits that touch only `core/`, and reaches the core repo
 with `git subtree push`. Updating the core and changing it from a project are in
 [`core/README.md`](README.md#projects). Starting a project, or moving a deck between projects, follows
-[`core/docs/NEW-PROJECT.md`](docs/NEW-PROJECT.md) (`new-project`).
+[`core/skills/new-project/SKILL.md`](skills/new-project/SKILL.md).
 
 ## Conventions & Constraints
 
@@ -89,8 +96,6 @@ with `git subtree push`. Updating the core and changing it from a project are in
   inline editor rewrites the array between them. Never remove or reword them, and keep anything
   the editor must not touch outside them. The block is strict JSON in the format
   `JSON.stringify(slides, null, 2)` writes, with no comments, so a save changes only the edited lines.
-- **Editable text carries `data-edit="<slideIndex>/<field>"`** (for example
-  `1/columns/0/description`). Any new template region that should be editable needs this path.
 - **Points are the unit.** The Reveal canvas is `960×540` — a PowerPoint 16:9 page — so one
   canvas unit = 1 pt. The type scale and spacing tokens hold point values, written in `px`
   because CSS px == our point; never use `pt`/`cm`/`mm` keywords in CSS (they drift 96-vs-72).
@@ -101,19 +106,13 @@ with `git subtree push`. Updating the core and changing it from a project are in
   theme outside that transform — the landing page (`index.html`), the toolbars in `chrome.css`, and the figure page in `figure.css` —
   must size with literal screen px, not the point-valued type/spacing tokens, or they come out
   half-size. Colours and other non-size tokens are still shared.
-- **Fragments only animate in fullscreen.** In a normal tab every `fragment` shows at once;
-  entering fullscreen restarts the current slide's fragments. This is deliberate.
-- **Heading/prose roles.** Pick tags by semantic role, never by size: `h1` = the one slide title,
-  `h2` = every column/card heading, `h3` = a heading nested inside a column (rare), `p` = all prose.
-- **`?thumb`** renders a chrome-less, non-interactive first slide. **`?print-pdf`** loads Reveal's
-  print CSS and auto-opens the print dialog.
 
 ## Architecture
 
 The core is grouped by what is inside. `theme/` holds the tokens every page loads, plus the settings and toolbar look decks and figures share; `drawing-kit/`
 draws diagrams, charts, and icons; `math/` turns LaTeX into vector SVG; `deck-kit/` builds decks; `figure-kit/` composes figures, for figure pages and for decks that import a figure;
 `landing/` builds the index page that lists them.
-`tools/` and `docs/` are never loaded by a page. `example/` is the core's own small project, so
+`tools/` and `skills/` are never loaded by a page. `example/` is the core's own small project, so
 the core can be run and changed without one. A project adds its own `visuals/`, `decks/`, and
 `figures/` beside `core/`.
 
@@ -165,8 +164,8 @@ the core can be run and changed without one. A project adds its own `visuals/`, 
 
 | Path | Global | Owns |
 |---|---|---|
-| `landing.css` | — | Top bar, hero, tabs, cards, about, footer, and bare `h1/h2/h3/p` for the landing page only; not loaded by decks or figures |
-| `landing.js` | — | Tab toggle, deferred thumbnails, card titles from each thumbnail's `DeckMeta` / `FigureMeta` |
+| `landing.css` | — | Top bar, hero, tabs, collapsible card groups, cards, about, footer, and bare `h1/h2/h3/p` for the landing page only; not loaded by decks or figures |
+| `landing.js` | — | Tab toggle, deferred thumbnails, card titles each thumbnail sends by `postMessage` |
 
 **Example** (`core/example/`) — the core's own project, laid out like one, one level deeper:
 
@@ -174,13 +173,10 @@ the core can be run and changed without one. A project adds its own `visuals/`, 
 |---|---|---|
 | `index.html` | — | Landing page for the pages below; the template a project's landing page is copied from |
 | `.claude/launch.json` | — | The preview config a project copies, with its `core/tools/serve.js` path; never used from here |
-| `visuals/` | — | An empty `brand.css`, so the core's neutral defaults show, an `image-prompt.md` template, placeholder assets, and the Hopfield deck's `HopfieldBackground` in `backgrounds/` |
+| `visuals/` | — | An empty `brand.css`, so the core's neutral defaults show, an `image-prompt.md` template, placeholder assets, a generated illustration, and the example decks' apps |
 | `decks/showcase/index.html` | — | One slide per template, block kind, and widget; where a core change is looked at |
-| `decks/hopfield-networks/` | — | A short real deck; its hero `background` is a live network |
-| `figures/example-steps/` | `ExampleStepsFigure` | One stepped figure; the worked example in FIGURE-STYLE.md |
-| `figures/hopfield-state/` | `HopfieldStateFigure` | The Hopfield deck's stepped figure: neurons as pixels, and the state as all their values |
-| `figures/hopfield-landscape/` | `HopfieldLandscapeFigure` | The Hopfield deck's stepped figure: stored images as valleys, and a state running downhill into one |
-| `figures/hopfield-heart-equations/` | `HopfieldHeartWeightFigure`, `HopfieldHeartEnergyFigure`, `HopfieldHeartUpdateFigure` | The Hopfield deck's three equation figures, one heart each, stepped; `hopfield-heart-{weight,energy,update}/` hold their pages |
+| `figures/example-steps/` | `ExampleStepsFigure` | One stepped figure; the worked example in the `figures` skill |
+| other `decks/`, `figures/` | — | The Hopfield and dot-product decks, with the figures they import, as real examples |
 
 **Project** — beside `core/`, one set per project. Locality above governs the core. A project is
 organized by kind, because its content belongs to the project rather than to one deck: a deck's
@@ -189,12 +185,12 @@ folder holds only its `index.html`, a figure's folder that figure, and `visuals/
 | Path | Global | Owns |
 |---|---|---|
 | `visuals/brand.css` | — | The project's `--color-*` palette and its semantic colour (and optionally CSS font) overrides. Loaded right after `core/theme/theme.css` on every page. Raw `--color-*` never leave this file, and it overrides nothing structural. Figure, diagram, and chart labels always use `--f-figure` from `config.js` |
-| `visuals/image-prompt.md` | — | The fixed blocks of the project's illustration prompts (see IMAGE-STYLE.md) |
+| `visuals/image-prompt.md` | — | The fixed blocks of the project's illustration prompts (see the `illustrations` skill) |
 | `visuals/vendor-icons.js` | extends `Icons` | Third-party marks, never recoloured; project-only, so the core ships no trademarks. Loaded explicitly after `icons.js` |
-| `visuals/backgrounds/<name>-background.js` + `.css` | e.g. `<Name>Background` | A hero `background`, whether one deck uses it or several; its CSS also places the title block. Not a widget: widgets are core only |
+| `visuals/apps/<name>.js` + `.css` | e.g. `<Name>` | A live, interactive piece, whether one deck uses it or several: `render(spec)` returns its markup and the app drives itself. Placed with the `app` block, or as a hero `background`, where its CSS also places the title block. Not a widget: widgets are core only |
 | `visuals/assets/` | — | Project media: logos, portraits, partner marks, covers, generated illustrations |
 | `decks/<name>/index.html` | — | The `SLIDES` array + one `Deck.mount({...})` call |
-| `figures/<name>/<name>.js` | `<Name>Figure` | `{ width, height, title, name, className, ariaLabel, steps?, draw }`; `draw(fig[, step])` renders in local coordinates and adds **no** background. Nine-section template, see FIGURE-STYLE.md. The only way to make a drawing that a deck or another figure reuses; one file may export several modules that share size settings |
+| `figures/<name>/<name>.js` | `<Name>Figure` | `{ width, height, title, name, className, ariaLabel, steps?, draw }`; `draw(fig[, step])` renders in local coordinates and adds **no** background. Nine-section template, see the `figures` skill. The only way to make a drawing that a deck or another figure reuses; one file may export several modules that share size settings |
 | `figures/<name>/<name>.css` | — | The figure's drawing appearance, on its diagram's SVG class; loaded by every page that shows the figure |
 | `figures/<name>/index.html` | — | Thin shell → `Figure.mountModule(window.<Name>Figure)` |
 | `index.html` | — | Landing page: hero, cards, and about, on `core/landing/`; copied from the example's |
@@ -207,30 +203,13 @@ folder holds only its `index.html`, a figure's folder that figure, and `visuals/
 - **Text never resizes on its own.** `theme.css` sets `--diagram-scale: 1.5` and `deck.css` applies it to
   both kinds of import — a placed drawing (`.diagram`, `.chart`) and a whole imported figure (`.figure`)
   — as intrinsic size × scale capped at 100% of the container: *1.5, or the largest that fits*.
-  An 8pt figure label reads 12pt on a slide. Figure pages don't link `deck.css`, so they keep
+  An 8pt figure label reads 12pt on a slide, provided the figure is authored no wider than its column ÷ 1.5 and no taller than `maxHeight` ÷ 1.5, or the scale drops (see the `figures` skill). Figure pages don't link `deck.css`, so they keep
   their authored cm size. Text added *around* an import belongs to the slide or figure and takes
   that surface's type scale.
-- **Icon colour and stroke are independent toggles**, not icon kinds: colour defaults to
-  `--icon-*` but is inert on brand marks; stroke is a fixed absolute width unless
-  `fixedStroke: false`.
-- **`image`** is the one way to show a still picture, alone or as a set. With no slot size each
-  picture takes its own size; stating `cellWidth`/`cellHeight` or `width`/`height` puts every
-  item in an equal slot, for logos and icons. `equalize` sizes slotted logos to one drawn area,
-  weighted by each logo's `cover` (ink fraction from `mark-coverage.js`) when given. **`wash`** is a coloured backdrop panel whose hue is
-  picked by hashing a seed string, so the same seed is always the same wash. The **`figure`**
-  block (`figure-import.js`) imports a whole figure onto a slide and drives its steps from Reveal fragments, or plays them
-  on a timer when the module declares `autoplay`/`holds`.
-- **Rasters in figures** are listed in the module's `images` as ordinary relative paths and
-  inlined as data URIs on export — so *exporting* such a figure needs the dev server, *viewing*
-  it does not.
-- **Nesting:** `fig.nestModule(M, {x,y,scale?})` drops a child composition module into a parent
-  as one flat `<g transform>`; `fig.nest({x,y,scale?}, drawFn)` is the bounds-less form beneath it.
-- **Saving edits:** on the dev server, the editor's **Done** sends the page to the server with a
-  `PUT`, which overwrites that existing `.html` file with no prompts. This `fetch` is the one exception to the
-  no-`fetch` rule: only the server's injected script sets `window.DEV_SERVER`, so it never runs on
-  `file://`, where the editor uses the browser's file picker, or a download without one.
-- **Debug frames** are always emitted and CSS-hidden; the chrome's Debug button reveals them all
-  and `serialize()` strips them from every export.
+- **Dev-server only:** the server's injected script sets `window.DEV_SERVER`, and only code that
+  checks it may `fetch`. The deck editor's **Done** sends the page back with a `PUT`, which
+  overwrites that existing `.html` file with no prompts; figure export fetches image bytes.
+  Without the server, **Edit** and a figure with images' exports show disabled, with a note on hover.
 
 ## Running It
 
@@ -240,12 +219,11 @@ There is no build, test, or lint step. Validation is opening the page.
 |---|---|
 | Live-reload dev server (port 8099), from the project root; the core's example is at `/core/example/` | `bun run core/tools/serve.js` |
 | Dev server for the core alone, from the core folder; `/` redirects to `/example/` | `bun run tools/serve.js` |
-| Dev server started by an agent, so it never takes the user's port 8099; stop it when done | `PORT=8100 bun run core/tools/serve.js` |
 | Regenerate icon bounding boxes | `bun run core/tools/icon-metrics.js` |
 | Ink coverage for optically sized marks | `bun run core/tools/mark-coverage.js <file\|folder>...` |
 
-Opening any deck's or figure's `index.html` directly also works; you only lose auto-refresh and
-prompt-free saving (see **Saving edits**).
+Opening any deck's or figure's `index.html` directly also works; you lose auto-refresh, editing,
+and exporting figures with images (see **Dev-server only**).
 Without a project, open `example/index.html` in the core.
 
 **Gotcha:** the on-slide editor autosaves a draft to `localStorage` under

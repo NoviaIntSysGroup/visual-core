@@ -227,6 +227,12 @@
   z-index: 10000;
 }
 
+/* On a touch screen, Reveal's arrows sit clear of rounded corners and the home bar,
+   which cover its 12px margin in iPad fullscreen. Screen px, as for the toolbar. */
+@media (pointer: coarse) {
+  .reveal-viewport { --r-controls-spacing: 28px; }
+}
+
 /* The editor's status message, left of the buttons; hidden when it has none. */
 #edit-status {
   background: var(--background);

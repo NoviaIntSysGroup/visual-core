@@ -17,6 +17,7 @@
   --edges:         #9A9A9A;
   --line-width:    0.5px;
   --line-width-strong: 1px;
+  --line-width-very-strong: 1.5px;
   /* Accent: one brand hue with default/strong variants. */
   --accent:        #5F87B0;
   --accent-strong: #43678D;
@@ -53,7 +54,7 @@
   /* Type scale in points (1 canvas unit = 1pt on the 960×540 page; written in px
      because CSS px == our point), for deck slides and the figures' own CSS. Figure
      native text uses Config.figure.type instead. --t-base (16pt) is the slide floor;
-     --t-sm/--t-xs are for handout-only text. See SLIDE-STYLE.md. */
+     --t-sm/--t-xs are for handout-only text. See the slide-decks skill. */
   --t-xs:   10px;
   --t-sm:   12px;
   --t-base: 16px;

@@ -1,0 +1,108 @@
+/* Dot product app: the plane with its legend and values beside it, the four sliders under both. */
+.dot-product {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+}
+.reveal .dot-product p { margin: 0; }
+
+/* The plane at its own size, never scaled (the script sets it), the readouts beside it. */
+.dot-product-view {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  gap: var(--s4);
+}
+.dot-product-readouts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+}
+.dot-product-legend {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+}
+.dot-product-key {
+  width: var(--s5);
+  height: 3px;
+  border-radius: 2px;
+}
+.dot-product-legend .tex + .dot-product-key { margin-left: var(--s3); }
+.dot-product-key.is-shadow { height: 4px; opacity: var(--opacity-dim); }
+/* Every value keeps one width, sign or not, so the column never shifts while a slider moves. */
+.dot-product-readouts [data-shows] {
+  display: inline-block;
+  min-width: 5ch;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.dot-product-plane {
+  justify-self: center;
+  overflow: visible;
+}
+.dot-product-axis { stroke: var(--edges); stroke-width: var(--line-width-strong); }
+.dot-product-projection { stroke: var(--text); stroke-width: 1.25; stroke-dasharray: 2 3; }
+.dot-product-corner { stroke: var(--text); stroke-width: 1; fill: none; }
+.dot-product-arc { stroke: var(--text); stroke-width: 1.25; fill: none; }
+.dot-product-theta {
+  fill: var(--text);
+  font-size: var(--t-base);
+  font-style: italic;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+.dot-product-vector line { stroke-width: 2.5; stroke-linecap: round; }
+/* The projection is x's shadow, not a vector: x's hue, faded back. */
+.dot-product-shadow { stroke-width: 4; stroke-linecap: round; opacity: var(--opacity-dim); }
+
+/* One hue per vector: its arrow, its legend key, and its sliders; on the unit-circle cover too. */
+:is(.dot-product, .unit-circle) .is-w { --dot-product-hue: var(--graphic-primary); }
+:is(.dot-product, .unit-circle) .is-x { --dot-product-hue: var(--graphic-tertiary); }
+.dot-product-key { background: var(--dot-product-hue); }
+.dot-product-vector line, .dot-product-shadow { stroke: var(--dot-product-hue); }
+.dot-product-vector polygon { fill: var(--dot-product-hue); }
+
+.dot-product-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s1) var(--s4);
+}
+
+/* A thin track, the vector's hue up to the thumb and the quiet neutral after it. */
+.dot-product-control input {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: var(--s4);
+  margin: 0;
+  background: transparent;
+}
+.dot-product-control input::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(to right,
+    var(--dot-product-hue) var(--dot-product-fill), var(--graphic-neutral) var(--dot-product-fill));
+}
+.dot-product-control input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: var(--s4);
+  height: var(--s4);
+  margin-top: -6px;
+  border: none;
+  border-radius: 50%;
+  background: var(--dot-product-hue);
+}
+.dot-product-control input::-moz-range-track { height: 4px; border-radius: 2px; background: var(--graphic-neutral); }
+.dot-product-control input::-moz-range-progress { height: 4px; border-radius: 2px; background: var(--dot-product-hue); }
+.dot-product-control input::-moz-range-thumb {
+  width: var(--s4);
+  height: var(--s4);
+  border: none;
+  border-radius: 50%;
+  background: var(--dot-product-hue);
+}

@@ -74,8 +74,8 @@ Run from the new project's folder. If `core/` exists, start at step 2.
 6. **Write `AGENTS.md`** from the template below.
 7. **Write the README:** what the project is, then the quick start (clone, open `index.html`).
 8. **Add the first deck or figure,** if wanted. See
-   [Add a New Deck](../README.md#add-a-new-deck) and
-   [Add A Publication Figure](../README.md#add-a-publication-figure).
+   [Add a New Deck](../../README.md#add-a-new-deck) and
+   [Add A Publication Figure](../../README.md#add-a-publication-figure).
 
 The `AGENTS.md` template, with every `<…>` filled in:
 
@@ -106,10 +106,10 @@ copy the files in themselves.
 2. **Its figures:** every `figures/<name>/` the deck's `index.html` links, and any figure those
    nest (listed in each figure's `index.html`).
 3. **Its assets:** every `../../visuals/...` file named in the deck and the copied figures,
-   including stylesheets (such as a portraits file) and its hero background, at the same paths.
+   including stylesheets (such as a portraits file) and any app it places, at the same paths.
 4. **A new `storageKey`** in `Deck.mount`. Drafts are stored per browser origin, so two projects on
    one dev server port would share one otherwise.
-5. **A landing-page card** for the deck and each figure worth listing.
+5. **A landing-page card** for the deck and each figure worth listing, figures inside a `card-group`.
 6. **Its look.** The deck now takes this project's `brand.css`. Tell the user its colours changed,
    and replace any slide naming the old project's logo or partners.
 

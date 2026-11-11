@@ -2,7 +2,8 @@
    window.FigureImport. A module with `steps` steps on Reveal fragments, one press per
    state. One with `autoplay` (ms per frame) and `holds` (frames where it waits)
    plays: fragments release holds, a timer walks between them. `maxHeight` caps the
-   import via the width the deck's import rule sizes by. */
+   import via the width the deck's import rule sizes by. A figure that renders below its
+   intended scale is reported, in the console and in the toolbar. */
 (function () {
   /* The figure module a stage names, or null if it was never loaded. */
   function moduleFor(name) {
@@ -45,6 +46,55 @@
       +    '<div class="figure-import-host"></div>'
       +    marks
       +  '</div>';
+  }
+
+  /* Scale check. The import rule gives a figure `width × --diagram-scale`, capped by its column
+     and by `maxHeight`; a figure that comes out smaller is too wide or too tall for its slot.
+     BELOW maps each such module to its reason, as the slides on show reveal them. */
+  var BELOW = {};
+  var CHECK = !/[?&](thumb|print-pdf)\b/.test(location.search);
+
+  function cm(pt) { return (pt * 2.54 / 72).toFixed(1) + ' cm'; }
+
+  function checkScale(stage, mod) {
+    var svg = stage.querySelector('.figure-import-host svg');
+    var name = stage.getAttribute('data-module');
+    if (!CHECK || !svg) return;
+    /* Layout pixels: Reveal scales the canvas, so undo it. No width: the slide is not on screen. */
+    var shown = svg.getBoundingClientRect().width / window.Reveal.getScale();
+    if (!shown) return;
+    var scale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--diagram-scale')) || 1;
+    var want = mod.width * scale;
+    if (shown >= want - 0.5) { delete BELOW[name]; return showBadge(); }
+
+    var column = stage.parentElement, style = getComputedStyle(column);
+    var room = column.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+    var cap = parseFloat(stage.style.getPropertyValue('--figure-import-max-width'));
+    var reason = cap && cap < want - 0.5 && cap <= room + 0.5
+      ? cm(mod.height) + ' tall, but maxHeight ' + Math.round(cap * mod.height / mod.width) + ' allows '
+        + cm(cap * mod.height / mod.width / scale) + ' (÷ ' + scale + ')'
+      : cm(mod.width) + ' wide, but its column fits ' + cm(room / scale) + ' (' + Math.round(room) + ' pt ÷ ' + scale + ')';
+    var note = name + ' renders at ' + (shown / mod.width).toFixed(3) + '× instead of ' + scale + '×: ' + reason + '.';
+    if (BELOW[name] !== note) console.warn('FigureImport: ' + note);
+    BELOW[name] = note;
+    showBadge();
+  }
+
+  /* The toolbar's notice: how many figures are scaled down, their reasons on hover. */
+  function showBadge() {
+    var chrome = document.getElementById('deck-chrome');
+    if (!chrome) return;
+    var el = document.getElementById('figure-scale-status');
+    var names = Object.keys(BELOW);
+    if (!names.length) { if (el) el.remove(); return; }
+    if (!el) {
+      el = document.createElement('span');
+      el.id = 'figure-scale-status';
+      el.className = 'chrome-status';
+      chrome.insertBefore(el, chrome.firstChild);
+    }
+    el.textContent = names.length + (names.length === 1 ? ' figure' : ' figures') + ' scaled down';
+    el.title = names.map(function (n) { return BELOW[n]; }).join('\n');
   }
 
   /* Draw one stage. Re-rendering outright keeps the step state in exactly one
@@ -130,7 +180,12 @@
 
   function updateAll() {
     var stages = document.querySelectorAll('.figure-import');
-    for (var i = 0; i < stages.length; i++) update(stages[i]);
+    for (var i = 0; i < stages.length; i++) {
+      update(stages[i]);
+      /* Every update, not every draw: a slide drawn while hidden has no size until it is shown. */
+      var mod = moduleFor(stages[i].getAttribute('data-module'));
+      if (mod) checkScale(stages[i], mod);
+    }
   }
 
   function onFragment(e) {

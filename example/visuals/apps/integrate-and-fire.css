@@ -1,0 +1,37 @@
+/* Integrate and fire app: the neuron and its recording pipette over the membrane potential trace.
+   The input axons take x's hue and the neuron w's, as in the dot-product apps; every spike the accent. */
+/* Shown at its own size, never scaled: the script sets the plot's width and height from its viewBox.
+   Clicking the inputs fast must not select the labels. */
+.integrate-and-fire-plot { display: block; user-select: none; }
+
+.integrate-and-fire .is-input { --integrate-and-fire-hue: var(--graphic-tertiary); }
+.integrate-and-fire .is-main { --integrate-and-fire-hue: var(--graphic-primary); }
+
+/* A dendrite's stroke width is set per branch by the script, thinning with depth. */
+.integrate-and-fire-body { fill: var(--integrate-and-fire-hue); }
+.integrate-and-fire-dendrite { stroke: var(--integrate-and-fire-hue); stroke-linecap: round; }
+.integrate-and-fire-axon { fill: none; stroke: var(--integrate-and-fire-hue); stroke-width: 1.6; stroke-linecap: round; }
+.integrate-and-fire-myelin { fill: var(--graphic-soft); stroke: var(--border); stroke-width: var(--line-width); }
+.integrate-and-fire-hit { fill: transparent; cursor: pointer; }
+
+.integrate-and-fire-glass { fill: var(--graphic-soft); stroke: var(--edges); stroke-width: var(--line-width); }
+.integrate-and-fire-wire { fill: none; stroke: var(--edges); stroke-width: 1; }
+.integrate-and-fire-pen { fill: var(--graphic-primary); }
+
+.integrate-and-fire-pulse { fill: var(--accent-strong); }
+.integrate-and-fire-flash { fill: none; stroke: var(--accent-strong); stroke-width: 2; }
+
+.integrate-and-fire-axis { stroke: var(--edges); stroke-width: var(--line-width-strong); }
+.integrate-and-fire-rest { stroke: var(--edges); stroke-width: var(--line-width); opacity: 0.4; }
+.integrate-and-fire-threshold { stroke: var(--accent-strong); stroke-width: var(--line-width); stroke-dasharray: 4 3; }
+.integrate-and-fire-trace { fill: none; stroke: var(--graphic-primary); stroke-width: 1.6; stroke-linejoin: round; }
+
+.integrate-and-fire-text {
+  fill: var(--text);
+  font-size: var(--t-sm);
+  dominant-baseline: central;
+}
+.integrate-and-fire-text.is-label { fill: var(--text-soft); }
+.integrate-and-fire-text.is-end { text-anchor: end; }
+.integrate-and-fire-text.is-start { text-anchor: start; }
+.integrate-and-fire-text.is-middle { text-anchor: middle; }

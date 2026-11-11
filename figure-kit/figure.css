@@ -93,18 +93,9 @@ body.figure-page {
   margin-left: auto;
 }
 
-.figure-size,
-.figure-note {
-  font-size: var(--chrome-text);
-}
-
 .figure-size {
+  font-size: var(--chrome-text);
   color: var(--text-soft);
-}
-
-/* Says why exports are disabled; accent because it must be noticed. */
-.figure-note {
-  color: var(--accent);
 }
 
 /* Back/Next and the step counter, set apart from the exports. */

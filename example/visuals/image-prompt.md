@@ -2,7 +2,7 @@
 
 The fixed blocks of every illustration prompt in this project. The method — when to use an
 illustration, how to write the SCENE, generating a set, checking the result — is in
-`core/docs/IMAGE-STYLE.md`. Copy the blocks below verbatim and write only the SCENE fresh.
+`core/skills/illustrations/SKILL.md`. Copy the blocks below verbatim and write only the SCENE fresh.
 
 A new project copies this file to `visuals/image-prompt.md` and replaces every `<…>` with its own
 look, taking the hexes from its `brand.css`.

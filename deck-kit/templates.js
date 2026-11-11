@@ -11,9 +11,9 @@
     return (badges || []).map(function (b) { return b === 'TODAY' ? todayLabel() : b; });
   }
 
-  // TEMPLATE: full-bleed hero/title slide. `background` names a loaded global
-  // whose render(slide) fills the panel; without one the panel is plain.
-  // Its CSS also owns where the title block sits.
+  // TEMPLATE: full-bleed hero/title slide. `background` names a loaded global,
+  // the core's Wash or a project app, whose render(slide) fills the panel;
+  // without one the panel is plain. Its CSS also owns where the title block sits.
   function hero(slide, i) {
     var background = '';
     if (slide.background) {
@@ -411,6 +411,23 @@
       }
       return window.FigureImport.render(block, opts);
     }
+    // A project app in the column: `module` names a loaded global whose
+    // render(block) returns its markup. The app drives itself from then on.
+    if (type === 'app') {
+      var app = window[block.module];
+      if (!app || !app.render) {
+        throw new Error('app block requires the app ' + (block.module || '(none named)') + ' to be loaded');
+      }
+      // `play: "press"` adds two presses of its own after the one that shows the app,
+      // one to start and one to stop: the app reads the start marker and runs only
+      // while it is the current press. The wrapper takes no box of its own and keeps
+      // a touch drag on the app (a slider, say) from also swiping to the next slide.
+      return '<div class="deck-app" data-prevent-swipe>'
+        + app.render(block)
+        + (block.play === 'press' ? '<span class="fragment deck-fragment-marker deck-app-start" aria-hidden="true"></span>'
+          + '<span class="fragment deck-fragment-marker deck-app-stop" aria-hidden="true"></span>' : '')
+        + '</div>';
+    }
     // One picture or a set of them — photos, illustrations, logos, icons. The
     // block renderer (core/deck-kit/image.js) owns every option.
     if (type === 'image') {
@@ -419,15 +436,23 @@
       }
       return window.ImageBlock.render(block, { path: opts.path });
     }
-    // A silent looping clip, filling its share of the column. Reveal plays it
-    // when its slide opens (`data-autoplay`) and stops it when the slide closes.
-    // `maxHeight` (points) caps how tall it stands, as on an image.
+    // A looping clip, filling its share of the column, silent unless `sound`. Reveal
+    // plays it when its slide opens (`data-autoplay`) and stops it when the slide
+    // closes; with `play: "press"` it waits on its start frame for two presses of its
+    // own, one to start and one to stop. `start` (seconds) is where it plays and loops
+    // from, kept by deck.js. `maxHeight` (points) caps how tall it stands.
     if (type === 'video') {
       var videoCap = block.maxHeight ? ' style="--video-max-height:' + block.maxHeight + 'px"' : '';
+      var press = block.play === 'press';
       return '<div' + videoCap + '>'
         + '<video class="deck-video" src="' + (block.src || '') + '"'
         + (block.alt ? ' aria-label="' + block.alt + '"' : '')
-        + ' muted loop playsinline data-autoplay></video>'
+        + (block.sound ? '' : ' muted')
+        + (block.start ? ' data-start="' + block.start + '"' : ' loop')
+        + (press ? ' data-press preload="metadata"' : ' data-autoplay')
+        + ' playsinline></video>'
+        + (press ? '<span class="fragment deck-fragment-marker deck-video-start" aria-hidden="true"></span>'
+          + '<span class="fragment deck-fragment-marker deck-video-stop" aria-hidden="true"></span>' : '')
         + window.Deck.caption(block, opts.path)
         + '</div>';
     }

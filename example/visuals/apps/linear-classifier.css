@@ -1,0 +1,100 @@
+/* Linear classifier app: the plane over its density plot on the left, the legend, the overlap, and
+   w's slider beside them. Shown at its own size, never scaled: the script sets the drawing's size. */
+.linear-classifier {
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: center;
+  align-items: center;
+  gap: var(--s6);
+}
+.reveal .linear-classifier p { margin: 0; }
+
+.linear-classifier-plot { display: block; }
+.linear-classifier-side {
+  width: 150px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+}
+.linear-classifier-legend {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+}
+.linear-classifier-key {
+  width: var(--s3);
+  height: var(--s3);
+  border-radius: 50%;
+  background: var(--linear-classifier-hue);
+}
+.linear-classifier-key.is-w { width: var(--s5); height: 3px; border-radius: 2px; }
+/* The overlap and the angle keep one width, so the column never shifts while the slider moves. */
+.linear-classifier [data-shows] {
+  display: inline-block;
+  min-width: 4ch;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.linear-classifier-control { margin-top: var(--s3); }
+
+/* One hue per class, the embedding figures' cats and cars; w in the deck's colour for weights. */
+.linear-classifier .is-0 { --linear-classifier-hue: var(--graphic-tertiary); --linear-classifier-tint: var(--graphic-tertiary-tint); }
+.linear-classifier .is-1 { --linear-classifier-hue: var(--graphic-secondary); --linear-classifier-tint: var(--graphic-secondary-tint); }
+.linear-classifier .is-w { --linear-classifier-hue: var(--graphic-primary); }
+
+.linear-classifier-axis { stroke: var(--edges); stroke-width: var(--line-width); }
+.linear-classifier-line { stroke: var(--edges); stroke-width: var(--line-width-strong); }
+.linear-classifier-point { fill: var(--linear-classifier-hue); stroke: var(--edges); stroke-width: 0.5; }
+.linear-classifier-drop { stroke: var(--edges); stroke-width: 0.6; stroke-dasharray: 2 2; opacity: var(--opacity-dim); }
+.linear-classifier-foot { fill: var(--linear-classifier-hue); opacity: var(--opacity-dim); }
+.linear-classifier-w line { stroke: var(--linear-classifier-hue); stroke-width: 2.5; stroke-linecap: round; }
+.linear-classifier-w polygon { fill: var(--linear-classifier-hue); }
+.linear-classifier-density {
+  fill: var(--linear-classifier-tint);
+  fill-opacity: 0.6;
+  stroke: var(--linear-classifier-hue);
+  stroke-width: var(--line-width-strong);
+}
+.linear-classifier-rug { stroke: var(--linear-classifier-hue); stroke-width: 1.25; }
+.linear-classifier-text {
+  fill: var(--text);
+  font-size: var(--t-base);
+  text-anchor: middle;
+}
+.linear-classifier-text.is-start { text-anchor: start; }
+.linear-classifier-text.is-end { text-anchor: end; }
+
+/* A thin track, w's hue up to the thumb and the quiet neutral after it. */
+.linear-classifier-control input {
+  --linear-classifier-hue: var(--graphic-primary);
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: var(--s4);
+  margin: 0;
+  background: transparent;
+}
+.linear-classifier-control input::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(to right,
+    var(--linear-classifier-hue) var(--linear-classifier-fill), var(--graphic-neutral) var(--linear-classifier-fill));
+}
+.linear-classifier-control input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: var(--s4);
+  height: var(--s4);
+  margin-top: -6px;
+  border: none;
+  border-radius: 50%;
+  background: var(--linear-classifier-hue);
+}
+.linear-classifier-control input::-moz-range-track { height: 4px; border-radius: 2px; background: var(--graphic-neutral); }
+.linear-classifier-control input::-moz-range-progress { height: 4px; border-radius: 2px; background: var(--linear-classifier-hue); }
+.linear-classifier-control input::-moz-range-thumb {
+  width: var(--s4);
+  height: var(--s4);
+  border: none;
+  border-radius: 50%;
+  background: var(--linear-classifier-hue);
+}

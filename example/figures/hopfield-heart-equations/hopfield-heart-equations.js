@@ -1,5 +1,5 @@
 /* Hopfield Heart Equations — figure composition modules.
-   Three stepped 6.6 × 3.3 cm figures, one per equation: one heart, the links of one neuron
+   Three stepped 6.5 × 3.3 cm figures, one per equation: one heart, the links of one neuron
    (green where it shares a value with the stored heart, yellow where it differs) and a key
    beside it. Each steps from an empty first state through one colour of link at a time, the
    other faded, counting as it goes; the key stays, its rows of the other colour faded. */
@@ -9,13 +9,14 @@
   var TYPE = window.Config.figure.type;
 
   /* ---- Canvas + placement spacings --------------------------------------- */
+  /* A three-column slide's column fits 6.5 cm at the deck's 1.5× import (279.5 pt). */
   var PAGE = {
-    w: cm(6.6),
+    w: cm(6.5),
     h: cm(3.3)
   };
 
   /* ---- Type --------------------------------------------------------------- */
-  var TEXT = { label: TYPE.label.size };
+  var TEXT = { label: TYPE.slideBody.size };
 
   /* ---- Colour ------------------------------------------------------------- */
   var COLOR = {
@@ -25,15 +26,18 @@
   var FADE = 35;   /* percent of its colour a faded link keeps; the key's faded text in the figure's CSS keeps the same */
 
   /* ---- Layout knobs ------------------------------------------------------- */
-  var GRID   = { x: cm(0.175), pitch: cm(0.55), pixel: cm(0.45), top: cm(0.15), radius: cm(0.04), hubStroke: 2 };
-  var LINK   = { width: cm(0.05), bow: cm(0.2) };   /* bow: curve on a link that would run through a pixel */
+  var LINE   = { link: 'var(--line-width-very-strong)' };
+  var GRID   = { x: cm(0.175), pitch: cm(0.55), pixel: cm(0.45), top: cm(0.15), radius: cm(0.04) };
+  var LINK   = { bow: cm(0.2) };   /* bow: curve on a link that would run through a pixel */
   /* The count under the grid, written piece by piece because SVG collapses a run of spaces: pieces `gap` apart, then the conclusion. */
   var CAPTION = { y: cm(3.15), gap: cm(1.1), conclusion: cm(2.3), numberGap: cm(0.1), verdictWord: cm(2.4) };   /* verdictWord: room for `neuron turns` before its box */
-  /* The key, to the right of the grid: rows `y` (the weight key's two, the others' four, green first), boxes `cell`, then per figure what follows the first box. */
+  /* The key, to the right of the grid: four rows `y`, green first, boxes `cell`, then per figure what follows the first box. */
   var KEY = {
-    x: cm(3.5), weightY: [cm(1.15), cm(1.85)], y: [cm(0.75), cm(1.25), cm(1.75), cm(2.25)], cell: cm(0.3), link: cm(0.1), swatch: cm(0.5),
-    linkGap: cm(0.25), pairGap: cm(0.2), gap: cm(0.15), word: cm(0.95), edge: cm(0.4), equals: cm(0.4)
+    x: cm(3.5), y: [cm(0.75), cm(1.25), cm(1.75), cm(2.25)], cell: cm(0.3),
+    link: cm(0.25), pairGap: cm(0.2), gap: cm(0.15), word: cm(0.95), equals: cm(0.4)
   };
+  var PAIR_W = 2 * KEY.cell + KEY.link;
+  var KEY_TEXT_X = KEY.x + 2 * PAIR_W + KEY.pairGap + KEY.gap;   /* where text after the two pairs starts */
 
   /* ---- Content ------------------------------------------------------------ */
   /* One string per row; X is on, a dot is off. The heart is the state figure's. */
@@ -42,7 +46,11 @@
     hub: { row: 1, col: 1 },
     wrong: [[0, 0], [2, 3], [3, 0], [4, 2]],   /* pixels flipped in the clashing state */
     weight: { title: 'Hopfield Heart Weight', name: 'hopfield-heart-weight', caption: 'one stored image',
-      legend: { same: 'w = 1', differ: 'w = −1' },
+      /* A row is a pair of pixels (1 blue, 0 white) and their link, then the link alone standing for w, then its value. */
+      legend: [
+        { kind: 'same', pair: '11', text: '= 1' }, { kind: 'same', pair: '00', text: '= 1' },
+        { kind: 'differ', pair: '10', text: '= −1' }, { kind: 'differ', pair: '01', text: '= −1' }
+      ],
       ariaLabel: 'A heart of five by five pixels with one neuron marked. Its links to the other pixels are shown one colour at a time: green to the pixels that have its value in the stored heart, then yellow to those that have the other value.' },
     energy: { title: 'Hopfield Heart Energy', name: 'hopfield-heart-energy', conclusions: { stored: 'low energy', damaged: 'high energy' },
       /* A pair is right when its pixels agree with its link: one colour on green, two on yellow. Green rows first;
@@ -166,8 +174,18 @@
     });
   }
 
+  /* Pairs of boxes side by side on row `y`, each pair joined by a link of `kind`; `id` keeps the nodes apart. */
+  function keyPairs(d, kind, pairs, id, y, faded) {
+    pairs.forEach(function (pixels, k) {
+      var x = KEY.x + k * (PAIR_W + KEY.pairGap);
+      box(d, id + k + 'a', x, y, pixels.charAt(0) === '1', undefined, faded);
+      box(d, id + k + 'b', x + KEY.cell + KEY.link, y, pixels.charAt(1) === '1', undefined, faded);
+      keyEdge(d, kind, x + KEY.cell, y, KEY.link, faded);
+    });
+  }
+
   function keyEdge(d, kind, x, y, length, faded) {
-    d.edge({ x: x, y: y }, { x: x + length, y: y }, { gap: 0, appearance: { color: linkColor(kind, faded ? 'faded' : 'full'), width: KEY.link } });
+    d.edge({ x: x, y: y }, { x: x + length, y: y }, { gap: 0, appearance: { color: linkColor(kind, faded ? 'faded' : 'full'), width: LINE.link } });
   }
 
   /* Whether a key row is faded: while a colour of link is shown in full, the rows of the other colour are. */
@@ -177,7 +195,7 @@
   }
 
   function keyText(fig, text, x, y, faded) {
-    fig.text(text, { x: x, y: y, align: 'start', role: 'label', cls: faded ? 'hopfield-heart-faded' : '' });
+    fig.text(text, { x: x, y: y, align: 'start', role: 'slideBody', cls: faded ? 'hopfield-heart-faded' : '' });
   }
 
   /* One state: the neuron's links as `looks` gives them, then the pixels, each marked when `marked` and its link is drawn. */
@@ -186,7 +204,7 @@
     for (var r = 0; r < 5; r++) {
       for (var c = 0; c < 5; c++) {
         if ((r === hub.row && c === hub.col) || !looks[linkKind(r, c)]) continue;
-        var look = { gap: 0, appearance: { color: linkColor(linkKind(r, c), looks[linkKind(r, c)]), width: LINK.width } };
+        var look = { gap: 0, appearance: { color: linkColor(linkKind(r, c), looks[linkKind(r, c)]), width: LINE.link } };
         if (greatestDivisor(Math.abs(r - hub.row), Math.abs(c - hub.col)) > 1) { look.route = 'arc'; look.bulge = LINK.bow; }
         d.edge(centre(hub.row, hub.col), centre(r, c), look);
       }
@@ -199,14 +217,14 @@
         d.node('p-' + r + '-' + c, {
           x: GRID.x + c * GRID.pitch, y: GRID.top + r * GRID.pitch, w: GRID.pixel, h: GRID.pixel, frame: true, radius: GRID.radius,
           label: shown ? (right ? '✓' : '×') : undefined,
-          appearance: { label: on ? COLOR.onText : COLOR.hub, fill: on ? COLOR.on : COLOR.off, stroke: isHub ? COLOR.hub : (on ? COLOR.on : COLOR.line), strokeWidth: isHub ? GRID.hubStroke : undefined }
+          appearance: { label: on ? COLOR.onText : COLOR.hub, fill: on ? COLOR.on : COLOR.off, stroke: isHub ? COLOR.hub : (on ? COLOR.on : COLOR.line) }
         });
       }
     }
   }
 
   function caption(fig, text) {
-    fig.text(text, { x: GRID.x + GEO().size / 2, y: CAPTION.y, role: 'label' });
+    fig.text(text, { x: GRID.x + GEO().size / 2, y: CAPTION.y, role: 'slideBody' });
   }
 
   /* ---- Draw --------------------------------------------------------------- */
@@ -214,13 +232,17 @@
     var m = COPY.weight, looks = m.steps[step].looks;
     if (!looks) return;
     var d = newDiagram(m);
-    var kinds = ['same', 'differ'].filter(function (kind) { return looks[kind]; });
+    var rows = m.legend.filter(function (row) { return looks[row.kind]; });
     heart(d, COPY.stored, looks, false);
-    kinds.forEach(function (kind, i) { keyEdge(d, kind, KEY.x, KEY.weightY[i], KEY.swatch); });
+    var edgeX = KEY.x + PAIR_W + KEY.gap;
+    rows.forEach(function (row, i) {
+      keyPairs(d, row.kind, [row.pair], 'k' + i, KEY.y[i]);
+      keyEdge(d, row.kind, edgeX, KEY.y[i], KEY.link);
+    });
     fig.place(d.render(m.name + '-' + step), { x: 0, y: 0, w: PAGE.w });
     caption(fig, m.caption);
-    kinds.forEach(function (kind, i) {
-      fig.text(m.legend[kind], { x: KEY.x + KEY.swatch + KEY.gap, y: KEY.weightY[i] + TEXT.label / 3, align: 'start', role: 'label' });
+    rows.forEach(function (row, i) {
+      fig.text(row.text, { x: edgeX + KEY.link + KEY.gap, y: KEY.y[i] + TEXT.label / 3, align: 'start', role: 'slideBody' });
     });
   }
 
@@ -230,25 +252,18 @@
     var d = newDiagram(m);
     var rows = stateRows(s.state), counts = tally(rows, s.looks);
     heart(d, rows, s.looks, true);
-    var pairW = 2 * KEY.cell + KEY.linkGap;
     m.key.forEach(function (row, i) {
-      row.pairs.forEach(function (pixels, k) {
-        var x = KEY.x + k * (pairW + KEY.pairGap);
-        var faded = rowFaded(row.kind, s.looks);
-        box(d, 'k' + i + k + 'a', x, KEY.y[i], pixels.charAt(0) === '1', undefined, faded);
-        box(d, 'k' + i + k + 'b', x + KEY.cell + KEY.linkGap, KEY.y[i], pixels.charAt(1) === '1', undefined, faded);
-        keyEdge(d, row.kind, x + KEY.cell, KEY.y[i], KEY.linkGap, faded);
-      });
+      keyPairs(d, row.kind, row.pairs, 'k' + i, KEY.y[i], rowFaded(row.kind, s.looks));
     });
     fig.place(d.render(m.name + '-' + step), { x: 0, y: 0, w: PAGE.w });
     if (counts.right + counts.wrong) {
       ['✓ ' + counts.right, '× ' + counts.wrong].forEach(function (text, i) {
-        fig.text(text, { x: GRID.x + i * CAPTION.gap, y: CAPTION.y, align: 'start', role: 'label' });
+        fig.text(text, { x: GRID.x + i * CAPTION.gap, y: CAPTION.y, align: 'start', role: 'slideBody' });
       });
     }
-    if (s.conclude) fig.text(m.conclusions[s.state], { x: GRID.x + CAPTION.conclusion, y: CAPTION.y, align: 'start', role: 'label' });
+    if (s.conclude) fig.text(m.conclusions[s.state], { x: GRID.x + CAPTION.conclusion, y: CAPTION.y, align: 'start', role: 'slideBody' });
     m.key.forEach(function (row, i) {
-      keyText(fig, row.text, KEY.x + 2 * pairW + KEY.pairGap + KEY.gap, KEY.y[i] + TEXT.label / 3, rowFaded(row.kind, s.looks));
+      keyText(fig, row.text, KEY_TEXT_X, KEY.y[i] + TEXT.label / 3, rowFaded(row.kind, s.looks));
     });
   }
 
@@ -265,24 +280,24 @@
     if (s.conclude) {
       box(d, 'vr', verdictX + CAPTION.verdictWord, countY, true);
     }
-    var wordX = KEY.x + KEY.cell + KEY.edge + KEY.gap, queryX = wordX + KEY.word + KEY.gap;
+    var wordX = KEY.x + KEY.cell + KEY.link + KEY.gap, queryX = wordX + KEY.word + KEY.gap;
     m.key.forEach(function (row, i) {
       var faded = rowFaded(row.kind, s.looks);
       box(d, 'n' + i, KEY.x, KEY.y[i], row.pixel === '1', undefined, faded);
-      keyEdge(d, row.kind, KEY.x + KEY.cell, KEY.y[i], KEY.edge, faded);
+      keyEdge(d, row.kind, KEY.x + KEY.cell, KEY.y[i], KEY.link, faded);
       box(d, 'q' + i, queryX, KEY.y[i], false, '?', faded);
       box(d, 'r' + i, queryX + KEY.cell + KEY.equals, KEY.y[i], row.vote === '1', undefined, faded);
     });
     fig.place(d.render(m.name + '-' + step), { x: 0, y: 0, w: PAGE.w });
     if (counted) [counts.on, counts.off].forEach(function (count, i) {
-      fig.text(String(count), { x: GRID.x + i * CAPTION.gap + KEY.cell + CAPTION.numberGap, y: CAPTION.y, align: 'start', role: 'label' });
+      fig.text(String(count), { x: GRID.x + i * CAPTION.gap + KEY.cell + CAPTION.numberGap, y: CAPTION.y, align: 'start', role: 'slideBody' });
     });
-    if (s.conclude) fig.text(m.verdict, { x: verdictX, y: CAPTION.y, align: 'start', role: 'label' });
+    if (s.conclude) fig.text(m.verdict, { x: verdictX, y: CAPTION.y, align: 'start', role: 'slideBody' });
     m.key.forEach(function (row, i) {
       var y = KEY.y[i] + TEXT.label / 3;
       var faded = rowFaded(row.kind, s.looks);
       keyText(fig, m.word, wordX, y, faded);
-      fig.text('=', { x: queryX + KEY.cell + KEY.equals / 2, y: y, role: 'label', cls: faded ? 'hopfield-heart-faded' : '' });
+      fig.text('=', { x: queryX + KEY.cell + KEY.equals / 2, y: y, role: 'slideBody', cls: faded ? 'hopfield-heart-faded' : '' });
     });
   }
 

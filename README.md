@@ -16,7 +16,7 @@ core. A figure drops onto a slide or into another figure unchanged.
 ## See It
 
 The core's [example project](https://noviaintsysgroup.github.io/visual-core/example/) is hosted online: a landing page, a showcase deck with every slide template, block, and widget, a short deck on 
-Hopfield networks, and three stepped figures. This is what a working project looks like.
+Hopfield networks, a draft lecture on dot products, and the figures those decks import. This is what a working project looks like.
 
 The core is not used on its own. It is added to a project repo as a git subtree at `core/`, beside
 the project's `visuals/`, `decks/` and `figures/`.
@@ -47,7 +47,7 @@ guardrails before any agent runs; Claude Code reads settings only from the folde
 **On Windows, run Claude Code inside WSL2.** The guardrails require its sandbox, which does not run
 on native Windows, so Claude Code exits at startup there.
 
-Then tell your agent: *Set up this project using `core/docs/NEW-PROJECT.md`.* A new repo has no
+Then tell your agent: *Set up this project using `core/skills/new-project/SKILL.md`.* A new repo has no
 `AGENTS.md` yet, so the agent finds that file only because you name it. It creates the landing page,
 `AGENTS.md`, and the rest of the structure; you can also follow it by hand.
 
@@ -69,7 +69,7 @@ git diff --no-index core/example/.claude/launch.json .claude/launch.json
 
 ### Change The Core From A Project
 
-A change to the core's kits, theme, tools, or docs can reach every project, so agree on it first;
+A change to the core's kits, theme, tools, or skills can reach every project, so agree on it first;
 `example/` can change freely. The simplest way is to change a clone of
 the core repo and pull it, as above. To send back a change made in a project's `core/`, keep it in
 commits that touch nothing else and push them to a branch:
@@ -135,7 +135,7 @@ index.html                    landing page: hero, cards, and about, on core/land
 visuals/
   brand.css                   the palette: semantic colour (and font) overrides
   image-prompt.md             fixed blocks of the illustration prompts
-  backgrounds/                hero backgrounds, for one deck or several
+  apps/                       live, interactive pieces, for one deck or several
   assets/                     logos, portraits, partner marks, covers, generated illustrations
 decks/<name>/
   index.html                  SLIDES + Deck.mount(...)
@@ -151,7 +151,7 @@ core/                         this repo
   figure-kit/                 what figures are built with: figure pages, and decks that import one
   landing/                    the index page
   tools/                      dev server and measuring scripts; not loaded by any page
-  docs/                       the four style guides and new-project setup; not loaded by any page
+  skills/                     the agent skills: four style guides, new-project setup, and doc upkeep; not loaded by any page
   example/                    the core's example project, one level deeper
 ```
 
@@ -159,11 +159,9 @@ core/                         this repo
 
 ### On The Slides
 
-1. Open a deck through the dev server, or open its `index.html` directly.
+1. Open a deck through the dev server. Opened directly, **Edit** is disabled.
 2. Click **Edit**, click editable text, and type. Edits autosave in the browser.
-3. Click **Done** to write the edits into the deck's `index.html`. The dev server saves at once.
-   Opened directly, Chrome or Edge asks you to pick the file (and may ask again in a later
-   session); other browsers download a copy.
+3. Click **Done** to write the edits into the deck's `index.html`.
 
 This edits existing text. Add or remove slides, columns, chips, and block options in the `SLIDES`
 array between the `SLIDES:START` and `SLIDES:END` markers.
@@ -174,7 +172,7 @@ array between the `SLIDES:START` and `SLIDES:END` markers.
 
 ### In A Text Editor
 
-The dev server is optional ([Bun](https://bun.sh)); it adds live reload. Run it from the project root:
+The dev server ([Bun](https://bun.sh)) adds live reload, and is needed for editing on the slides. Run it from the project root:
 
 ```powershell
 bun run core/tools/serve.js
@@ -185,21 +183,59 @@ It serves that folder on `http://localhost:8099` (or `$PORT`): `/` is the landin
 
 Working on the core alone, run `bun run tools/serve.js` from the core folder; `/` redirects to the example.
 
+### Checking Pages Headlessly
+
+How an agent looks at a page, only when the user asks; otherwise the user checks in their own
+browser. The browser is Bun's `Bun.WebView`, driving the Chromium binary named by `BUN_CHROME_PATH`.
+
+- Each sandboxed command has its own network: the user's server on 8099, or one left running in
+  the background, is out of reach. Start a server on port 8100 in the same command that loads
+  the pages, and stop it before the command ends.
+- Pass `--no-sandbox`: Chromium's own sandbox cannot start inside the agent's.
+- `evaluate()` takes one expression, not statements.
+- Write the script and its screenshots to the agent's scratch folder, never into the repo.
+
+```js
+// BUN_CHROME_PATH=<chromium> bun check.js /decks/<name>/   (run from the project root)
+const server = Bun.spawn(["bun", "run", "core/tools/serve.js"], { env: { ...process.env, PORT: "8100" } });
+await Bun.sleep(1000);
+const view = new Bun.WebView({ width: 1440, height: 900,
+  backend: { type: "chrome", path: process.env.BUN_CHROME_PATH, argv: ["--no-sandbox"] } });
+await view.navigate("http://localhost:8100" + process.argv[2]);
+await Bun.sleep(2500);   // let figures, MathJax, and apps render
+await Bun.write("shot.png", await view.screenshot());
+await view.close(); server.kill();
+```
+
+Chromium has to be readable by the sandbox, so not under the home folder. The user installs it
+once, with the libraries it needs:
+
+```bash
+sudo env PLAYWRIGHT_BROWSERS_PATH=/opt/ms-playwright "$(command -v bun)" x playwright install chromium
+sudo apt install libnss3 libnspr4 libasound2t64
+```
+
+`BUN_CHROME_PATH` is then
+`/opt/ms-playwright/chromium_headless_shell-<version>/chrome-headless-shell-linux64/chrome-headless-shell`.
+
 ## Animations & Presenting
 
-Fragments animate only in fullscreen. In a normal tab every fragment is visible so content can be
+Present with the toolbar's **Fullscreen** button, or the F key. Fragments animate only in
+fullscreen. In a normal tab every fragment is visible so content can be
 read and edited; entering fullscreen restarts the current slide's fragments.
 
-## Style Guides
+## Skills
 
-Read the guide that matches the work before following any how-to below:
+Read the skill that matches the work before following any how-to below:
 
-| Guide | For |
+| Skill | For |
 |---|---|
-| [SLIDE-STYLE.md](docs/SLIDE-STYLE.md) | Writing slides and building decks: layouts, tags, colour tokens |
-| [DIAGRAM-STYLE.md](docs/DIAGRAM-STYLE.md) | Constructing diagrams and charts on the shared kits |
-| [FIGURE-STYLE.md](docs/FIGURE-STYLE.md) | Composing publication figures and exporting them |
-| [IMAGE-STYLE.md](docs/IMAGE-STYLE.md) | Writing prompts for generated illustrations |
+| [`slide-decks`](skills/slide-decks/SKILL.md) | Writing slides and building decks: layouts, tags, colour tokens |
+| [`diagrams`](skills/diagrams/SKILL.md) | Constructing diagrams and charts on the shared kits |
+| [`figures`](skills/figures/SKILL.md) | Composing publication figures and exporting them |
+| [`illustrations`](skills/illustrations/SKILL.md) | Writing prompts for generated illustrations |
+| [`issue-log`](skills/issue-log/SKILL.md) | Logging instruction and code problems an agent hit, to `issues/` |
+| [`issue-fix`](skills/issue-fix/SKILL.md) | Fixing logged problems at their cause; docs by rewriting, not appending |
 
 [AGENTS.md](AGENTS.md) is the manual for coding agents: the rules, the file map, and the
 constraints that are easy to violate.
@@ -225,7 +261,7 @@ constraints that are easy to violate.
 
 ### Add A Generated Illustration
 
-Write the prompt per [IMAGE-STYLE.md](docs/IMAGE-STYLE.md), with the fixed blocks from
+Write the prompt per the [`illustrations`](skills/illustrations/SKILL.md) skill, with the fixed blocks from
 `visuals/image-prompt.md`. Illustrations are for sparse, wordless visual beats; processes,
 relationships, comparisons, and hierarchies stay editable diagrams or figures. Save the image as
 `visuals/assets/generated/<kebab-case-name>.png`, add it with an `image` block, and always write `alt`.
@@ -244,4 +280,4 @@ Make it a figure, drawing only the picture, and import it with
 `{ "type": "figure", "module": "<Name>Figure" }`. The deck loads the figure's `.js` and `.css` with
 classic `<script>` and `<link>` tags, to keep `file://` working. Icon geometry belongs in
 `core/drawing-kit/icons/icons.js` and default icon appearance in `icons.css`; see
-[DIAGRAM-STYLE.md](docs/DIAGRAM-STYLE.md).
+the [`diagrams`](skills/diagrams/SKILL.md) skill.
