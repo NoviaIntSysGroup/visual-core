@@ -63,9 +63,10 @@
     var api;
     var framed = false;   // page debug frame appended once, however often render() runs
 
-    /* Fill the canvas (e.g. to replicate a slide background). */
-    function background(fill) {
-      parts.push('<rect x="0" y="0" width="' + r(W) + '" height="' + r(H) + '" fill="' + (fill || 'var(--background)') + '"/>');
+    /* Fill the canvas (e.g. to replicate a slide background), its corners rounded by radius. */
+    function background(fill, radius) {
+      var rx = radius ? ' rx="' + r(radius) + '"' : '';
+      parts.push('<rect x="0" y="0" width="' + r(W) + '" height="' + r(H) + '"' + rx + ' fill="' + (fill || 'var(--background)') + '"/>');
       return api;
     }
 
@@ -665,7 +666,7 @@
 
     function build(step) {
       var fig = create(M.width, M.height, { className: M.className, ariaLabel: M.ariaLabel });
-      fig.background();
+      fig.background(null, M.radius);
       // A stepped module's draw takes the step, so it can't go through nest().
       if (stepped) M.draw(fig, step); else fig.nest({ x: 0, y: 0 }, M.draw);
       return fig;
@@ -684,7 +685,7 @@
 
   window.Figure = {
     create: create,
-    preload: preload, imageSize: imageSize,
+    preload: preload, imageSize: imageSize, svgText: serialize,
     mount: mount, mountModule: mountModule
   };
 })();

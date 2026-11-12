@@ -4,7 +4,7 @@ The hard rules for working with this core and the projects built on it, plus the
 that are easy to violate. Paths in text are written from a project root, where this repo is checked
 out as `core/`; link targets are relative to this file. If the working directory has no `core/`
 folder, you are working on the core alone: drop the `core/` prefix; the project paths then exist only
-under `example/`. The fuller editing, running, and publishing workflow is in [`core/README.md`](README.md).
+under `example/`. The fuller editing, running, and presenting workflow is in [`core/README.md`](README.md).
 
 ## Rules
 
@@ -15,7 +15,7 @@ under `example/`. The fuller editing, running, and publishing workflow is in [`c
 5. Comments say what the code does, nothing else. Five lines max, fewer is better.
 6. Compose from existing shared pieces. Anything new is ask-first: plan, agree, then build.
 7. Read the skill that governs the files you are about to touch, before touching them.
-8. Onnly inspect a page visually when asked to do so [`core/README.md`](README.md#checking-pages-headlessly).
+8. Only inspect a page visually when asked to do so, with [`core/skills/page-check/SKILL.md`](skills/page-check/SKILL.md).
 9. Always work in the current checkout, only create a git worktree if explicitly asked to do so.
 10. Stay inside the repo. Never search, read, or write outside the working directory.
 
@@ -72,6 +72,7 @@ one only when the task needs it.
 | [`core/skills/illustrations/SKILL.md`](skills/illustrations/SKILL.md) | `visuals/image-prompt.md`, `visuals/assets/generated/` | writing an image-generation prompt; only the SCENE block is written fresh |
 | [`core/skills/issue-log/SKILL.md`](skills/issue-log/SKILL.md) | `issues/` | as soon as you suspect a problem in the repo's instructions or code (see *Observing while you work*) |
 | [`core/skills/issue-fix/SKILL.md`](skills/issue-fix/SKILL.md) | instructions: skills, `AGENTS.md`, `README.md`, code comments, kit doc headers | changing any instruction, or working through `issues/`, code entries included |
+| [`core/skills/page-check/SKILL.md`](skills/page-check/SKILL.md) | headless screenshots and figure exports | looking at a page or exporting a figure, only when the user asks |
 
 Placing an existing figure onto a slide or into another figure is slides/figures work, not
 diagram work. Anything structural is a diagram, never a generated illustration. Work that spans
@@ -80,7 +81,7 @@ two rows — a figure whose diagram you also change — means reading both.
 **The core is a subtree.** In a project, `core/` is ordinary committed files, one project's copy of
 the core. An agreed core change goes in commits that touch only `core/`, and reaches the core repo
 with `git subtree push`. Updating the core and changing it from a project are in
-[`core/README.md`](README.md#projects). Starting a project, or moving a deck between projects, follows
+[`core/README.md`](README.md#keeping-a-project-in-sync-with-the-core). Starting a project, or moving a deck between projects, follows
 [`core/skills/new-project/SKILL.md`](skills/new-project/SKILL.md).
 
 ## Conventions & Constraints
@@ -227,6 +228,6 @@ and exporting figures with images (see **Dev-server only**).
 Without a project, open `example/index.html` in the core.
 
 **Gotcha:** the on-slide editor autosaves a draft to `localStorage` under
-`deck-draft:<storageKey>:v1`. That draft shadows hand-edits to the same `SLIDES` fields until it
-clears. If a file change does not appear in the browser, clear that key or finish the on-screen
-edit with **Done**.
+`deck-draft:<storageKey>:v1`. While it exists, the deck shows the draft's slides, not the file's.
+A hand-edit to `SLIDES` discards the draft on the next load, so finish an on-slide edit with
+**Done** before editing the file.

@@ -26,7 +26,7 @@
   var FADE = 35;   /* percent of its colour a faded link keeps; the key's faded text in the figure's CSS keeps the same */
 
   /* ---- Layout knobs ------------------------------------------------------- */
-  var LINE   = { link: 'var(--line-width-very-strong)' };
+  var LINE   = { link: 'var(--line-width-very-strong)', hub: 'var(--line-width-very-strong)', keyHub: 'var(--line-width-strong)' };   /* hub, keyHub: the focus neuron's outline in the grid and in the key */
   var GRID   = { x: cm(0.175), pitch: cm(0.55), pixel: cm(0.45), top: cm(0.15), radius: cm(0.04) };
   var LINK   = { bow: cm(0.2) };   /* bow: curve on a link that would run through a pixel */
   /* The count under the grid, written piece by piece because SVG collapses a run of spaces: pieces `gap` apart, then the conclusion. */
@@ -170,7 +170,7 @@
   function box(d, id, x, y, on, label, faded) {
     d.node(id, {
       x: x, y: y - KEY.cell / 2, w: KEY.cell, h: KEY.cell, frame: true, radius: GRID.radius, label: label,
-      appearance: { fill: on ? COLOR.on : COLOR.off, stroke: label ? COLOR.hub : (on ? COLOR.on : COLOR.line), label: on ? COLOR.onText : COLOR.hub, opacity: faded ? FADE / 100 : 1 }
+      appearance: { fill: on ? COLOR.on : COLOR.off, stroke: label ? COLOR.hub : (on ? COLOR.on : COLOR.line), strokeWidth: label ? LINE.keyHub : undefined, label: on ? COLOR.onText : COLOR.hub, opacity: faded ? FADE / 100 : 1 }
     });
   }
 
@@ -217,7 +217,7 @@
         d.node('p-' + r + '-' + c, {
           x: GRID.x + c * GRID.pitch, y: GRID.top + r * GRID.pitch, w: GRID.pixel, h: GRID.pixel, frame: true, radius: GRID.radius,
           label: shown ? (right ? '✓' : '×') : undefined,
-          appearance: { label: on ? COLOR.onText : COLOR.hub, fill: on ? COLOR.on : COLOR.off, stroke: isHub ? COLOR.hub : (on ? COLOR.on : COLOR.line) }
+          appearance: { label: on ? COLOR.onText : COLOR.hub, fill: on ? COLOR.on : COLOR.off, stroke: isHub ? COLOR.hub : (on ? COLOR.on : COLOR.line), strokeWidth: isHub ? LINE.hub : undefined }
         });
       }
     }
