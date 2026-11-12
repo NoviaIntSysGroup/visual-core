@@ -74,8 +74,8 @@ Run from the new project's folder. If `core/` exists, start at step 2.
 6. **Write `AGENTS.md`** from the template below.
 7. **Write the README:** what the project is, then the quick start (clone, open `index.html`).
 8. **Add the first deck or figure,** if wanted. See
-   [Add a New Deck](../../README.md#add-a-new-deck) and
-   [Add A Publication Figure](../../README.md#add-a-publication-figure).
+   [Create a new deck](../slide-decks/SKILL.md#create-a-new-deck) and
+   [A figure is a composition module + a thin shell](../figures/SKILL.md#a-figure-is-a-composition-module--a-thin-shell).
 
 The `AGENTS.md` template, with every `<…>` filled in:
 

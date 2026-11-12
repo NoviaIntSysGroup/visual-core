@@ -110,6 +110,7 @@
       logo: opts.logo,
       logoHeight: opts.logoHeight || null,   // points; falls back to deck.css's --s8
       originalHTML: authoredHTML(),
+      fileSlides: JSON.stringify(opts.slides),   // the file's SLIDES, which a draft was made from
       draftKey: 'deck-draft:' + storageKey + ':v1',
       draftRestored: false,
       isPrintPDF: window.location.search.indexOf('print-pdf') !== -1,
@@ -343,7 +344,8 @@
       if (!raw) return;
       const draft = JSON.parse(raw);
       if (!draft || !Array.isArray(draft.slides)) return;
-      if (draft.version !== 2) {
+      // A draft made from other file SLIDES would land on the wrong slides; drop it.
+      if (draft.version !== 3 || draft.fileSlides !== ctx.fileSlides) {
         localStorage.removeItem(ctx.draftKey);
         return;
       }
@@ -425,7 +427,7 @@
 
     function persistDraft() {
       try {
-        localStorage.setItem(ctx.draftKey, JSON.stringify({ version: 2, savedAt: new Date().toISOString(), slides: ctx.slides }));
+        localStorage.setItem(ctx.draftKey, JSON.stringify({ version: 3, savedAt: new Date().toISOString(), fileSlides: ctx.fileSlides, slides: ctx.slides }));
       } catch (e) {}
     }
 
@@ -437,6 +439,7 @@
         const response = await fetch(location.pathname, { method: 'PUT', body: buildUpdatedHTML(ctx) });
         if (!response.ok) throw new Error('the dev server answered ' + response.status);
         dirty = false;
+        ctx.fileSlides = JSON.stringify(ctx.slides);
         clearDraft();
         setStatus('Saved at ' + new Date().toLocaleTimeString() + '. Commit & push to publish.');
         return true;

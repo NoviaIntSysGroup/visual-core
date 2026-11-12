@@ -9,3 +9,6 @@ Thumbs.db
 # Claude Code scratch and personal settings
 .claude/.cc-writes
 .claude/settings.local.json
+
+# Issue entries the issue-fix skill has fixed
+issues-fixed/

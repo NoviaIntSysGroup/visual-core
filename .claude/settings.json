@@ -4,6 +4,7 @@
   },
   "permissions": {
     "blockReadsOutsideWorkingDirectories": true,
+    "blockWritesOutsideWorkingDirectories": true,
     "deny": ["Edit(**/.claude/**)"]
   },
   "sandbox": {

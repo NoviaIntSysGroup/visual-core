@@ -6,8 +6,8 @@
 `ariaLabel`). `W`/`H` are points — author them with `cm()/mm()`. Builder methods
 each append native SVG and return the builder:
 
-- **`background(fill)`** — a full-canvas `<rect>` (e.g. `'var(--background)'` to
-  replicate the slide tint; omit for a transparent figure).
+- **`background(fill, radius?)`** — a full-canvas `<rect>` (e.g. `'var(--background)'` to
+  replicate the slide tint; omit for a transparent figure), its corners rounded by `radius`.
 - **`place(svgString, { x, y, w, h? })`** — drop a diagram-kit SVG string
   (`Diagram.create(…).render()`) at `(x, y)` scaled to width `w` (height follows
   its aspect unless `h` is given). The drawing is wrapped in a `<g transform>`,
@@ -69,7 +69,7 @@ Put colour there; size/weight/style live in `config.js`.
 
 `Figure.mountModule(M, { step })` is the whole script in a
 figure document. It builds the canvas from the module's own `width`/`height`,
-paints the background, drops the drawing in (`nest` when static, `draw(fig, step)`
+paints the background (corners rounded by the module's optional `radius`, in points), drops the drawing in (`nest` when static, `draw(fig, step)`
 when stepped), and mounts the chrome — so no document restates a size, a title,
 or a step count. `step` opens the page on a given state (an index or `'last'`).
 

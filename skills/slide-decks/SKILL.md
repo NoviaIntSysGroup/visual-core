@@ -14,7 +14,7 @@ This skill governs how to author slide content in this repo: which layout to
 reach for, which element/tag a piece of text *is*, and which theme tokens to
 style with — so every deck stays consistent. Visual styling itself lives in
 [`core/theme/theme.css`](../../theme/theme.css) and the template/widget CSS; the
-fuller editing and publishing workflow is in [README.md](../../README.md).
+fuller editing and presenting workflow is in [README.md](../../README.md).
 
 ## When to use this
 

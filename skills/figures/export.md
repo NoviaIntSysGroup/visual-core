@@ -3,7 +3,9 @@
 ## Export
 
 The chrome's export buttons call three functions private to `figure.js`, and
-produce **self-contained** files (the source is all native SVG):
+produce **self-contained** files (the source is all native SVG). The public
+`Figure.svgText(svgEl)` returns the same SVG as a string; to write it to a path,
+see the [page-check](../page-check/SKILL.md) skill.
 
 - **`download(svgEl, filename)`** — vector SVG with computed styles inlined and a
   physical `cm` size.

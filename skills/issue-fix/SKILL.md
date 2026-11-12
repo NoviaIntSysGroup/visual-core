@@ -2,10 +2,10 @@
 name: issue-fix
 description: >-
   Edit this repo's instructions — skills and their reference files, AGENTS.md, the README,
-  code comments, and kit doc headers — so they are correct, clear, and short. Use when working
-  through the problems logged in `issues/` by the `issue-log` skill, including the ones in
-  code, when the user asks to tidy or rewrite a doc, or before any other change to an
-  instruction. Fixes the cause by rewriting, not by appending.
+  and code comments — so they are correct, clear, and short. Use when working through the
+  entries logged in `issues/` by the `issue-log` skill, including the ones in code and the
+  `memory` entries that become skills or notes, when the user asks to tidy or rewrite a doc,
+  or before any other change to an instruction. Fixes the cause by rewriting, not by appending.
 ---
 
 # Editing Instructions
@@ -27,12 +27,15 @@ for every problem seen so far.
    list, two places saying different things, a heading that sends readers elsewhere, detail
    that buries the point, or code that is wrong or awkward to use. The answer decides the
    edit; adding a sentence is rarely it, and a code cause is fixed in the code.
+   `memory` entries are hints, not fixes: weigh them together and consolidate only what
+   recurs or clusters. Then fold it into the doc readers already open when most tasks there
+   need it, add a lookup file beside that skill when few do, or write a new skill when the
+   cluster has none. Leave the rest to gather evidence.
 4. **Propose.** For each subject, say in a line or two what is wrong and what you will change,
-   with the length before and after. Changes to `core/` are agreed with the user before they
-   are made (AGENTS.md rule 6).
+   with the length before and after. Agree the proposal with the user before editing.
 5. **Edit** a doc by the rules below, and code by the skill that governs it.
-6. **Close.** Delete the entries you fixed; git keeps them. Tell the user which entries you
-   left, and why.
+6. **Close.** Move the entries you fixed to `issues-fixed/` beside `issues/`; `.gitignore`
+   keeps that folder out of git. Tell the user which entries you left, and why.
 
 ## Rules for the edit
 
