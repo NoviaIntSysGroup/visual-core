@@ -58,8 +58,7 @@
 
   /* ---- shared label helpers ----------------------------------------------
      A bare text node — a block label with no frame and no padding, placed at
-     (x, y). Every composed figure needs this; it lived as a copy-pasted local
-     `text()` in three of them before moving here.
+     (x, y): Diagram.label(d, id, x, y, lines, o).
        o: { align = 'center', size, lineHeight, color } */
   function label(d, id, x, y, lines, o) {
     o = o || {};
@@ -90,42 +89,23 @@
     return 'font-size:' + fontSizeCss(value);
   }
 
-  var NODE_APPEARANCE_VARS = {
-    fill: '--diagram-node-fill',
-    stroke: '--diagram-node-stroke',
-    strokeWidth: '--diagram-node-stroke-width',
-    opacity: '--diagram-node-opacity',
-    label: '--diagram-label-color',
-    iconPrimary: '--diagram-icon-primary',
-    iconSecondary: '--diagram-icon-secondary',
-    iconSurface: '--diagram-icon-surface',
-    iconDetail: '--diagram-icon-detail',
-    iconPerson: '--diagram-icon-person',
-    iconPersonOpacity: '--diagram-icon-person-opacity'
-  };
-
-  var EDGE_APPEARANCE_VARS = {
-    color: '--diagram-edge-color',
-    stroke: '--diagram-edge-color',
-    width: '--diagram-edge-width',
-    strokeWidth: '--diagram-edge-width'
-  };
-
   function cssValue(v) {
     return String(v).replace(/"/g, '&quot;');
   }
 
-  function styleAttr(appearance, map) {
+  /* `appearance` sets the element's own diagram.css variables: on a node,
+     iconPrimary → --diagram-node-icon-primary; on an edge, width → --diagram-edge-width. */
+  function styleAttr(appearance, element) {
     if (!appearance) return '';
-    var parts = [];
-    Object.keys(map).forEach(function (k) {
-      if (appearance[k] != null) parts.push(map[k] + ':' + cssValue(appearance[k]));
+    var parts = Object.keys(appearance).filter(function (k) { return appearance[k] != null; }).map(function (k) {
+      return '--diagram-' + element + '-' + k.replace(/[A-Z]/g, function (c) { return '-' + c.toLowerCase(); })
+        + ':' + cssValue(appearance[k]);
     });
     return parts.length ? ' style="' + parts.join(';') + '"' : '';
   }
 
   function hasEdgeColor(appearance) {
-    return !!(appearance && (appearance.color != null || appearance.stroke != null));
+    return !!(appearance && appearance.color != null);
   }
 
   /* Resolve module defaults + per-diagram opts into one config object. */
@@ -360,7 +340,7 @@
         corner: pick(o.corner, cfg.corner),
         arrow: !!o.arrow,
         arrowStart: !!o.arrowStart,
-        cls: o['class'] || '',
+        cls: [o['class'], o.line && 'line-' + o.line].filter(Boolean).join(' '),
         appearance: o.appearance || null
       });
       return api;
@@ -479,7 +459,7 @@
       var mw = a.length + 1, mh = a.width + 2, refY = mh / 2;
       return '<marker id="' + id + '" markerWidth="' + n(mw) + '" markerHeight="' + n(mh) + '"'
         + ' refX="' + n(a.length) + '" refY="' + n(refY) + '" orient="auto-start-reverse" markerUnits="userSpaceOnUse"'
-        + styleAttr(appearance, EDGE_APPEARANCE_VARS) + '>'
+        + styleAttr(appearance, 'edge') + '>'
         + '<path class="diagram-arrowhead" d="M0 ' + n(refY - a.width / 2) + ' L' + n(a.length) + ' ' + n(refY)
         + ' L0 ' + n(refY + a.width / 2) + ' Z"/>'
         + '</marker>';
@@ -492,7 +472,7 @@
       var markerId = hasEdgeColor(e.appearance) ? mk + '-' + index : mk;
       var ms = e.arrowStart ? ' marker-start="url(#' + markerId + ')"' : '';
       var me = e.arrow ? ' marker-end="url(#' + markerId + ')"' : '';
-      return '<path class="' + cls + '" d="' + d + '"' + styleAttr(e.appearance, EDGE_APPEARANCE_VARS) + ms + me + ' fill="none"/>';
+      return '<path class="' + cls + '" d="' + d + '"' + styleAttr(e.appearance, 'edge') + ms + me + ' fill="none"/>';
     }
 
     function renderNode(nd) {
@@ -523,7 +503,7 @@
           + ' dominant-baseline="' + baseline + '"' + dyAttr
           + ' style="' + fontSizeStyle(nd.fontSize) + '">' + nd.label + '</text>';
       }
-      return '<g class="' + grpCls + '"' + styleAttr(nd.appearance, NODE_APPEARANCE_VARS) + '>' + out + '</g>';
+      return '<g class="' + grpCls + '"' + styleAttr(nd.appearance, 'node') + '>' + out + '</g>';
     }
 
     function render(idPrefix) {

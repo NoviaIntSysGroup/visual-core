@@ -43,12 +43,6 @@
   function columns(slide, i) {
     var cols = slide.columns || [];
     var fragments = slide.fragments !== false;
-    // `dividers`: true (default) rules every gap, false none. An array rules gaps one
-    // by one (`dividers[j]` between column j and j+1), drawn flat for a row on screen
-    // all at once.
-    var perGap = Array.isArray(slide.dividers);
-    var dividers = perGap ? 'custom' : (slide.dividers !== false);
-    var gridHalign = slide.halign ? ' data-halign="' + slide.halign + '"' : '';
     var title = slide.title
       ? '<h1 data-edit="' + i + '/title">' + slide.title + '</h1>'
       : '';
@@ -58,15 +52,14 @@
     var highlight = highlightIndex(cols.map(function (c) {
       return [].concat.apply([], c.blocks || []);   // a column's blocks, groups flattened
     }), slide.highlight, 'slide ' + i);
-    var rendered = cols.map(function (c, j) {
-      return blocks(c, {
+    var rendered = grid(cols, slide, '', function (c, j) {
+      return {
         id: 'deck-col-' + i + '_' + j,
         path: i + '/columns/' + j,
         fragment: fragments && c.fragment !== false,
-        divider: perGap && j > 0 && !!slide.dividers[j - 1],
         dim: highlight != null && j !== highlight
-      });
-    }).join('');
+      };
+    });
 
     // The slide's lead-in, over the whole row rather than inside the first
     // column: the framing the columns are an answer to. It carries no fragment
@@ -100,9 +93,7 @@
       + '<div class="slide deck-columns-slide">'
       +   title
       +   lead
-      +   '<div class="deck-columns-grid"' + gridHalign + ' data-dividers="' + dividers + '" style="--deck-columns-count:' + cols.length + '">'
-      +     rendered
-      +   '</div>'
+      +   rendered
       +   timeline
       +   closing
       +   marker
@@ -116,14 +107,19 @@
   // DOM order with the figure's steps moved in after that group; slides without
   // `startAfter` are returned untouched and keep Reveal's unindexed order.
   function placeFigureSteps(slide, html) {
+    // Groups and figures in DOM order, nested `columns` blocks included, so the k-th
+    // found here is the k-th element the queries below find.
     var groups = [], figures = [];
-    function collect(b) { if (b && b.type === 'figure') figures.push(b); }
-    (slide.columns || []).forEach(function (c) {
-      (c.blocks || []).forEach(function (item) {
-        if (Array.isArray(item)) { groups.push(item); item.forEach(collect); }
-        else collect(item);
+    function walk(items) {
+      items.forEach(function (item) {
+        if (Array.isArray(item)) { groups.push(item); walk(item); }
+        else if (item && item.type === 'figure') figures.push(item);
+        else if (item && item.type === 'columns') {
+          (item.columns || []).forEach(function (c) { walk(c.blocks || []); });
+        }
       });
-    });
+    }
+    (slide.columns || []).forEach(function (c) { walk(c.blocks || []); });
     if (!figures.some(function (f) { return f.startAfter != null; })) return html;
 
     var root = document.createElement('div');
@@ -257,6 +253,23 @@
     throw new Error('toc slide ' + i + ' has no items, and no earlier toc slide defines them');
   }
 
+  // A grid of equal columns, the slide's or a `columns` block's. `spec.dividers`: true
+  // (default) rules every gap, false none; an array rules gaps one by one (`dividers[j]`
+  // between column j and j+1), drawn flat for a row on screen all at once.
+  // `spec.halign: "center"` centres the columns. `columnOpts(c, j)` gives each column's opts.
+  function grid(cols, spec, cls, columnOpts) {
+    var perGap = Array.isArray(spec.dividers);
+    var rendered = cols.map(function (c, j) {
+      var o = columnOpts(c, j);
+      o.divider = perGap && j > 0 && !!spec.dividers[j - 1];
+      return blocks(c, o);
+    }).join('');
+    return '<div class="deck-columns-grid' + (cls ? ' ' + cls : '') + '"'
+      + (spec.halign ? ' data-halign="' + spec.halign + '"' : '')
+      + ' data-dividers="' + (perGap ? 'custom' : spec.dividers !== false) + '"'
+      + ' style="--deck-columns-count:' + cols.length + '">' + rendered + '</div>';
+  }
+
   function blocks(column, opts) {
     if (!Array.isArray(column.blocks)) {
       throw new Error('column ' + opts.path + ' has no blocks');
@@ -324,8 +337,17 @@
     return '<div class="' + cls + '">' + rendered + '</div>';
   }
 
+  // `halign` and `valign` align what a block holds, as they do for a column or the
+  // slide; they land on the block's root element, whatever its type.
   function renderBlock(column, block, opts) {
     block = block || {};
+    var html = blockMarkup(column, block, opts);
+    var align = (block.halign ? ' data-halign="' + block.halign + '"' : '')
+      + (block.valign ? ' data-valign="' + block.valign + '"' : '');
+    return align ? html.replace(/^<[\w-]+/, '$&' + align) : html;
+  }
+
+  function blockMarkup(column, block, opts) {
     var type = block.type || 'text';
     if (type === 'title') return textBlock(block, opts.path, 'h2');
     // The h3 tier: a named part inside a column that already has a title. Plain
@@ -456,29 +478,23 @@
         + window.Deck.caption(block, opts.path)
         + '</div>';
     }
-    // A side-by-side pair inside one column: two equal halves, each block in a cell,
-    // so a block of fixed size (a portrait) keeps its size inside its half. `valign:
-    // 'top'` hangs the cells from the row's top edge instead of centring them. A
-    // bracketed cell steps in on its own press; a cell of brackets (`[[a], [b]]`)
-    // stacks groups that step in turn.
-    if (type === 'row') {
-      var rowAlign = block.valign ? ' data-valign="' + block.valign + '"' : '';
-      var inner = (block.blocks || []).map(function (item, n) {
-        var cellOpts = {
-          id: (opts.id || 'deck-block') + '-' + n,
-          path: opts.path ? opts.path + '/blocks/' + n : ''
+    // The slide's column grid one level down, inside a column. Its columns are the
+    // slide's columns, but never step: the column holding them steps around them.
+    // One level only, so a nested column may not hold another `columns` block.
+    if (type === 'columns') {
+      var cols = block.columns || [];
+      cols.forEach(function (c) {
+        if ([].concat.apply([], c.blocks || []).some(function (b) { return b && b.type === 'columns'; })) {
+          throw new Error('columns block ' + opts.path + ' holds another columns block');
+        }
+      });
+      return grid(cols, block, 'deck-block-columns', function (c, j) {
+        return {
+          id: (opts.id || 'deck-block') + '-' + j,
+          path: opts.path ? opts.path + '/columns/' + j : '',
+          fragment: false
         };
-        var groups = !Array.isArray(item) ? null : Array.isArray(item[0]) ? item : [item];
-        return '<div class="deck-block-row-cell">' + (groups
-          ? groups.map(function (group, k) {
-            return renderGroupItem(column, group, null, opts.fragment, groups === item ? {
-              id: cellOpts.id + '-' + k,
-              path: cellOpts.path ? cellOpts.path + '/' + k : ''
-            } : cellOpts);
-          }).join('')
-          : renderBlock(column, item, cellOpts)) + '</div>';
-      }).join('');
-      return '<div class="deck-block-row"' + rowAlign + '>' + inner + '</div>';
+      });
     }
     return '';
   }

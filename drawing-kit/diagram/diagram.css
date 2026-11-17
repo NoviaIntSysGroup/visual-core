@@ -1,7 +1,8 @@
 /* Default appearance for the node/edge diagram kit (core/drawing-kit/diagram/diagram.js).
    Geometry comes from JS; this file only styles, via theme tokens. Each token
    falls back to a standalone default when no theme is loaded. Components
-   restyle by mapping these to their own vocabulary or overriding the tokens. */
+   restyle by mapping these to their own vocabulary or overriding the tokens;
+   a node's or edge's `appearance` sets its own --diagram-node-* / --diagram-edge-*. */
 
 .diagram {
   --diagram-edge-color: var(--edges, currentColor);
@@ -10,19 +11,19 @@
   --diagram-node-stroke: var(--border, currentColor);
   --diagram-node-stroke-width: var(--line-width-strong, 1px);
   --diagram-node-opacity: 1;
-  --diagram-label-color: var(--text, currentColor);
+  --diagram-node-label: var(--text, currentColor);
   /* The figure font, unconditionally — NOT var(--f-body). A label's width is
      geometrically coupled to the box it sits in, so the typeface has to be the
      same wherever the drawing is placed; a diagram that read Arial in a figure
      and system-ui on a slide would lay out differently on the two surfaces.
      Published by config.js; the fallback is for a page without a theme. */
-  --diagram-label-font: var(--f-figure, Arial, Helvetica, "Liberation Sans", sans-serif);
-  --diagram-icon-primary: var(--graphic-primary, #4477AA);
-  --diagram-icon-secondary: var(--graphic-secondary, #EE6677);
-  --diagram-icon-surface: var(--diagram-node-fill);
-  --diagram-icon-detail: var(--diagram-label-color);
-  --diagram-icon-person: var(--text, currentColor);
-  --diagram-icon-person-opacity: 0.4;
+  --diagram-node-label-font: var(--f-figure, Arial, Helvetica, "Liberation Sans", sans-serif);
+  --diagram-node-icon-primary: var(--graphic-primary, #4477AA);
+  --diagram-node-icon-secondary: var(--graphic-secondary, #EE6677);
+  --diagram-node-icon-surface: var(--diagram-node-fill);
+  --diagram-node-icon-detail: var(--diagram-node-label);
+  --diagram-node-icon-person: var(--text, currentColor);
+  --diagram-node-icon-person-opacity: 0.4;
 
   /* Width is set inline by the kit (the viewBox width in pt), so a diagram is
      portable/exact in figures and exports. Decks scale it up to fill the slide
@@ -78,15 +79,15 @@ body.debug-on .debug-frame--component { stroke: var(--graphic-secondary, #EE6677
 /* Font SIZE is emitted inline by the kit (from Diagram.defaults.fontSize, kept
    linked to lineHeight); only family + colour are styled here. */
 .diagram-node-label {
-  fill: var(--diagram-label-color);
-  font-family: var(--diagram-label-font);
+  fill: var(--diagram-node-label);
+  font-family: var(--diagram-node-label-font);
 }
 
 .diagram-node-icon {
-  --icon-primary: var(--diagram-icon-primary);
-  --icon-secondary: var(--diagram-icon-secondary);
-  --icon-surface: var(--diagram-icon-surface);
-  --icon-detail: var(--diagram-icon-detail);
-  --icon-person: var(--diagram-icon-person);
-  --icon-person-opacity: var(--diagram-icon-person-opacity);
+  --icon-primary: var(--diagram-node-icon-primary);
+  --icon-secondary: var(--diagram-node-icon-secondary);
+  --icon-surface: var(--diagram-node-icon-surface);
+  --icon-detail: var(--diagram-node-icon-detail);
+  --icon-person: var(--diagram-node-icon-person);
+  --icon-person-opacity: var(--diagram-node-icon-person-opacity);
 }

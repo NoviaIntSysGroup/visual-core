@@ -100,7 +100,7 @@
 
 /* The accent inside a column (a quote's rule, a subhead). One hue across all columns,
    so colour doesn't suggest meaning by position. A hue that carries meaning stays
-   explicit: see .deck-accent. */
+   explicit: see .deck-accent-*. */
 .deck-columns-grid > * {
   --column-accent: var(--accent);
 }
@@ -166,6 +166,21 @@
   text-align: center;
 }
 
+/* The same on one block: it sits centred, or at the end, of the space it has, and
+   `center` centres its lines; the blocks around it keep the column's alignment. */
+.deck-column-content [data-halign] {
+  width: fit-content;
+}
+
+.deck-column-content [data-halign="center"] {
+  margin-inline: auto;
+  text-align: center;
+}
+
+.deck-column-content [data-halign="end"] {
+  margin-left: auto;
+}
+
 /* A `video` block: the clip fills its share of the column at its own aspect.
    A `maxHeight` cap shrinks it whole, centred in its share, like a capped image. */
 .deck-video {
@@ -176,40 +191,13 @@
   object-fit: contain;
 }
 
-/* A side-by-side pair inside one column: an image next to the text about it,
-   where the column's default stack would give the picture the full width and
-   push the words below the fold. Two equal halves, centred against each other —
-   unequal tracks are what the slide's own column grid is for. Full width so the
-   pair still spans its column when the column itself is centred. */
-.deck-block-row {
-  display: flex;
-  align-items: center;
-  gap: var(--s4);
-  width: 100%;
-}
-
-/* ...unless the row asks to hang from its top edge. Centring is right for the
-   usual row — a picture beside the words about it, where two blocks of unlike
-   height read as a pair only when they share a middle. It is wrong for a row of
-   pictures: there the pictures are the line the eye follows, and a caption that
-   wraps to two lines would push its own picture up off that line. */
-.deck-block-row[data-valign="top"] {
-  align-items: flex-start;
-}
-
-/* The half itself. It is a cell rather than the block, so that a block which
-   cannot be stretched — a portrait, whose width and height are one diameter —
-   still gets a half of the row and simply sits at the start of it, on the same
-   edge as the rest of the column's blocks. Blocks that DO fill their width
-   (an image, a paragraph) fill the cell and nothing changes for them. */
-.deck-block-row-cell {
-  flex: 1 1 0;
-  min-width: 0;
-}
-
-/* Groups stacked in one cell keep the same gap as blocks inside a group. */
-.deck-block-row-cell > .deck-block-group + .deck-block-group {
-  margin-top: var(--s5);
+/* A `columns` block: the slide's grid inside a column. Each column carries the
+   grid's side padding, so the block reaches out by that padding on both sides to
+   line its outer columns up with the blocks above and below it. An explicit width
+   keeps it spanning its column when the column itself is centred. */
+.deck-block-columns {
+  margin-inline: calc(-1 * var(--s3));
+  width: calc(100% + 2 * var(--s3));
 }
 
 /* An app block's wrapper only carries `data-prevent-swipe`; the app lays out as if
@@ -467,13 +455,18 @@
   margin-top: var(--s3);
 }
 
-/* Inline emphasis on a word carrying a *meaning* hue (agent = secondary), the
-   slide twin of the figure kit's .fig-accent. Not positional — this hue means
-   the same thing in every column. */
-.reveal .deck-accent {
-  color: var(--graphic-secondary);
+/* Inline emphasis on a word in one of the graphic hues, so it matches what that hue
+   means in the slide's drawings; twins of the figure kit's .fig-accent-*. Not
+   positional — a hue means the same thing in every column. */
+.reveal .deck-accent-primary,
+.reveal .deck-accent-secondary,
+.reveal .deck-accent-tertiary {
   font-weight: var(--w-bold);
 }
+
+.reveal .deck-accent-primary { color: var(--graphic-primary); }
+.reveal .deck-accent-secondary { color: var(--graphic-secondary); }
+.reveal .deck-accent-tertiary { color: var(--graphic-tertiary); }
 
 /* Table of contents. */
 .deck-toc-list {

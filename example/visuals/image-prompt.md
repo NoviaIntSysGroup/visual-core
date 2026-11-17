@@ -2,10 +2,11 @@
 
 The fixed blocks of every illustration prompt in this project. The method — when to use an
 illustration, how to write the SCENE, generating a set, checking the result — is in
-`core/skills/illustrations/SKILL.md`. Copy the blocks below verbatim and write only the SCENE fresh.
+`core/skills/illustrations/SKILL.md`. Copy the blocks below verbatim and write only the SCENE
+fresh.
 
-A new project copies this file to `visuals/image-prompt.md` and replaces every `<…>` with its own
-look, taking the hexes from its `brand.css`.
+A new project copies this file to `visuals/image-prompt.md` and replaces every `<…>` with its
+own look, taking the hexes from its `brand.css`.
 
 ## The fixed blocks
 
@@ -31,8 +32,9 @@ background, no border or frame, no text, no lettering, no numerals, no watermark
 no logo, no signature.
 ```
 
-In the COLOUR block, `<focal object> fill` is the only phrase that adapts: rename it to whatever
-the focal object of *this* scene is. The colour, the hex, and every other line stay as written.
+In the COLOUR block, `<focal object> fill` is the only phrase that adapts: rename it to
+whatever the focal object of *this* scene is. The colour, the hex, and every other line stay as
+written.
 
 ## Colour roles
 

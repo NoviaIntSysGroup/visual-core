@@ -3,7 +3,8 @@ name: page-check
 description: >-
   Look at a deck, figure, or landing page headlessly: screenshot it, or take a figure's SVG
   export, with Bun's WebView driving Chromium. Use only when the user asks you to look at a
-  page or to export a figure (AGENTS.md rule 8); otherwise the user checks in their own browser.
+  page or to export a figure (AGENTS.md rule 8); otherwise the user checks in their own
+  browser.
 ---
 
 # Checking Pages Headlessly
@@ -15,8 +16,9 @@ The browser is Bun's `Bun.WebView`, driving the Chromium binary named by `BUN_CH
   the pages, and stop it before the command ends.
 - Pass `--no-sandbox`: Chromium's own sandbox cannot start inside the agent's.
 - `evaluate()` takes one expression, not statements; wrap several in an async arrow function.
-- A figure's SVG export is `await view.evaluate("Figure.svgText(document.querySelector('.figure-stage svg'))")`;
-  write the string to a file. There is no headless PNG export: screenshot the page, or, for
+- A figure's SVG export is
+  `await view.evaluate("Figure.svgText(document.querySelector('.figure-stage svg'))")`; write
+  the string to a file. There is no headless PNG export: screenshot the page, or, for
   transparent edges, draw that SVG onto a canvas in the page and return `canvas.toDataURL()`.
 - Write the script and its screenshots to the agent's scratch folder, never into the repo.
 

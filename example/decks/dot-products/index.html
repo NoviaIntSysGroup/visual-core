@@ -256,21 +256,30 @@ const SLIDES = [
             "text": "Nobel Prize in Medicine 1906"
           },
           {
-            "type": "row",
-            "blocks": [
+            "type": "columns",
+            "dividers": false,
+            "columns": [
               {
-                "type": "image",
-                "src": "https://www.nobelprize.org/images/cajal-12850-portrait-medium.jpg",
-                "alt": "Portrait of Santiago Ramón y Cajal",
-                "maxHeight": 220,
-                "caption": "Santiago Ramón y Cajal"
+                "blocks": [
+                  {
+                    "type": "image",
+                    "src": "https://www.nobelprize.org/images/cajal-12850-portrait-medium.jpg",
+                    "alt": "Portrait of Santiago Ramón y Cajal",
+                    "maxHeight": 220,
+                    "caption": "Santiago Ramón y Cajal"
+                  }
+                ]
               },
               {
-                "type": "image",
-                "src": "../../visuals/assets/images/Cajal_Retina.jpg",
-                "alt": "Cajal's drawing of the nerve cells of the retina",
-                "maxHeight": 220,
-                "caption": "His drawing of the retina"
+                "blocks": [
+                  {
+                    "type": "image",
+                    "src": "../../visuals/assets/images/Cajal_Retina.jpg",
+                    "alt": "Cajal's drawing of the nerve cells of the retina",
+                    "maxHeight": 220,
+                    "caption": "His drawing of the retina"
+                  }
+                ]
               }
             ]
           },
@@ -378,20 +387,31 @@ const SLIDES = [
               "text": "Hubel and Wiesel, Late 1950s and 1960s"
             },
             {
-              "type": "row",
-              "blocks": [
+              "type": "columns",
+              "dividers": false,
+              "columns": [
                 {
-                  "type": "video",
-                  "src": "https://www.science.smith.edu/~rolivo/bio300/vision/VisualCortexHiRes.mp4",
-                  "alt": "Hubel and Wiesel's recording from a neuron in a cat's visual cortex",
-                  "maxHeight": 157,
-                  "start": 251,
-                  "sound": true,
-                  "play": "press"
+                  "valign": "center",
+                  "blocks": [
+                    {
+                      "type": "video",
+                      "src": "https://www.science.smith.edu/~rolivo/bio300/vision/VisualCortexHiRes.mp4",
+                      "alt": "Hubel and Wiesel's recording from a neuron in a cat's visual cortex",
+                      "maxHeight": 157,
+                      "start": 251,
+                      "sound": true,
+                      "play": "press"
+                    }
+                  ]
                 },
                 {
-                  "type": "text",
-                  "text": "<b>David H. Hubel and Torsten N. Wiesel</b>, Nobel Prize 1981, “for their discoveries concerning information processing in the visual system”"
+                  "valign": "center",
+                  "blocks": [
+                    {
+                      "type": "text",
+                      "text": "<b>David H. Hubel and Torsten N. Wiesel</b>, Nobel Prize 1981, “for their discoveries concerning information processing in the visual system”"
+                    }
+                  ]
                 }
               ]
             }
@@ -500,15 +520,26 @@ const SLIDES = [
             "text": "$$\\mathbf{x} \\cdot \\mathbf{w} = \\sum_{i=1}^{n} x_i w_i$$"
           },
           {
-            "type": "row",
-            "blocks": [
+            "type": "columns",
+            "dividers": false,
+            "columns": [
               {
-                "type": "figure",
-                "module": "SummaryFieldsFigure"
+                "valign": "center",
+                "blocks": [
+                  {
+                    "type": "figure",
+                    "module": "SummaryFieldsFigure"
+                  }
+                ]
               },
               {
-                "type": "text",
-                "text": "Seeing $\\mathbf{w}$ as weights shows what a neuron responds to."
+                "valign": "center",
+                "blocks": [
+                  {
+                    "type": "text",
+                    "text": "Seeing $\\mathbf{w}$ as weights shows what a neuron responds to."
+                  }
+                ]
               }
             ]
           }
@@ -526,15 +557,26 @@ const SLIDES = [
             "text": "$$\\cos \\theta = \\frac{\\mathbf{x} \\cdot \\mathbf{w}}{\\lVert \\mathbf{x} \\rVert \\, \\lVert \\mathbf{w} \\rVert}$$"
           },
           {
-            "type": "row",
-            "blocks": [
+            "type": "columns",
+            "dividers": false,
+            "columns": [
               {
-                "type": "figure",
-                "module": "SummarySearchFigure"
+                "valign": "center",
+                "blocks": [
+                  {
+                    "type": "figure",
+                    "module": "SummarySearchFigure"
+                  }
+                ]
               },
               {
-                "type": "text",
-                "text": "Seeing the dot product as $\\cos \\theta$ lets us search."
+                "valign": "center",
+                "blocks": [
+                  {
+                    "type": "text",
+                    "text": "Seeing the dot product as $\\cos \\theta$ lets us search."
+                  }
+                ]
               }
             ]
           }
@@ -552,15 +594,26 @@ const SLIDES = [
             "text": "$$\\lVert \\mathbf{x} \\rVert \\cos \\theta = \\frac{\\mathbf{x} \\cdot \\mathbf{w}}{\\lVert \\mathbf{w} \\rVert}$$"
           },
           {
-            "type": "row",
-            "blocks": [
+            "type": "columns",
+            "dividers": false,
+            "columns": [
               {
-                "type": "figure",
-                "module": "SummaryClassifierFigure"
+                "valign": "center",
+                "blocks": [
+                  {
+                    "type": "figure",
+                    "module": "SummaryClassifierFigure"
+                  }
+                ]
               },
               {
-                "type": "text",
-                "text": "Seeing the dot product as a projection lets us classify things."
+                "valign": "center",
+                "blocks": [
+                  {
+                    "type": "text",
+                    "text": "Seeing the dot product as a projection lets us classify things."
+                  }
+                ]
               }
             ]
           }

@@ -128,7 +128,7 @@
     /* Inline paint for the primitives below. Everything is optional: with no
        options a rule keeps its .figure-rule styling and a rect its CSS default,
        so appearance stays in CSS unless a figure deliberately overrides it.
-       o: { fill, stroke, width, opacity, dash } (dash: number[] or string) */
+       o: { fill, stroke, width, opacity } */
     /* A class attribute, or nothing at all when there are no classes — so the
        primitives never emit an empty class="" or a trailing space. */
     function clsAttr() {
@@ -142,15 +142,14 @@
       if (o.stroke != null) st.push('stroke:' + o.stroke);
       if (o.width != null) st.push('stroke-width:' + o.width);
       if (o.opacity != null) st.push('opacity:' + o.opacity);
-      if (o.dash != null) st.push('stroke-dasharray:' + (Array.isArray(o.dash) ? o.dash.map(r).join(' ') : o.dash));
       return st.length ? ' style="' + st.join(';') + '"' : '';
     }
 
-    /* A straight rule (e.g. a column divider). Styled via .figure-rule; `dash`
-       and the other paint options override it for one line (a dashed boundary). */
+    /* A straight rule (e.g. a column divider). Styled via .figure-rule; the paint
+       options override it for one line, and `line: 'dashed' | 'dotted'` sets its style. */
     function rule(x1, y1, x2, y2, o) {
       o = o || {};
-      parts.push('<line' + clsAttr('figure-rule', o.cls) + ' x1="' + r(x1) + '" y1="' + r(y1)
+      parts.push('<line' + clsAttr('figure-rule', o.line && 'line-' + o.line, o.cls) + ' x1="' + r(x1) + '" y1="' + r(y1)
         + '" x2="' + r(x2) + '" y2="' + r(y2) + '"' + paint(o) + '/>');
       return api;
     }

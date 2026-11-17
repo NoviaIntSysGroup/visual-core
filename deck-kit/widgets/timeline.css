@@ -1,13 +1,16 @@
 /* Timeline: one axis through the middle, entries evenly spaced on it, each
    label in a band above or below on a stem from its circle. The track is solid
-   through the past and dashed into the future; future circles are hollow. Extra
-   air above sets it apart from the row it sits under. */
+   through the past and dashed into the future; future circles are hollow. A
+   branch runs --timeline-half off the axis, leaving and rejoining it on S-curves
+   --timeline-bend wide; every stem reaches the same label bands. Extra air above sets it apart. */
 .timeline-section {
   --timeline-line: 2px;
   --timeline-dot: 12px;
   --timeline-reach: var(--s10);
   --timeline-label-gap: var(--s2);
   --timeline-label-height: 44px;
+  --timeline-branch-offset: var(--s8);
+  --timeline-bend: var(--s10);
   margin-top: var(--s5);
 }
 
@@ -22,8 +25,13 @@
 }
 
 .timeline {
+  --timeline-half: 0px;
   position: relative;
-  height: calc(2 * (var(--timeline-reach) + var(--timeline-label-gap) + var(--timeline-label-height)));
+  height: calc(2 * (var(--timeline-half) + var(--timeline-reach) + var(--timeline-label-gap) + var(--timeline-label-height)));
+}
+
+.timeline-with-branches {
+  --timeline-half: var(--timeline-branch-offset);
 }
 
 .timeline-track {
@@ -34,9 +42,41 @@
   border-top: var(--timeline-line) solid var(--edges);
 }
 
-.timeline-track-future {
+.timeline-dashed {
   border-top-style: dashed;
 }
+
+.timeline-branch-above { top: calc(50% - var(--timeline-half) - var(--timeline-line) / 2); }
+.timeline-branch-below { top: calc(50% + var(--timeline-half) - var(--timeline-line) / 2); }
+
+/* timeline.js centres a bend on the point where branch and axis meet; its
+   curve keeps the line's width however the box is stretched. */
+.timeline-bend {
+  position: absolute;
+  width: var(--timeline-bend);
+  height: var(--timeline-half);
+  margin-left: calc(var(--timeline-bend) / -2);
+  overflow: visible;
+  fill: none;
+  stroke: var(--edges);
+  stroke-width: var(--timeline-line);
+}
+
+.timeline-bend-above { top: calc(50% - var(--timeline-half)); }
+.timeline-bend-below { top: 50%; }
+.timeline-bend.timeline-dashed { stroke-dasharray: calc(3 * var(--timeline-line)); }
+
+/* A branch's name sits between it and the axis, where the branch starts. */
+.reveal .timeline-branch-name {
+  position: absolute;
+  margin: 0;
+  line-height: 1;
+  font-weight: var(--w-semibold);
+  color: var(--text-soft);
+}
+
+.timeline-branch-name-above { top: calc(50% - var(--timeline-half) + var(--timeline-label-gap)); }
+.timeline-branch-name-below { bottom: calc(50% - var(--timeline-half) + var(--timeline-label-gap)); }
 
 .reveal .timeline-entries {
   position: absolute;
@@ -47,24 +87,34 @@
 /* Every entry spans the whole timeline, so its stem, circle and label step
    in together; only the label takes clicks, for the editor. */
 .timeline-entry {
+  --y: 0px;
   position: absolute;
   inset: 0;
   pointer-events: none;
 }
 
+.timeline-on-above { --y: calc(-1 * var(--timeline-half)); }
+.timeline-on-below { --y: var(--timeline-half); }
+
 .timeline-stem {
   position: absolute;
   left: calc(var(--x) - var(--timeline-line) / 2);
-  height: var(--timeline-reach);
   border-left: var(--timeline-line) solid var(--edges);
 }
 
-.timeline-above .timeline-stem { bottom: 50%; }
-.timeline-below .timeline-stem { top: 50%; }
+.timeline-above .timeline-stem {
+  bottom: calc(50% - var(--y));
+  height: calc(var(--timeline-reach) + var(--timeline-half) + var(--y));
+}
+
+.timeline-below .timeline-stem {
+  top: calc(50% + var(--y));
+  height: calc(var(--timeline-reach) + var(--timeline-half) - var(--y));
+}
 
 .timeline-dot {
   position: absolute;
-  top: calc(50% - var(--timeline-dot) / 2);
+  top: calc(50% + var(--y) - var(--timeline-dot) / 2);
   left: calc(var(--x) - var(--timeline-dot) / 2);
   box-sizing: border-box;
   width: var(--timeline-dot);
@@ -117,11 +167,11 @@
 
 .timeline-above .timeline-label {
   flex-direction: column-reverse;
-  bottom: calc(50% + var(--timeline-reach) + var(--timeline-label-gap));
+  bottom: calc(50% + var(--timeline-half) + var(--timeline-reach) + var(--timeline-label-gap));
 }
 
 .timeline-below .timeline-label {
-  top: calc(50% + var(--timeline-reach) + var(--timeline-label-gap));
+  top: calc(50% + var(--timeline-half) + var(--timeline-reach) + var(--timeline-label-gap));
 }
 
 .reveal .timeline-entry p {

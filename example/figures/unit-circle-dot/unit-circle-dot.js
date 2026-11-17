@@ -20,7 +20,7 @@
   var FADE = 0.35;   /* opacity of a faded guide; unit-circle-dot.css fades labels the same */
 
   /* ---- Layout knobs ------------------------------------------------------- */
-  var LINE   = { vector: 'var(--line-width-strong)', axis: 'var(--line-width)', guide: 'var(--line-width)', dash: [2.5, 2] };
+  var LINE   = { vector: 'var(--line-width-strong)', axis: 'var(--line-width)', guide: 'var(--line-width)' };
   var HEAD   = { length: cm(0.28), half: cm(0.11) };
   var LABEL  = { gap: cm(0.22), dot: cm(0.06) };   /* clearance; radius of the unit point in the last step */
   /* Radius, origin, and how far the axes reach behind and ahead of it, in radii. */
@@ -84,7 +84,7 @@
   }
 
   function guide(fig, a, b, faded) {
-    fig.rule(a[0], a[1], b[0], b[1], { stroke: COLOR.guide, width: LINE.guide, dash: LINE.dash, opacity: faded ? FADE : null });
+    fig.rule(a[0], a[1], b[0], b[1], { stroke: COLOR.guide, width: LINE.guide, line: 'dashed', opacity: faded ? FADE : null });
   }
 
   /* A label centred on (x, y), or with its end there for align 'end'. */

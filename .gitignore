@@ -10,5 +10,7 @@ Thumbs.db
 .claude/.cc-writes
 .claude/settings.local.json
 
-# Issue entries the issue-fix skill has fixed
+# Issue entries
+issues/
 issues-fixed/
+issues-dismissed/

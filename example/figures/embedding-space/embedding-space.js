@@ -576,7 +576,6 @@
     var s = CLASSIFY_STEP[step], g = CLASSIFY_GEO(), P = CPLANE, C = COPY.classify;
     var W = s.w != null ? g.ws[s.w] : null, f = s.fresh != null ? CLASSIFY.fresh[s.fresh] : null, fg = f ? g.fresh[s.fresh] : null;
     var o = plane(P, [0, 0]), y = SCORE.y, lo = scoreX(-1), hi = scoreX(1);
-    var dash = [cm(0.08), cm(0.08)];
     function along(t) { return plane(P, [t * W.w[0], t * W.w[1]]); }
     function scoreX(v) { return SCORE.zero + v * SCORE.unit; }
     function densityY(col, v) { return y - density(W, col, v) / W.peak * DENSITY.height; }
@@ -591,7 +590,7 @@
     var dropped = W && !s.using ? W.images : fg ? [fg] : [];
     dropped.forEach(function (im) {
       var p = plane(P, im.e), q = plane(P, im.foot);
-      fig.rule(p[0], p[1], q[0], q[1], { stroke: COLOR.edge, width: LINE.thin, dash: dash });
+      fig.rule(p[0], p[1], q[0], q[1], { stroke: COLOR.edge, width: LINE.thin, line: 'dashed' });
     });
 
     /* Every labelled embedding as a dot in its group's hue, each group named beside its middle, the feet on w,
@@ -636,7 +635,7 @@
     fig.text(C.fresh, { x: FRESH.x + FRESH.side / 2, y: FRESH.y - FRESH.labelGap, role: 'slideBody' });
     fresh(fig, f, { x: FRESH.x, y: FRESH.y }, FRESH.side);
     var fx = scoreX(fg.s), meets = [densityY(0, fg.s), densityY(1, fg.s)];
-    fig.rule(fx, y, fx, Math.min(meets[0], meets[1]), { stroke: COLOR.ink, width: LINE.thin, dash: dash });
+    fig.rule(fx, y, fx, Math.min(meets[0], meets[1]), { stroke: COLOR.ink, width: LINE.thin, line: 'dashed' });
     dot(fig, [fx, y], COLOR.ink, DOT.r);
     meets.forEach(function (my) {
       if (y - my > DOT.r) fig.rule(fx - MEET.half, my, fx + MEET.half, my, { stroke: COLOR.ink, width: LINE.strong });
@@ -650,7 +649,7 @@
   /* The best w alone, the classifier's end state: the labelled embeddings dropped onto w's line, and the score line under
      the plane with each group's density and every score. */
   function drawBest(fig, step) {
-    var g = CLASSIFY_GEO(), B = g.best, C = COPY.classify, P = BPLANE, S = BSCORE, dash = [cm(0.08), cm(0.08)];
+    var g = CLASSIFY_GEO(), B = g.best, C = COPY.classify, P = BPLANE, S = BSCORE;
     var f = step ? CLASSIFY.fresh[step - 1] : null, fg = f ? g.fresh[step - 1] : null;
     function at(v) { return [P.x + v[0] * P.unit, P.y - v[1] * P.unit]; }
     function polarAt(deg, len) { var a = deg * Math.PI / 180; return at([len * Math.cos(a), len * Math.sin(a)]); }
@@ -674,7 +673,7 @@
     var dropped = fg ? [fg] : B.images;
     dropped.forEach(function (im) {
       var p = at(im.e), q = at(im.foot);
-      fig.rule(p[0], p[1], q[0], q[1], { stroke: COLOR.edge, width: LINE.thin, dash: dash });
+      fig.rule(p[0], p[1], q[0], q[1], { stroke: COLOR.edge, width: LINE.thin, line: 'dashed' });
     });
     B.images.forEach(function (im) { dot(fig, at(im.e), COLOR.group[im.col], DOT.r); });
     dropped.forEach(function (im) { dot(fig, at(im.foot), im === fg ? COLOR.ink : COLOR.group[im.col], DOT.foot); });
@@ -710,7 +709,7 @@
     fig.text(C.fresh, { x: BFRESH.x, y: BFRESH.label, role: 'slideBody' });
     fresh(fig, f, { x: BFRESH.x - BFRESH.side / 2, y: BFRESH.top }, BFRESH.side);
     var fx = scoreX(fg.s), meets = [densityY(0, fg.s), densityY(1, fg.s)];
-    fig.rule(fx, S.y, fx, Math.min(meets[0], meets[1]), { stroke: COLOR.ink, width: LINE.thin, dash: dash });
+    fig.rule(fx, S.y, fx, Math.min(meets[0], meets[1]), { stroke: COLOR.ink, width: LINE.thin, line: 'dashed' });
     dot(fig, [fx, S.y], COLOR.ink, DOT.r);
     meets.forEach(function (my) {
       if (S.y - my > DOT.r) fig.rule(fx - MEET.half, my, fx + MEET.half, my, { stroke: COLOR.ink, width: LINE.strong });
@@ -740,12 +739,12 @@
   }
 
   function drawBestThumb(fig) {
-    var at = thumbPlane(fig), B = CLASSIFY_GEO().best, o = at([0, 0]), dash = [cm(0.08), cm(0.08)];
+    var at = thumbPlane(fig), B = CLASSIFY_GEO().best, o = at([0, 0]);
     var a = at([-1.15 * B.w[0], -1.15 * B.w[1]]), b = at([1.15 * B.w[0], 1.15 * B.w[1]]);
     fig.rule(a[0], a[1], b[0], b[1], { stroke: COLOR.edge, width: LINE.strong });
     B.images.forEach(function (im) {
       var p = at(im.e), q = at(im.foot);
-      fig.rule(p[0], p[1], q[0], q[1], { stroke: COLOR.edge, width: LINE.thin, dash: dash });
+      fig.rule(p[0], p[1], q[0], q[1], { stroke: COLOR.edge, width: LINE.thin, line: 'dashed' });
     });
     B.images.forEach(function (im) { dot(fig, at(im.e), COLOR.group[im.col], DOT.r); });
     B.images.forEach(function (im) { dot(fig, at(im.foot), COLOR.group[im.col], DOT.foot); });

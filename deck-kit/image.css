@@ -83,9 +83,9 @@
   object-fit: cover;
 }
 
-/* ...but no margin inside a row, where the column's block gap already separates the
-   row from what follows. */
-.deck-block-row-cell > .deck-image-portrait {
+/* ...but no margin inside a `columns` block, where the column's block gap already
+   separates the block from what follows. */
+.deck-block-columns .deck-image-portrait {
   margin-bottom: 0;
 }
 

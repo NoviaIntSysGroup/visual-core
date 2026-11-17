@@ -2,24 +2,26 @@
 name: issue-log
 description: >-
   Read on any signal while working in this repo, before deciding it was nothing: a user
-  correction, a failed call, a guess, a workaround, two sources that disagree, a result that
-  surprised you, reading far more than the task needed, or something you had to work out or be
-  told that no instruction states. Decides whether to log it to `issues/`, and how. Logging
-  never fixes; the fix happens later, in a batch, with the `issue-fix` skill.
+  correction, a failed call, two sources that disagree, a result that surprised you, reading
+  far more than the task needed, code that breaks a Human-first architecture rule in AGENTS.md,
+  or anything you had to guess, work around, work out, or be told that no instruction states.
+  Decides whether to log it to `issues/`, and how. Logging never fixes; the fix happens later,
+  in a batch, with the `issue-fix` skill.
 ---
 
 # Logging Problems
 
-Patching a doc or code on the spot makes it grow one special case at a time, so it becomes
-long and hard to follow. Instead, write the problem down here and keep working, unless the
-user asks you to fix it.
+Patching a doc or code on the spot makes it grow one special case at a time, so it becomes long
+and hard to follow. Instead, write the problem down here and keep working, unless the user asks
+you to fix it.
 
 ## Is it worth logging?
 
 You are here on one of the signals in the description. Re-read the instruction or code once,
-then log it when it cost you something and the next agent would likely pay the same cost. Do
-not log your own slip where the text was clear, a one-off preference, or problems in tools
-outside this repo.
+then log it when it cost you something and the next agent would likely pay the same cost. Code
+that breaks a *Human-first architecture* rule in AGENTS.md is logged as `scattered` even when
+it cost you little, since every later reader pays. Do not log your own slip where the text was
+clear, or problems in tools outside this repo.
 
 The cost need not come from a fault. When no instruction covers what you learned, whether you
 worked it out or were told by the user or the system, log it as `memory`; when the gap is in an
@@ -69,6 +71,5 @@ cost: <what not knowing it cost: files read, calls made, dead ends, a correction
 learned: <what you learned, in a sentence or two>
 ```
 
-Before writing, `ls issues/` and skip a problem that is already logged. Log a `memory` entry
-even when a similar one exists: how often it recurs is what `issue-fix` weighs. At the end of
-the turn, tell the user in one line what you logged.
+Log a problem even when it is already logged: how often it recurs is what `issue-fix` weighs.
+At the end of the turn, tell the user in one line what you logged.

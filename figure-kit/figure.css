@@ -44,12 +44,18 @@
   fill: var(--background-plain);
 }
 
-/* Inline emphasis inside a line (the coloured word on the slide). */
-.figure .fig-accent {
-  fill: var(--graphic-secondary);
+/* Inline emphasis inside a line in one of the graphic hues; twins of the deck's
+   .deck-accent-*. */
+.figure .fig-accent-primary,
+.figure .fig-accent-secondary,
+.figure .fig-accent-tertiary {
   font-weight: var(--w-bold);
   font-style: italic;
 }
+
+.figure .fig-accent-primary { fill: var(--graphic-primary); }
+.figure .fig-accent-secondary { fill: var(--graphic-secondary); }
+.figure .fig-accent-tertiary { fill: var(--graphic-tertiary); }
 
 /* Inline emphasis: bold a phrase within a line (no colour change). */
 .figure .fig-bold {

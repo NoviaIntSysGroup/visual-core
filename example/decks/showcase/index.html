@@ -88,7 +88,7 @@ const SLIDES = [
       },
       {
         "title": "Visuals",
-        "text": "Icons, images, logos, portraits, rows, charts, figures, and formulas"
+        "text": "Icons, images, logos, portraits, nested columns, charts, figures, and formulas"
       },
       {
         "title": "Structure",
@@ -138,6 +138,11 @@ const SLIDES = [
           {
             "type": "text",
             "text": "A divider rules every gap unless the slide turns them off. It steps in as usual, then dims with the first."
+          },
+          {
+            "type": "text",
+            "text": "One block centres on its own.",
+            "halign": "center"
           }
         ]
       }
@@ -193,6 +198,10 @@ const SLIDES = [
           {
             "type": "note",
             "text": "A note is the quiet follow-up line."
+          },
+          {
+            "type": "text",
+            "text": "A word takes a <span class=\"deck-accent-primary\">primary</span>, <span class=\"deck-accent-secondary\">secondary</span>, or <span class=\"deck-accent-tertiary\">tertiary</span> hue."
           },
           {
             "type": "text",
@@ -437,25 +446,36 @@ const SLIDES = [
   },
   {
     "layout": "columns",
-    "title": "Images, Portraits and Rows",
+    "title": "Images, Portraits and Nested Columns",
     "columns": [
       {
         "blocks": [
           {
             "type": "title",
-            "text": "A Row"
+            "text": "Nested Columns"
           },
           {
-            "type": "row",
-            "blocks": [
+            "type": "columns",
+            "dividers": false,
+            "columns": [
               {
-                "type": "image",
-                "src": "../../visuals/assets/picture.svg",
-                "alt": "A placeholder landscape"
+                "valign": "center",
+                "blocks": [
+                  {
+                    "type": "image",
+                    "src": "../../visuals/assets/picture.svg",
+                    "alt": "A placeholder landscape"
+                  }
+                ]
               },
               {
-                "type": "text",
-                "text": "A row lays its blocks side by side in equal halves."
+                "valign": "center",
+                "blocks": [
+                  {
+                    "type": "text",
+                    "text": "A columns block lays out columns inside a column."
+                  }
+                ]
               }
             ]
           }
@@ -926,6 +946,66 @@ const SLIDES = [
           "text": "Final report",
           "future": true,
           "milestone": true
+        }
+      ]
+    }
+  },
+  {
+    "layout": "columns",
+    "title": "Timeline With Branches",
+    "columns": [],
+    "timeline": {
+      "branches": [
+        {
+          "name": "Design",
+          "side": "above"
+        },
+        {
+          "name": "Spin-off",
+          "side": "below",
+          "to": "edge"
+        }
+      ],
+      "items": [
+        {
+          "date": "Jan",
+          "text": "Kickoff"
+        },
+        {
+          "date": "Feb",
+          "text": "Sketches",
+          "branch": 0
+        },
+        {
+          "date": "Mar",
+          "text": "Prototype"
+        },
+        {
+          "date": "Apr",
+          "text": "User tests",
+          "branch": 0
+        },
+        {
+          "date": "Jun",
+          "text": "Launch",
+          "milestone": true
+        },
+        {
+          "date": "Sep",
+          "text": "Fork the code",
+          "branch": 1,
+          "future": true
+        },
+        {
+          "date": "Oct",
+          "text": "Next version",
+          "future": true
+        },
+        {
+          "date": "Dec",
+          "text": "Pilot customer",
+          "branch": 1,
+          "future": true
         }
       ]
     }

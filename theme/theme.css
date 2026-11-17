@@ -18,6 +18,9 @@
   --line-width:    0.5px;
   --line-width-strong: 1px;
   --line-width-very-strong: 1.5px;
+  /* Line styles: the dash patterns behind the .line-* classes below, sized for the widths above. */
+  --line-dashed:   4px 3px;
+  --line-dotted:   0 3px;
   /* Accent: one brand hue with default/strong variants. */
   --accent:        #5F87B0;
   --accent-strong: #43678D;
@@ -104,3 +107,8 @@
   --dur-mid:  400ms;
   --dur-slow: 600ms;
 }
+
+/* Line styles, set by `line: 'dashed' | 'dotted'` on a diagram edge or a figure rule.
+   A new style is one token above and one rule here. */
+.line-dashed { stroke-dasharray: var(--line-dashed); }
+.line-dotted { stroke-dasharray: var(--line-dotted); stroke-linecap: round; }
