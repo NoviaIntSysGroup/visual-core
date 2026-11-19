@@ -44,6 +44,8 @@
 <script src="../../../drawing-kit/charts/charts.js"></script>
 <script src="../../../figure-kit/figure.js"></script>
 <script src="../../figures/example-steps/example-steps.js"></script>
+<script src="../../figures/brain/brain.js"></script>
+<script src="../../figures/neuron-zoom/neuron-zoom.js"></script>
 <script src="../../../deck-kit/widgets/badge.js"></script>
 <script src="../../../deck-kit/widgets/wash.js"></script>
 <script src="../../../deck-kit/widgets/timeline.js"></script>
@@ -669,6 +671,38 @@ const SLIDES = [
   },
   {
     "layout": "columns",
+    "title": "Documents",
+    "columns": [
+      {
+        "blocks": [
+          {
+            "type": "title",
+            "text": "A Typed Original"
+          },
+          {
+            "type": "document",
+            "title": "A PROPOSAL FOR A SHOWCASE OF EVERY BLOCK",
+            "byline": "The Core Team, 1 January 2026",
+            "text": "… a sheet of paper in a typewriter face, for quoting a historical document as it was written. …"
+          }
+        ]
+      },
+      {
+        "blocks": [
+          {
+            "type": "title",
+            "text": "When to Use It"
+          },
+          {
+            "type": "text",
+            "text": "Quote a few lines of an old typed document when its look is part of the story. Its title, byline, and text are all editable."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "layout": "columns",
     "title": "Charts",
     "columns": [
       {
@@ -932,20 +966,62 @@ const SLIDES = [
         },
         {
           "date": "Jun",
-          "text": "Review"
+          "text": "Lab demo",
+          "module": "NeuronZoomFigure"
         },
         {
           "date": "Sep",
           "future": true,
           "src": "../../visuals/assets/picture.svg",
           "alt": "A placeholder landscape",
-          "height": 56
+          "height": 56,
+          "text": "Field trip"
         },
         {
           "date": "Dec",
           "text": "Final report",
           "future": true,
           "milestone": true
+        }
+      ]
+    }
+  },
+  {
+    "layout": "columns",
+    "title": "Timeline With Cards",
+    "columns": [],
+    "timeline": {
+      "cards": true,
+      "title": "A Project Year",
+      "items": [
+        {
+          "date": "Jan",
+          "text": "Start",
+          "milestone": true
+        },
+        {
+          "date": "Mar",
+          "text": "First draft"
+        },
+        {
+          "date": "Jun",
+          "text": "Lab demo",
+          "module": "NeuronZoomFigure"
+        },
+        {
+          "date": "Sep",
+          "future": true,
+          "src": "../../visuals/assets/picture.svg",
+          "alt": "A placeholder landscape",
+          "height": 56,
+          "text": "Field trip"
+        },
+        {
+          "date": "Dec",
+          "text": "Final report",
+          "future": true,
+          "milestone": true,
+          "outcome": true
         }
       ]
     }

@@ -15,13 +15,25 @@ default instead, so it is not repeated here.
 ## Content
 
 - **A narrative slide argues.** State the question that matters, make the reasoning step
-  explicit (premise → conclusion), and pose the puzzle the next slides answer. Dated facts
-  belong in a timeline, not in bullet lists.
-- **A figure shows what the text does not.** A drawing that only illustrates the headings
-  beside it goes; with no figure that carries information, the slide is text only.
-- **Write for a lay reader.** Plain words and concrete examples, not a specialist's terms or
-  compressed metaphors. Before paraphrasing a source, check its wording and how it is commonly
-  explained.
+  explicit (premise → conclusion), and pose the puzzle the next slides answer. The next lead
+  picks the argument up by answering that puzzle, not by summarising its own slide. Dated
+  facts belong in a timeline, not in bullet lists.
+- **Show it rather than say it.** Whenever a figure (a diagram, chart, image, or illustration)
+  can carry a message, use it instead of text, and cut the text it replaces. A drawing that
+  only decorates the headings beside it goes.
+- **A picture shows the finding**, not a portrait of who found it. Build it from real vector
+  art (a public-domain SVG, recoloured to theme tokens, credited in the module header), then
+  from the drawing kit, and generate an image last; never invent organic shapes from made-up
+  coordinates. One or two lines under it state the message. A picture that comes out small
+  beside empty space means the layout is wrong: measure where the space goes and reshape it.
+- **Motion carries the message, or it goes.** Animate what happens in time: a flow, a signal
+  spreading, a rhythm, a zoom into another scale. What a still frame shows equally well, such
+  as a cause and its effect, is steps. Tell it in beats (set the scene, reveal, the event), and
+  end on the frame that summarises it.
+- **Write and draw for a lay reader.** Plain words and concrete examples, not a specialist's
+  terms or compressed metaphors. Before paraphrasing a source, check its wording and how it is
+  commonly explained. A drawn object is one a non-engineer would name on sight, with only the
+  parts that carry the point; for a historical machine, a real photo can beat a schematic.
 
 ## Capitalization
 
@@ -52,9 +64,11 @@ way in the source.
   and in its figures; a word in the text takes the hue of what it names. An element that
   belongs to no category (a divider, a border between regions) takes `--edges` or `--text`,
   never `--accent`, which in the default theme is the same blue as `--graphic-primary`.
-- **Reuse one treatment.** As few line widths, strokes, fills, and corner styles as possible;
-  start from the kit defaults and add a different treatment only when it carries a meaning,
-  named after that meaning.
+- **Reuse one treatment.** As few line widths, strokes, fills, and corner styles as possible,
+  across a drawing and the figures shown beside it (a timeline row, a set of columns), whose
+  caption lines match in number, size, and form; matching the set outranks real art in
+  another style. Start from the kit defaults and add a different treatment only when it
+  carries a meaning, named after that meaning.
 - **Corners are rounded**, as the kits draw them; a new line or frame rounds its corners
   unless there is a reason not to.
 - **Things that look aligned are aligned.** Two gaps or borders meant to match share one

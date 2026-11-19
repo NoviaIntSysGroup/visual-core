@@ -12,6 +12,8 @@
   /* Background: slide/page canvas only, not panels or graphic shapes. */
   --background:    #FAFAFA;
   --background-plain: #FFFFFF;
+  /* Paper: the sheet of a reproduced old document, warmer than the canvas. */
+  --paper:         #F3EBD8;
   /* Lines: borders frame boxes; edges connect diagram, graph, and ruler elements. */
   --border:        #9A9A9A;
   --edges:         #9A9A9A;
@@ -53,6 +55,8 @@
   --f-body:    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
                'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
   --f-mono:    ui-monospace, 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace;
+  /* A typewriter face, for a reproduced typed document; system fonts on every OS. */
+  --f-typewriter: 'Courier New', Courier, 'Nimbus Mono PS', 'Liberation Mono', monospace;
 
   /* Type scale in points (1 canvas unit = 1pt on the 960×540 page; written in px
      because CSS px == our point), for deck slides and the figures' own CSS. Figure

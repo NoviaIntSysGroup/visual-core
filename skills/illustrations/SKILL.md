@@ -28,15 +28,18 @@ It is a sibling of the drawing skills, and the *last* thing to reach for:
 
 **Not** for anything structural. If the content is a process, a relationship, a comparison, or
 a hierarchy, it is a diagram — build it with `core/skills/diagrams/SKILL.md`, which stays
-editable, exports as vector, and recolours with the theme. An illustration earns its place only
-as a single evocative, human beat — a metaphor a diagram would flatten. Use them sparingly; one
-per stretch of deck, standing alone on its own slide.
+editable, exports as vector, and recolours with the theme. An illustration earns its place as
+an evocative, human beat a diagram would flatten, either standing alone on its own slide, one
+per stretch of deck, or as the small pictures of a row (a timeline's entries) where a found
+photo would not carry the exact message. A row is one sheet (*Generating a set*, below), so
+its pictures match, and each cell keeps one subject that still reads at about 80 pt.
 
 ## Golden rule: only SCENE is written fresh
 
 A prompt is the project's fixed blocks plus one SCENE. **The opening line, STYLE, COLOUR, and
 FORMAT are fixed boilerplate from `visuals/image-prompt.md` — copy them verbatim, unchanged.**
-They are what makes two images look like a set. All the thinking goes into SCENE. Changing a
+Blocks still written as `<…>` (the core's example, a new project) mean no look is set: agree
+them with the user before writing a prompt. They are what makes two images look like a set. All the thinking goes into SCENE. Changing a
 style/colour/format line to "make this one work" breaks the set and is a discuss-with-the-user
 change, exactly like touching `core/`.
 

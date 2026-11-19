@@ -1,9 +1,9 @@
-/* Timeline: an optional h2 over dated entries on one axis, their labels above or
-   below, each on a stem from its circle. Named branches run beside the axis,
-   above or below it, as in a git graph: each leaves the axis on a curve, or
-   starts at the left edge, and merges back on a curve, or runs to the right edge.
-   Every track is solid through the past and dashed from halfway to the first
-   future entry. Exposes window.Timeline. */
+/* Timeline: an optional h2 over dated entries on one axis, each in an equal column, labelled
+   above or below on a stem, its date over the stem; at an end no track runs past, the entry
+   sits on the edge, and an outcome ends the axis in a card on it. Named branches run above or
+   below the axis, as in a git graph, leaving it on a curve or from the left edge, rejoining it
+   on a curve or running to the right edge. Tracks are solid through the past, dashed from
+   halfway to the first future entry. Exposes window.Timeline. */
 (function () {
   // Default height of an entry's picture, in points.
   var IMAGE_HEIGHT = 64;
@@ -69,24 +69,39 @@
         to: b.to === 'edge' || e === stretches.length - 1 ? null : stretches[e].end + 0.5
       };
     });
-    return { steps: at + width, place: place, ends: ends };
+    // An end is open when a branch runs on to that edge; a lone step counts as open both ways.
+    var steps = at + width;
+    var open = {
+      left: steps === 1 || ends.some(function (e) { return e && e.from === null; }),
+      right: steps === 1 || ends.some(function (e) { return e && e.to === null; })
+    };
+    return { steps: steps, place: place, ends: ends, open: open };
   }
 
-  // `timeline` is { title, branches, items }, items in time order being
-  // { date, text, milestone, future, branch } (a milestone's circle takes the
-  // accent, a future one is hollow), with { src, alt, height } in place of `text`
-  // for a picture beyond the date. `branches` are { name, side: 'above' | 'below',
-  // from, to }, `from`/`to` 'edge' or, by default, 'axis'; `branch` is an index.
-  // With `opts.fragment` the section arrives with its title, tracks and first
-  // entry, then each later entry.
+  // The HTML of `timeline`, { title, cards, branches, items }, its fields as listed under `timeline`
+  // in core/skills/slide-decks/blocks.md. With `opts.fragment` the section arrives with its
+  // title, tracks and first entry, then each later entry.
   function row(timeline, opts) {
     opts = opts || {};
     var path = opts.path || '';
     var items = timeline.items || [];
     var branches = timeline.branches || [];
     var plan = layout(items, branches);
-    var last = Math.max(plan.steps - 1, 1);
-    var x = plan.place.map(function (p) { return p.at / last; });
+    // Each step owns an equal column; `pos` is the middle of step `at`'s, as a fraction of
+    // the width. An entry sits there, or, in the end column at a closed end, on the edge;
+    // an outcome always sits in its column's middle.
+    function pos(at) { return (at + 0.5) / plan.steps; }
+    var flush = plan.place.map(function (p, k) {
+      return items[k].outcome ? ''
+        : p.at === 0 && !plan.open.left ? 'start' : p.at === plan.steps - 1 && !plan.open.right ? 'end' : '';
+    });
+    // An outcome's card is as wide as the widest figure's.
+    var figureWidth = Math.max.apply(null, items.map(function (item) {
+      return item.module ? window[item.module].width : 0;
+    }));
+    var x = plan.place.map(function (p, k) {
+      return flush[k] === 'start' ? 0 : flush[k] === 'end' ? 1 : pos(p.at);
+    });
     var firstFuture = items.findIndex(function (item) { return item.future; });
     var splitX = firstFuture < 0 ? 1 : firstFuture === 0 ? 0 : (x[firstFuture - 1] + x[firstFuture]) / 2;
 
@@ -104,7 +119,7 @@
 
     var meets = [];
     plan.ends.forEach(function (e) {
-      if (e) [e.from, e.to].forEach(function (m) { if (m !== null) meets.push(m / last); });
+      if (e) [e.from, e.to].forEach(function (m) { if (m !== null) meets.push(pos(m)); });
     });
     // The axis spans its entries and the bends; an end at a bend stops where the curve meets it.
     var half = 'var(--timeline-bend) / 2';
@@ -125,7 +140,7 @@
     branches.forEach(function (b, i) {
       var e = plan.ends[i];
       if (!e) return;
-      var a = e.from === null ? 0 : e.from / last, z = e.to === null ? 1 : e.to / last;
+      var a = e.from === null ? 0 : pos(e.from), z = e.to === null ? 1 : pos(e.to);
       tracks += track('timeline-branch-' + b.side, a, z,
           e.from === null ? '0px' : 'calc(' + half + ')', e.to === null ? '0px' : 'calc(-1 * ' + half + ')')
         + (e.from === null ? '' : bend(b.side, a, true))
@@ -137,46 +152,52 @@
 
     var entries = items.map(function (item, k) {
       var p = plan.place[k];
-      // A label may reach halfway to its nearest neighbour on the same side, either
-      // way; an end label, aligned to its edge, reaches one way only.
-      var room = 2 / last;
+      // A label may run, in steps, from the edges to halfway between its column's middle and
+      // its nearest neighbours' on the same side. A centred one takes the same both ways; one
+      // at a closed end hangs inward from the edge.
+      var c = p.at + 0.5, lo = 0, hi = plan.steps;
       plan.place.forEach(function (q, i) {
-        if (i !== k && q.above === p.above) room = Math.min(room, Math.abs(x[i] - x[k]));
+        if (i === k || items[i].outcome || q.above !== p.above) return;
+        if (q.at < p.at) lo = Math.max(lo, (c + q.at + 0.5) / 2);
+        else hi = Math.min(hi, (c + q.at + 0.5) / 2);
       });
-      if (x[k] === 0 || x[k] === 1) room /= 2;
+      var room = (item.outcome ? 1 : flush[k] === 'start' ? hi : flush[k] === 'end' ? plan.steps - lo
+        : 2 * Math.min(c - lo, hi - c)) / plan.steps;
       var itemPath = path ? path + '/items/' + k : '';
       var label = '<p class="timeline-date"' + window.Deck.editAttr(itemPath && itemPath + '/date') + '>' + item.date + '</p>'
-        + (item.src
-          ? '<img class="timeline-image" src="' + item.src + '" alt="' + (item.alt || '')
-            + '" style="height:' + (item.height || IMAGE_HEIGHT) + 'px">'
-          : '<p class="timeline-text"' + window.Deck.editAttr(itemPath && itemPath + '/text') + '>' + item.text + '</p>');
+        + '<div class="timeline-content">'
+        +   (item.src
+            ? '<img class="timeline-image" src="' + item.src + '" alt="' + (item.alt || '')
+              + '" style="height:' + (item.height || IMAGE_HEIGHT) + 'px">'
+            : item.module ? window.FigureImport.render({ module: item.module }) : '')
+        +   (item.text
+            ? '<p class="timeline-text"' + window.Deck.editAttr(itemPath && itemPath + '/text') + '>' + item.text + '</p>'
+            : '')
+        + '</div>';
+      var mark = '<span class="timeline-mark"><span class="timeline-stem"></span><span class="timeline-dot"></span></span>';
+      var card = item.outcome || timeline.cards && (item.src || item.module);
       return ''
-        + '<li class="timeline-entry ' + (p.above ? 'timeline-above' : 'timeline-below')
-        +   (x[k] === 0 ? ' timeline-first' : x[k] === 1 ? ' timeline-last' : '')
+        + '<li class="timeline-entry ' + (item.outcome ? 'timeline-outcome' : p.above ? 'timeline-above' : 'timeline-below')
         +   (p.branch ? ' timeline-on-' + p.branch.side : '')
+        +   (flush[k] ? ' timeline-flush-' + flush[k] : '')
         +   (item.milestone ? ' timeline-milestone' : '')
         +   (item.future ? ' timeline-future' : '')
         +   (opts.fragment && k > 0 ? ' fragment fade-up' : '')
-        +   '" style="--x:' + x[k] * 100 + '%;--timeline-label-width:' + room * 100 + '%">'
-        +   '<span class="timeline-stem"></span>'
-        +   '<span class="timeline-dot"></span>'
-        +   '<div class="timeline-label">' + label + '</div>'
+        +   '" style="--x:' + x[k] * 100 + '%;--timeline-label-width:' + room * 100 + '%'
+        +   (item.module ? ';--timeline-figure-width:' + window[item.module].width + 'px'
+            : item.outcome && figureWidth ? ';--timeline-figure-width:' + figureWidth + 'px' : '') + '">'
+        +   (item.outcome ? '' : mark)
+        +   '<div class="timeline-label' + (card ? ' timeline-card' : '') + '">' + label + (item.outcome ? mark : '') + '</div>'
         + '</li>';
     });
 
     var title = timeline.title
       ? '<h2 class="timeline-title"' + window.Deck.editAttr(path && path + '/title') + '>' + timeline.title + '</h2>'
       : '';
-    // Both label bands are as tall as the tallest picture, keeping the axis centred.
-    var tallest = Math.max.apply(null, [0].concat(items.map(function (item) {
-      return item.src ? item.height || IMAGE_HEIGHT : 0;
-    })));
-    return '<div class="timeline-section' + (tallest ? ' timeline-with-images' : '')
-      + (opts.fragment ? ' fragment fade-up' : '') + '"'
-      + (tallest ? ' style="--timeline-image-height:' + tallest + 'px"' : '') + '>'
+    return '<div class="timeline-section' + (opts.fragment ? ' fragment fade-up' : '') + '">'
       + title
       + '<div class="timeline' + (branches.length ? ' timeline-with-branches' : '') + '">'
-      +   tracks
+      +   '<div class="timeline-tracks">' + tracks + '</div>'
       +   '<ol class="timeline-entries">' + entries.join('') + '</ol>'
       + '</div>'
       + '</div>';

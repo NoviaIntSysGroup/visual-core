@@ -220,8 +220,8 @@ collaborators need no access to the core repo.
 git subtree pull --prefix=core https://github.com/NoviaIntSysGroup/visual-core.git main --squash -m "update core"
 ```
 
-An update can change every deck and figure. Look through the landing page, and undo the merge
-if something broke.
+An update can change every deck and figure. Restart the dev server, which never reloads its own
+code, look through the landing page, and undo the merge if something broke.
 
 An update does not touch the project's copied guardrails. Compare them, and copy over any
 change:

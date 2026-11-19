@@ -7,9 +7,10 @@ discuss it with the user first.
 **Where a new piece goes.** Stop at the first that fits:
 
 1. Existing pieces can express it: add nothing.
-2. A drawing a deck and a figure could share: a figure module, placed with the `figure` block.
-3. Something live the viewer plays with or watches run, belonging to the project: an app in
-   `visuals/apps/`, placed with the `app` block or as a hero `background`.
+2. A drawing, still, stepped, or playing a fixed sequence: a figure module, placed with the
+   `figure` block.
+3. Something the viewer plays with, or that runs without end: an app in `visuals/apps/`,
+   placed with the `app` block or as a hero `background`.
 4. It arranges a whole slide: a layout.
 5. The author places it in a column's `blocks`, and it works at column width: a block, in
    `templates.js`. It gets its own file in `core/deck-kit/` once it has enough code and options
@@ -24,8 +25,8 @@ Blocks and widgets are always core. What a project adds is a figure, or an app i
 
 | `layout`   | Use                                              | Fields |
 | ---------- | ------------------------------------------------ | ------ |
-| `hero`     | Cover slide — one big title with optional badges | `badges` (string[]), `title`, `subtitle`, `byline` (string; optional line under the subtitle), `background` (the global name of a loaded app, or the core's `Wash`, whose `render(slide)` fills the panel, plain without one; its CSS places the title block, and any extra slide fields reach it. `"Wash"` is the core's own, taking `seed`, `variant`, `hue`, and `strength` as slide fields) |
-| `columns`  | **Generic default** — title + a row of 1–N equal columns/cards | `title`, `columns` (array), `lead` (string; the framing line over the whole row), `closing` (string; the closing line under the whole row), `timeline` (`{ title, branches, items }`, items `{ date, text, milestone, future, branch }` (or `{ src, alt, height }` in place of `text`); a full-width axis of dated entries under the grid), `fragments` (bool, default **true** — the opposite of `toc`), `dividers` (bool, or a per-gap `bool[]` of length `columns.length - 1`; default true), `halign` (`"center"` when the columns should sit centred) |
+| `hero`     | Cover slide — one big title with optional badges | `badges` (string[]), `title`, `subtitle`, `byline` (string; optional line under the subtitle), `background` (`"Wash"`, taking `seed`, `variant`, `hue`, and `strength` as slide fields, or a loaded app's global: see **Apps**; plain without one) |
+| `columns`  | **Generic default** — title + a row of 1–N equal columns/cards | `title`, `columns` (array), `lead` (string; the framing line over the whole row), `closing` (string; the closing line under the whole row), `timeline` (`{ title, cards, branches, items }`, items `{ date, text, milestone, future, branch, outcome }`, plus `{ src, alt, height }` for a picture or `{ module }` for a figure; a full-width axis of dated entries under the grid), `fragments` (bool, default **true** — the opposite of `toc`), `dividers` (bool, or a per-gap `bool[]` of length `columns.length - 1`; default true), `halign` (`"center"` when the columns should sit centred) |
 | `toc`      | Table of contents — a numbered list of the deck's sections | `title`, `items` (array of `{ title, text }`), `highlight` (an item's `title`, or its index; optional), `fragments` (bool, default **false** — the opposite of `columns`) |
 | `references` | Printout page — the deck's sources, grouped by topic | `title`, `groups` (array of `{ title, items }`, items `{ name, title, href }`) |
 
@@ -34,11 +35,12 @@ Blocks and widgets are always core. What a project adds is a figure, or an app i
 in* in `core/skills/slide-decks/SKILL.md`). The groups run on as one list, each under its `h2`,
 filling each of three columns to 80% of the slide's content height (`--deck-references-fill` in
 `core/deck-kit/templates.css`) before moving to the next, divided like `columns`; a group may
-continue into the next column, so a growing list needs no rebalancing by hand. Each item leads
-with a bold `name` saying only why it is cited, in words a newcomer understands, plus the year
-("First VLA model (2023)"); no authors or publishers. Under it, the source's real `title`,
-linked to `href`. Group by topic, not by source kind: a paper, a model page, and a blog post on
-the same topic share a group. It has no fragments, `lead`, or `closing`.
+continue into the next column. Three columns is the most: a longer list runs off the slide
+unseen, so split it across a second references slide. Each item leads with a bold `name` saying
+only why it is cited, in words a newcomer understands, plus the year ("First VLA model
+(2023)"); no authors or publishers. Under it, the source's real `title`, linked to `href`.
+Group by topic, not by source kind: a paper, a model page, and a blog post on the same topic
+share a group. It has no fragments, `lead`, or `closing`.
 
 `toc` renders each `items` entry as a zero-padded number, an `h2` title, and an optional `p`
 (`text`). `highlight` accents one entry and quiets the others. **The deck's overview slide
@@ -82,27 +84,43 @@ the steps up rather than being one. Use it when the columns only make sense afte
 premise; a slide whose columns speak for themselves doesn't need one, and two or three
 sentences is the budget before the row below it gets squeezed.
 
-`timeline` is a full-width row **under** the grid, above `closing`: dated entries evenly spaced
-on one axis, in time order, for a history the columns sit in. An optional `title` heads the row
-as an `h2`. Labels alternate above and below the axis, each on a straight stem from its circle;
-the date sits next to the axis on both sides, so the bands mirror. A label never wraps: it has
-half the distance to its nearest neighbour on the same side, either way of its entry (one step
-when they alternate), and one way only at the two ends, so a long label overlaps its neighbour. For histories that part and meet,
-`branches` adds named tracks `{ name, side, from, to }` beside the axis, drawn like a git
-graph, `side` `"above"` or `"below"`: a branch leaves the axis on a curve before its first
-entry and merges back after its last, or, with `from: "edge"` or `to: "edge"`, starts at the
-left edge or runs to the right one. An item with `branch: i` sits on that branch with its label
-on the branch's side; an axis item's label takes the side no branch is on. A branch runs
-between the axis items either side of its own, and there each track's n-th entry shares a
-column with the others' n-th, whatever their dates. Two branches `from: "edge"` on both sides,
-with the axis starting where they meet, show two histories merging; one branch per side at a
-time. Spacing is deliberately not to scale: bunched dates would crowd the axis. Mark each
-upcoming entry `future: true`: its circle is hollow, and the track turns dashed halfway between
-the last past entry and the first future one. An entry with `milestone: true` gets an accent
-circle and stem; one with `src` (and `alt`) shows that picture instead of `text`, on the far
-side of its date, `height` points tall (default 64), and any picture makes both label bands
-taller. Split the slide past about twelve items. With `fragments`, the section (its title, axis
-and first entry) arrives on one press after the columns, and each later entry on its own.
+`timeline` is a full-width row **under** the grid, above `closing`: dated entries on one axis,
+in time order, each in an equal column, for a history the columns sit in. An optional `title`
+heads the row as an `h2`. Labels alternate above and below the axis, each on a short stem from
+its circle, headed by its date over the stem. An entry sits in the middle of its column, its label
+centred; at an end no branch runs on past, the end entry sits on the edge instead, its label
+hanging inward from the stem, so the last gap there is one and a half columns. A label reaches
+halfway to its nearest neighbour's column middle on the same side (two columns wide when they
+alternate on a plain axis), and a text label never wraps, so a long one overlaps its neighbour.
+For histories that part and meet, `branches` adds named tracks `{ name, side, from, to }`
+beside the axis, drawn like a git graph, `side` `"above"` or `"below"`: a branch leaves the
+axis on a curve before its first entry and merges back after its last, or, with `from: "edge"`
+or `to: "edge"`, starts at the left edge or runs to the right one. An item with `branch: i`
+sits on that branch with its label on the branch's side; an axis item's label takes the side no
+branch is on. A branch runs between the axis items either side of its own, and there each
+track's n-th entry shares a column with the others' n-th, whatever their dates. Two branches
+`from: "edge"` on both sides, with the axis starting where they meet, show two histories
+merging; one branch per side at a time. Spacing is deliberately not to scale: bunched dates
+would crowd the axis. Mark each upcoming entry `future: true`: its circle is hollow, and the
+track turns dashed halfway between the last past entry and the first future one. An entry with
+`milestone: true` gets an accent circle and stem; one with `src` (and `alt`) shows that picture
+at the stem's end, `height` points tall (default 64). One with `module` shows that figure there
+instead, sized like any imported figure and stepping or playing on its own presses once its
+entry has arrived; a picture's or figure's `text`, if any, sits under it, wrapped at the
+label's width. Author a figure no wider than its label's room ÷ 1.5. It takes no `maxHeight`:
+to resize it, re-author the module. With `cards: true` on the timeline, each entry with a
+picture or figure becomes a card instead: a framed box headed by its date on the axis side, as
+wide as its content and at most its room less a small gap, so a figure is authored no wider
+than that room less the card's padding and frame, 2 × 10 pt, ÷ 1.5 (on a four-step track of 912
+pt, `cm(4.7)`). Use it when wide pictures or figures leave unclear which date each belongs to.
+The last item, on the axis, may be the `outcome: true` the timeline leads to: a card centred on
+the axis in its own column, the axis ending in its circle on the card's left edge, its date
+over its `text`. It is as wide as the timeline's widest figure card, so its gaps match theirs;
+with no figures, as wide as its text. Use it when the branches merge into one result.
+Each side of the axis is as tall as its tallest label, so the axis sits off centre when the
+sides differ. Split the slide past about twelve items. With `fragments`, the section (its
+title, axis and first entry) arrives on one press after the columns, and each later entry on
+its own.
 
 `closing` is the slide's closing line, rendered as one full-width row **under** the grid rather
 than inside the last column — a "so what" that answers all the columns belongs to none of them,
@@ -131,13 +149,16 @@ A `columns` slide renders each entry by shape:
   `--text` and may add `accent: true` to take the column's accent instead (see the variants
   table). `{ type: 'bullets', items: [...] }` is the bulleted list: each item is its own
   editable string, and a list sits tight against prose above it, while under a column title it
-  takes the usual gap. `{ type: 'columns', columns: [...], dividers }` is the slide's column
+  takes the usual gap. `{ type: 'document', title, byline, text }` reproduces a typed old
+  document on a sheet of paper, in a typewriter face, for quoting a few of its lines when its
+  look is part of the story; write the title as the original has it, capitals included, and
+  mark cut text with `…`. `{ type: 'columns', columns: [...], dividers }` is the slide's column
   grid as a block: equal columns **side by side** inside one column, each a block column with
   its own `blocks`, `valign`, and `halign`, and `dividers` as on the slide. Use it for what
   sits beside each other under or over something spanning the whole column — two titled
   cards over a full-width figure, a small image next to the text about it. Its columns never
-  step (the column holding them steps around them), and one level is the limit: a nested
-  column cannot hold another `columns` block. Columns hang from the top, so a picture beside
+  step on their own, but their groups do (*Bracketed groups*), and one level is the limit: a
+  nested column cannot hold another `columns` block. Columns hang from the top, so a picture beside
   the words about it sets `valign: 'center'` on its columns; a **row of pictures** keeps the
   top, so a caption that wraps doesn't push its picture off the line the eye follows.
   Visual blocks include `{ type: 'figure', module, maxHeight }` — a whole figure module
@@ -354,7 +375,8 @@ lump, so a title/subtitle stays on screen throughout while the groups after them
 a time.
 
 A video inside a group stays paused until that press, then plays from the start. Groups inside
-a `columns` block don't step: put the whole block in a group to step it.
+a `columns` block step the same way, column by column, after the groups above it; put the
+whole block in a group instead to step it in as one.
 
 Two more column-level fields build on that:
 
@@ -418,7 +440,7 @@ it.
 
 A figure whose module declares `autoplay` **plays** instead of stepping: the same block, but
 one press starts an animation and it runs to the module's next `holds` frame on its own (see
-*Played figures: `autoplay` + `holds`* in `core/skills/figures/SKILL.md`). The slide names
+*Stepped and played figures* in `core/skills/figures/SKILL.md`). The slide names
 nothing extra — how a drawing is paced belongs to the drawing.
 
 To start a figure's steps later than its place in the page, give its block `startAfter`: the
@@ -447,16 +469,20 @@ that runs live is an app — see **Apps** below.
 
 ## Apps
 
-An app is a project's live, interactive piece: a simulation, or a drawing the viewer changes
-with sliders. It lives in `visuals/apps/<name>.js` + `.css`, whether one deck uses it or
-several, and exposes one global with a `render(spec)` that returns its markup; from then on the
-app drives itself, listening for its own input or running its own loop. A slide places it in
-one of two ways, and the app is the same either way:
+An app is a project's live piece: one that keeps its own state, or answers the viewer's
+pointer or sliders — a simulation, or a drawing the viewer changes. A drawing that shows the
+same picture each time it reaches a given step, moving or not, is a figure instead, played with
+`autoplay` and `holds` when it moves; it gets the figure page, export, nesting, and landing card
+that an app never has. An app lives in `visuals/apps/<name>.js` + `.css`, whether one deck uses
+it or several, and exposes one global with a `render(spec)` that returns its markup; from then
+on the app drives itself, listening for its own input or running its own loop. A slide places
+it in one of two ways, and the app is the same either way:
 
 - **In a column** — `{ type: 'app', module: 'DotProduct' }`, at its own size. `render` gets the
   block.
 - **As a hero `background`** — `"background": "HopfieldNetwork"`, filling the cover panel.
-  `render` gets the slide, and the app's CSS also places the title block.
+  `render` gets the slide, its extra fields included, and the app's CSS also places the title
+  block. Returning `Wash.render(slide)` first keeps the wash under the app's scene.
 
 **An app is never scaled.** It is shown at the size it is built at, so its text lands at the
 size it is set in: an SVG drawing carries `width` and `height` equal to its `viewBox`, and
@@ -476,10 +502,9 @@ group, only while that group is the current press — or, placed with `play: "pr
 own start press is (a `.deck-app-start` marker right after the app's markup, which the app's
 own running check reads, followed by a `.deck-app-stop` press that stops it before the slide
 moves on) — and stands still under `?print-pdf` and reduced motion; a PDF shows its starting
-state. An app is not a figure: it has no figure page or export, so a drawing a figure could
-share stays a figure. The core's Hopfield deck
-(`core/example/decks/hopfield-networks/index.html`) places one on its cover, and the
-dot-product deck (`core/example/decks/dot-products/index.html`) one in a column.
+state. The core's Hopfield deck (`core/example/decks/hopfield-networks/index.html`) places
+one on its cover, and the dot-product deck (`core/example/decks/dot-products/index.html`) one
+in a column.
 
 **Input works by mouse and by touch.** An app listens for pointer events, never mouse events,
 which don't fire while a finger moves; anything driven by hover also works while a finger is

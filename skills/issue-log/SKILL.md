@@ -17,13 +17,13 @@ you to fix it.
 
 ## Is it worth logging?
 
-You are here on one of the signals in the description. Re-read the instruction or code once,
-then log it when it cost you something and the next agent would likely pay the same cost. Code
-that breaks a *Human-first architecture* rule in AGENTS.md is logged as `scattered` even when
-it cost you little, since every later reader pays. Do not log your own slip where the text was
-clear, or problems in tools outside this repo.
+You are here on one of the signals in the description. Re-read the instruction or code once;
+if the signal still stands, log it. Code that breaks a *Human-first architecture* rule in
+AGENTS.md is logged as `scattered` even when it cost you little, since every later reader
+pays. Do not log your own slip where the text was clear, or problems in tools outside this
+repo.
 
-The cost need not come from a fault. When no instruction covers what you learned, whether you
+A signal need not come from a fault. When no instruction covers what you learned, whether you
 worked it out or were told by the user or the system, log it as `memory`; when the gap is in an
 instruction you were following, it is `missing`. A `memory` entry is only a hint; `issue-fix`
 weighs it with the others and decides whether anything is worth consolidating, and how.
@@ -72,4 +72,5 @@ learned: <what you learned, in a sentence or two>
 ```
 
 Log a problem even when it is already logged: how often it recurs is what `issue-fix` weighs.
-At the end of the turn, tell the user in one line what you logged.
+End the turn with one line, `Issue check: <what you logged, or nothing>`; the Stop hook looks
+for it.

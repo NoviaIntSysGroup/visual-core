@@ -207,7 +207,7 @@
       drawFn(api);                       // child appends to the same parts buffer
       var inner = parts.splice(open).join('');
       var s = o.scale != null ? o.scale : 1;
-      var tr = 'translate(' + r(o.x || 0) + ' ' + r(o.y || 0) + ')' + (s !== 1 ? ' scale(' + r(s) + ')' : '');
+      var tr = 'translate(' + r(o.x || 0) + ' ' + r(o.y || 0) + ')' + (s !== 1 ? ' scale(' + Math.round(s * 1e4) / 1e4 + ')' : '');
       parts.push('<g transform="' + tr + '">' + inner + '</g>');
       return api;
     }
@@ -532,8 +532,30 @@
       title: opts.title || name,
       widthCm: cmW,
       heightCm: cmH,
-      sizeLabel: cmW + ' × ' + cmH + ' cm'
+      sizeLabel: cmW + ' × ' + cmH + ' cm',
+      steps: opts.steps > 1 ? opts.steps : 0,
+      // Playing time from first frame to last, without the waits at holds.
+      seconds: opts.steps > 1 && opts.autoplay > 0
+        ? Math.round((opts.steps - 1) * opts.autoplay / 100) / 10 : 0
     };
+  }
+
+  /* ---- playing ---------------------------------------------------------------
+     Walk a played figure toward a moving target, for the figure page and the deck's figure
+     block: the next frame at once, then one per `ms`. at() is the frame shown, target() the
+     one to reach, re-read every tick; a target behind lands at once. show(i) draws frame i.
+     Returns { on }, true until the walk arrives. */
+  function play(ms, at, target, show) {
+    var run = { on: true }, due = 0;
+    function tick(now) {
+      var current = at(), goal = target();
+      if (goal < current) show(goal);
+      if (goal <= current) { run.on = false; return; }
+      if (now >= due) { due = now + ms; show(current + 1); }
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+    return run;
   }
 
   /* ---- shared chrome --------------------------------------------------------
@@ -550,9 +572,12 @@
     if (window.parent !== window) window.parent.postMessage({ landingMeta: meta }, '*');
 
     /* Step support: opts.steps (total count) + opts.redraw(step) -> fig | string.
-       When steps > 1 the chrome grows a Back / Next controller. */
+       When steps > 1 the chrome grows a Back / Next controller. A played figure
+       (opts.autoplay, opts.holds) also gets a slider over every step, and two buttons that
+       go by holds: one plays to the next hold, one lands on the previous. */
     var totalSteps = (opts.steps && opts.steps > 1) ? opts.steps : 0;
     var currentStep = Math.min(Math.max(opts.step || 0, 0), totalSteps ? totalSteps - 1 : 0);
+    var played = !!(totalSteps && opts.autoplay > 0);
 
     /* ?thumb: render only the figure (no toolbar) for the landing-page card
        iframe — mirrors the deck's ?thumb mode. */
@@ -567,11 +592,19 @@
 
     document.body.classList.add('figure-page');
 
+    var holdHtml = played ? (
+      '<div class="figure-step">'
+      + '<button type="button" class="figure-hold-back" title="Back to the previous hold">&#9198;</button>'
+      + '<button type="button" class="figure-hold-next" title="Play to the next hold">&#9654;</button>'
+      + '</div>'
+    ) : '';
     var stepHtml = totalSteps ? (
       '<div class="figure-step">'
-      + '<button type="button" class="figure-step-back">&#8592;</button>'
-      + '<span class="figure-step-label">Step ' + (currentStep + 1) + ' of ' + totalSteps + '</span>'
-      + '<button type="button" class="figure-step-next">&#8594;</button>'
+      + '<button type="button" class="figure-step-back" title="Previous step">&#8592;</button>'
+      + (played ? '<input type="range" class="figure-step-slider" min="0" max="' + (totalSteps - 1)
+        + '" value="' + currentStep + '" aria-label="Step">' : '')
+      + '<span class="figure-step-label">Step ' + (currentStep + 1) + '\u202fof\u202f' + totalSteps + '</span>'
+      + '<button type="button" class="figure-step-next" title="Next step">&#8594;</button>'
       + '</div>'
     ) : '';
 
@@ -580,6 +613,7 @@
     chrome.innerHTML = '<h1>' + esc(meta.title) + '</h1>'
       + '<span class="figure-size">' + meta.sizeLabel + '</span>'
       + '<div class="chrome">'
+      + holdHtml
       + stepHtml
       + '<button type="button" data-export="svg">Export SVG</button>'
       + '<button type="button" data-export="png">Export PNG</button>'
@@ -624,21 +658,58 @@
       var btnBack = chrome.querySelector('.figure-step-back');
       var btnNext = chrome.querySelector('.figure-step-next');
       var stepLabel = chrome.querySelector('.figure-step-label');
+      var slider = chrome.querySelector('.figure-step-slider');
+      var btnHoldBack = chrome.querySelector('.figure-hold-back');
+      var btnHoldNext = chrome.querySelector('.figure-hold-next');
+      var last = totalSteps - 1;
+
+      function setButtons(step) {
+        btnBack.disabled = step === 0;
+        btnNext.disabled = step === last;
+        if (played) { btnHoldBack.disabled = step === 0; btnHoldNext.disabled = step === last; }
+      }
 
       function goToStep(step) {
         currentStep = step;
-        stepLabel.textContent = 'Step ' + (step + 1) + ' of ' + totalSteps;
-        btnBack.disabled = step === 0;
-        btnNext.disabled = step === totalSteps - 1;
+        stepLabel.textContent = 'Step ' + (step + 1) + '\u202fof\u202f' + totalSteps;
+        if (slider) slider.value = step;
+        setButtons(step);
         var result = opts.redraw(step);
         stage.innerHTML = typeof result === 'string' ? result : result.render();
         svg = stage.querySelector('svg');
       }
 
-      btnBack.addEventListener('click', function () { if (currentStep > 0) goToStep(currentStep - 1); });
-      btnNext.addEventListener('click', function () { if (currentStep < totalSteps - 1) goToStep(currentStep + 1); });
-      btnBack.disabled = currentStep === 0;
-      btnNext.disabled = currentStep === totalSteps - 1;
+      /* Going by step moves the target too, so it also stops a walk in flight. */
+      var target = currentStep, walk = null;
+      function jumpTo(step) { target = step; goToStep(step); }
+
+      btnBack.addEventListener('click', function () { if (currentStep > 0) jumpTo(currentStep - 1); });
+      btnNext.addEventListener('click', function () { if (currentStep < last) jumpTo(currentStep + 1); });
+      setButtons(currentStep);
+
+      if (played) {
+        var holds = opts.holds || [];
+        /* The first hold past the target, so a press mid-walk extends it; past the last
+           hold, the final step. Back lands on the last hold before the step shown. */
+        var nextHold = function () {
+          for (var i = 0; i < holds.length; i++) if (holds[i] > target) return holds[i];
+          return last;
+        };
+        var previousHold = function () {
+          for (var i = holds.length - 1; i >= 0; i--) if (holds[i] < currentStep) return holds[i];
+          return 0;
+        };
+        var walkTo = function (step) {
+          target = step;
+          if (!(walk && walk.on)) {
+            walk = play(opts.autoplay, function () { return currentStep; },
+              function () { return target; }, goToStep);
+          }
+        };
+        btnHoldNext.addEventListener('click', function () { walkTo(nextHold()); });
+        btnHoldBack.addEventListener('click', function () { walkTo(previousHold()); });
+        slider.addEventListener('input', function () { jumpTo(Number(slider.value)); });
+      }
     }
 
     /* Debug toggle: one class on <body> reveals every frame at every level at
@@ -677,6 +748,7 @@
         title: M.title, name: M.name,
         steps: stepped ? M.steps : 0,
         step: stepped ? start : 0,
+        autoplay: stepped ? M.autoplay : 0, holds: M.holds,
         redraw: stepped ? build : null
       });
     });
@@ -684,7 +756,7 @@
 
   window.Figure = {
     create: create,
-    preload: preload, imageSize: imageSize, svgText: serialize,
+    preload: preload, imageSize: imageSize, svgText: serialize, play: play,
     mount: mount, mountModule: mountModule
   };
 })();

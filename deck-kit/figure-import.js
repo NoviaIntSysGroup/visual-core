@@ -130,24 +130,14 @@
     return shown < holds.length ? holds[shown] : last;
   }
 
-  /* Walk toward the target frame, one frame per `ms`. The target is re-read
-     every tick, so a fragment arriving mid-flight just extends the run and
-     stepping backwards lands immediately instead of rewinding word by word.
-     One loop per stage, which ends itself as soon as it has arrived. */
+  /* Walk toward the fragments' target frame with the figure kit's loop, one loop per stage.
+     A fragment arriving mid-flight extends the run; stepping backwards lands at once. */
   function play(stage, mod, ms) {
-    if (stage.autoplaying) return;
-    stage.autoplaying = true;
-    var due = 0;
-    function tick(now) {
-      var current = Number(stage.getAttribute('data-step') || 0);
-      var target = targetStep(stage, mod);
-      if (target < current) draw(stage, target);          // stepped back: land at once
-      if (target <= current) { stage.autoplaying = false; return; }
-      if (!due) due = now + ms;
-      if (now >= due) { due = now + ms; draw(stage, current + 1); }
-      requestAnimationFrame(tick);
-    }
-    requestAnimationFrame(tick);
+    if (stage.walk && stage.walk.on) return;
+    stage.walk = window.Figure.play(ms,
+      function () { return Number(stage.getAttribute('data-step') || 0); },
+      function () { return targetStep(stage, mod); },
+      function (i) { draw(stage, i); });
   }
 
   /* A module that draws rasters declares them in `images`, and they must be

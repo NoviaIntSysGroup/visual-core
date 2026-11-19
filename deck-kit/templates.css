@@ -45,10 +45,9 @@
   color: var(--text);
 }
 
-/* The content-slide frame, shared by the columns and toc layouts: centred in the
-   canvas, with one gap between the slide title and whatever follows it. The two
-   layouts had drifted to different gaps (--s4 and --s8) for no reason; they are
-   the same relationship, so they get one rule. */
+/* The content-slide frame of the columns, toc and references layouts: centred in the
+   canvas, with padding --s5 --s6 in place of .slide's --s10 (500 pt of content height),
+   and one --s8 gap between the slide title and whatever follows it. */
 .deck-columns-slide,
 .deck-toc-slide,
 .deck-references-slide {
@@ -447,6 +446,35 @@
   white-space: pre-wrap;
   word-break: break-word;
   text-align: left;
+}
+
+/* A reproduced typed document: a sheet of paper in a typewriter face, its
+   title and byline centred, then the excerpt. */
+.deck-document {
+  padding: var(--s5) var(--s6);
+  border: var(--line-width) solid var(--border);
+  border-radius: var(--s2);
+  background: var(--paper);
+  font-family: var(--f-typewriter);
+  color: var(--text);
+}
+
+.reveal .deck-document p {
+  margin: 0;
+}
+
+.reveal .deck-document-title {
+  font-weight: var(--w-bold);
+  text-align: center;
+}
+
+.reveal .deck-document-byline {
+  margin-top: var(--s3);
+  text-align: center;
+}
+
+.reveal .deck-document-text {
+  margin-top: var(--s5);
 }
 
 /* Tighter than .deck-column-content's default var(--s5) gap, matching the

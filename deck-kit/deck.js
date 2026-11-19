@@ -84,6 +84,7 @@
       if (!ctx.isThumb) initPresentationMode();
       if (ctx.isPrintPDF) initPrintMode();
       if (!ctx.isThumb) initEditor(ctx);
+      if (!ctx.isThumb && !ctx.isPrintPDF) initOverflowCheck();
     });
   }
 
@@ -193,6 +194,52 @@
     const fullscreen = document.getElementById('fullscreen-btn');
     if (enter) fullscreen.addEventListener('click', () => enter.call(page));
     else { fullscreen.disabled = true; fullscreen.title = "This browser can't show a page fullscreen"; }
+  }
+
+  /* Overflow check. Each slide shown is measured once it settles: in-flow content past the
+     slide's padding box is clipped. The toolbar counts the slides seen to overflow, with
+     how far on hover, as FigureImport counts scaled-down figures. */
+  function initOverflowCheck() {
+    const over = {};
+    function check() {
+      const slide = Reveal.getCurrentSlide().querySelector('.slide');
+      if (!slide) return;
+      const scale = Reveal.getScale(), box = slide.getBoundingClientRect(), style = getComputedStyle(slide);
+      const top = box.top / scale + parseFloat(style.paddingTop);
+      const bottom = box.bottom / scale - parseFloat(style.paddingBottom);
+      let high = top, low = bottom;
+      for (const child of slide.children) {
+        if (/absolute|fixed/.test(getComputedStyle(child).position)) continue;
+        const r = child.getBoundingClientRect();
+        high = Math.min(high, r.top / scale);
+        low = Math.max(low, r.bottom / scale);
+      }
+      const n = Reveal.getIndices().h + 1, past = [];
+      if (high < top - 0.5) past.push(Math.round(top - high) + ' pt past the top');
+      if (low > bottom + 0.5) past.push(Math.round(low - bottom) + ' pt past the bottom');
+      if (past.length) over[n] = 'Slide ' + n + ': ' + past.join(', ') + '.';
+      else delete over[n];
+      showOverflow(over);
+    }
+    let timer;
+    function later() { clearTimeout(timer); timer = setTimeout(check, 1000); }
+    Reveal.addEventListener('ready', later);
+    Reveal.addEventListener('slidechanged', later);
+  }
+
+  function showOverflow(over) {
+    const chrome = document.getElementById('deck-chrome');
+    const notes = Object.values(over);
+    let el = document.getElementById('slide-overflow-status');
+    if (!notes.length) { if (el) el.remove(); return; }
+    if (!el) {
+      el = document.createElement('span');
+      el.id = 'slide-overflow-status';
+      el.className = 'chrome-status';
+      chrome.insertBefore(el, chrome.firstChild);
+    }
+    el.textContent = notes.length + (notes.length === 1 ? ' slide overflows' : ' slides overflow');
+    el.title = notes.join('\n');
   }
 
   function initPresentationMode() {
