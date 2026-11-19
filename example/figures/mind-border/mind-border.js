@@ -1,13 +1,17 @@
 /* Mind Border — figure composition module.
-   20.8 cm wide, height from content, 4 steps. A row of mental abilities with one border across
-   it: left of the border is matter, so a machine could in principle do it; right of it is a
-   non-physical mind. After Descartes' border, it notes other borders, then moves to all matter. */
+   20.8 cm wide, height from content, 6.4 s played on four presses. A row of mental abilities,
+   each an icon over its name, with one border across it: left of it is matter, which a machine
+   could be built to do; right of it is a non-physical mind, which nothing can be built to do.
+   Press 1: Descartes' border grows down, the colours spread out from it and the brackets draw
+   out under each side. Each later press glides the border one box right; the box it crosses
+   takes matter's colour where the border has passed, then flashes. Captions fade in turn. */
 (function () {
   /* 1 · Imports ------------------------------------------------------------ */
   var cm = window.Units.cm, TYPE = window.Config.figure.type;
 
   /* 2 · Canvas ------------------------------------------------------------- */
   var PAGE = { w: cm(20.8), margin: cm(0.3) };
+  var FPS = 25;
 
   /* 3 · Type --------------------------------------------------------------- */
   var TEXT = { body: TYPE.slideBody.size };
@@ -15,33 +19,66 @@
 
   /* 4 · Colour ------------------------------------------------------------- */
   var COLOR = { physical: 'var(--graphic-primary)', mind: 'var(--graphic-secondary)', idle: 'var(--edges)',
-                border: 'var(--text)' };
+                border: 'var(--text)', bracket: 'var(--edges)' };
   var TINT  = { physical: 'var(--graphic-primary-tint)', mind: 'var(--graphic-secondary-tint)' };
 
   /* 5 · Layout knobs ------------------------------------------------------- */
-  var BOX = { h: cm(1.1), gap: cm(0.25), radius: cm(0.15) };
-  var MARK = {
-    labelGap:   cm(0.2),   /* side label baseline -> border top */
-    overhang:   cm(0.15),  /* how far the border reaches past the boxes */
-    captionGap: cm(0.5)    /* border bottom -> caption's first line top */
+  var BOX = {
+    gap:     cm(0.25),
+    radius:  cm(0.15),
+    pad:     cm(0.25),   /* box edge -> icon top, and name bottom -> box edge */
+    icon:    cm(0.9),
+    iconGap: cm(0.15)    /* icon bottom -> name top */
   };
-  var LINE = { box: 'var(--line-width-strong)', border: 'var(--line-width-very-strong)' };
+  var MARK = {
+    overhang:   cm(0.15),  /* how far the border reaches past the boxes */
+    bracketGap: cm(0.25),  /* box bottom -> bracket line */
+    tick:       cm(0.15),  /* how far a bracket's ends turn up */
+    labelGap:   cm(0.15),  /* bracket line -> its label's first line top */
+    inset:      cm(0.1),   /* bracket end -> its side's outer box edge, and either side of the border */
+    captionGap: cm(0.5)    /* bracket label bottom -> caption's first line top */
+  };
+  var LINE = { box: 'var(--line-width-strong)', border: 'var(--line-width-very-strong)',
+               bracket: 'var(--line-width-strong)' };
+  /* A crossed box's flash: its tint's peak opacity, and how far its ring grows, × the icon. */
+  var FLASH = { peak: 0.5, ring: 1.8 };
 
   /* 6 · Content ------------------------------------------------------------ */
+  /* Seconds within a beat; each press plays one beat of `beat`. The old caption fades out over
+     `out`, then the new one in over `in`. Press 1: the border `drop`s, the colours `spread`
+     and the `brackets` draw. Later presses: the border `glide`s, and the crossed box flashes
+     over `flash` and its ring spreads over `ring`. */
+  var ACT = { beat: 1.6, out: 0.25, in: 0.25,
+              drop: { start: 0.3, dur: 0.5 }, spread: { start: 0.7, dur: 0.8 }, brackets: { start: 0.9, dur: 0.6 },
+              glide: { start: 0.25, dur: 0.8 }, flash: 0.5, ring: 0.5 };
   var COPY = {
-    abilities: ['Moving', 'Sensing', 'Remembering', 'Learning', 'Reasoning', 'Conversing', 'Being aware'],
-    sides: { physical: 'Matter', mind: 'Mind' },
+    abilities: [
+      { name: 'Moving',      icon: 'moving' },
+      { name: 'Sensing',     icon: 'sensing' },
+      { name: 'Remembering', icon: 'remembering' },
+      { name: 'Learning',    icon: 'learning' },
+      { name: 'Reasoning',   icon: 'reasoning' },
+      { name: 'Conversing',  icon: 'chat' },
+      { name: 'Being aware', icon: 'being-aware' }
+    ],
+    sides: { physical: 'Could be built', mind: 'Cannot be built' },
     ariaLabel: 'Seven mental abilities in a row, from moving to being aware, with a border marking which of them are physical.'
   };
 
   /* 7 · Steps -------------------------------------------------------------- */
-  /* `border` is how many abilities, from the left, count as matter; null before any answer. */
-  var STEP = [
+  /* One state per hold. `border` is how many abilities, from the left, count as matter; null
+     before any answer. Each press plays from one state to the next. */
+  var BEAT = [
     { border: null, caption: 'Which of these could a machine do, and which need a mind?' },
     { border: 3, caption: 'Descartes: moving, sensing and remembering are machinery; the rest needs a mind.' },
-    { border: 3, caption: 'People have drawn the border at various places.' },
-    { border: 7, caption: 'Some even made it all matter: then a machine could in principle be intelligent.' }
+    { border: 4, caption: 'Others have drawn the border further right: learning could be built too.' },
+    { border: 5, caption: 'Further right still: so could reasoning.' },
+    { border: 6, caption: 'Far enough right, all we usually call intelligence could be built.' }
   ];
+  /* One frame per 1/FPS s; playback holds at the start of each beat. */
+  var STEP = [], HOLDS = [];
+  for (var f = 0; f <= (BEAT.length - 1) * ACT.beat * FPS; f++) STEP.push({ t: f / FPS });
+  for (var b = 0; b < BEAT.length - 1; b++) HOLDS.push(Math.round(b * ACT.beat * FPS));
 
   /* 8 · Derived ------------------------------------------------------------ */
   var _geo;
@@ -49,13 +86,17 @@
     if (_geo) return _geo;
     var n = COPY.abilities.length;
     var boxW = (PAGE.w - 2 * PAGE.margin - (n - 1) * BOX.gap) / n;
-    var labelY = TEXT.body;
-    var borderTop = labelY + MARK.labelGap;
+    var borderTop = 0;
     var boxTop = borderTop + MARK.overhang;
-    var borderBottom = boxTop + BOX.h + MARK.overhang;
-    var captionY = borderBottom + MARK.captionGap + TEXT.body;
+    var boxH = 2 * BOX.pad + BOX.icon + BOX.iconGap + ROW.body;
+    var borderBottom = boxTop + boxH + MARK.overhang;
+    var bracketY = boxTop + boxH + MARK.bracketGap;
+    var sideY = bracketY + MARK.labelGap + TEXT.body;
+    var captionY = sideY - TEXT.body + ROW.body + MARK.captionGap + TEXT.body;
     _geo = {
-      boxW: boxW, labelY: labelY, borderTop: borderTop, boxTop: boxTop, borderBottom: borderBottom,
+      boxW: boxW, boxH: boxH, borderTop: borderTop, boxTop: boxTop, borderBottom: borderBottom,
+      bracketY: bracketY, sideY: sideY,
+      iconTop: boxTop + BOX.pad, nameY: boxTop + BOX.pad + BOX.icon + BOX.iconGap + TEXT.body,
       captionY: captionY,
       h: captionY + ROW.body - TEXT.body + MARK.overhang,
       boxX: function (i) { return PAGE.margin + i * (boxW + BOX.gap); },
@@ -65,33 +106,101 @@
   }
 
   /* 9 · Helpers → draw → export -------------------------------------------- */
-  function ability(fig, i, physical) {
-    var g = GEO(), x = g.boxX(i);
-    var kind = physical === null ? 'idle' : i < physical ? 'physical' : 'mind';
-    fig.rect(x, g.boxTop, g.boxW, BOX.h, {
-      fill: TINT[kind] || 'none', stroke: COLOR[kind], width: LINE.box, radius: BOX.radius
-    });
-    fig.text([COPY.abilities[i]], { x: x + g.boxW / 2, y: g.boxTop + BOX.h / 2 + TEXT.body * 0.35, role: 'slideBody' });
+  function r(v) { return Math.round(v * 1000) / 1000; }
+  function clamp(v) { return Math.max(0, Math.min(1, v)); }
+  /* Progress through an act { start, dur } at time u, eased in and out. */
+  function ease(act, u) { var p = clamp((u - act.start) / act.dur); return p * p * (3 - 2 * p); }
+  function fade(fig, alpha, drawFn) {
+    if (alpha <= 0) return;
+    fig.raw('<g style="opacity:' + r(alpha) + '">'); drawFn(); fig.raw('</g>');
   }
 
-  /* Matter is named over the left end and mind over the right, whenever each has a box. */
-  function draw(fig, step) {
-    var g = GEO(), at = STEP[step].border, n = COPY.abilities.length;
-    COPY.abilities.forEach(function (a, i) { ability(fig, i, at); });
-    if (at !== null) {
-      var x = g.borderX(at);
-      fig.rule(x, g.borderTop, x, g.borderBottom, { stroke: COLOR.border, width: LINE.border });
-      if (at > 0) fig.text([COPY.sides.physical], { x: PAGE.margin, y: g.labelY, align: 'start', role: 'slideBody', weight: 700 });
-      if (at < n) fig.text([COPY.sides.mind], { x: PAGE.w - PAGE.margin, y: g.labelY, align: 'end', role: 'slideBody', weight: 700 });
+  /* Every box and icon in one side's colour, shown only between x0 and x1. */
+  function layer(fig, kind, x0, x1, id) {
+    var g = GEO();
+    if (x1 - x0 <= 0) return;
+    var d = window.Diagram.create(PAGE.w, g.h, { className: 'mind-border-icons', ariaLabel: COPY.ariaLabel });
+    fig.raw('<clipPath id="' + id + '-clip"><rect x="' + r(x0) + '" y="0" width="' + r(x1 - x0)
+      + '" height="' + r(g.h) + '"/></clipPath><g clip-path="url(#' + id + '-clip)">');
+    COPY.abilities.forEach(function (a, i) {
+      var x = g.boxX(i);
+      fig.rect(x, g.boxTop, g.boxW, g.boxH, {
+        fill: TINT[kind] || 'none', stroke: COLOR[kind], width: LINE.box, radius: BOX.radius
+      });
+      d.node('ability-' + i, {
+        x: x + g.boxW / 2 - BOX.icon / 2, y: g.iconTop, w: BOX.icon, h: BOX.icon, icon: a.icon,
+        appearance: window.Diagram.iconApp(COLOR[kind], { surface: TINT[kind] })
+      });
+    });
+    fig.place(d.render(id), { x: 0, y: 0, w: PAGE.w });
+    fig.raw('</g>');
+  }
+
+  /* A bracket under the boxes from x0 to x1, its ends turned up, its label centred under it. */
+  function bracket(fig, x0, x1, label, alpha) {
+    var g = GEO(), y = g.bracketY;
+    fig.path('M' + r(x0) + ' ' + r(y - MARK.tick) + ' V' + r(y) + ' H' + r(x1) + ' V' + r(y - MARK.tick), {
+      fill: 'none', stroke: COLOR.bracket, width: LINE.bracket
+    });
+    fade(fig, alpha, function () { fig.text([label], { x: (x0 + x1) / 2, y: g.sideY, role: 'slideBody' }); });
+  }
+
+  /* Box i's flash once the border has crossed it, `since` seconds ago: its tint, then a ring. */
+  function flash(fig, i, since) {
+    var g = GEO(), x = g.boxX(i), c = { x: x + g.boxW / 2, y: g.iconTop + BOX.icon / 2 };
+    var glow = 1 - clamp(since / ACT.flash), ring = clamp(since / ACT.ring), rad = BOX.icon / 2 * (1 + ring * (FLASH.ring - 1));
+    if (glow > 0) fig.rect(x, g.boxTop, g.boxW, g.boxH, { fill: COLOR.physical, opacity: r(FLASH.peak * glow), radius: BOX.radius });
+    if (ring < 1) {
+      fig.path('M ' + r(c.x - rad) + ',' + r(c.y) + ' a ' + r(rad) + ',' + r(rad) + ' 0 1 0 ' + r(2 * rad) + ',0'
+        + ' a ' + r(rad) + ',' + r(rad) + ' 0 1 0 ' + r(-2 * rad) + ',0 Z',
+        { fill: 'none', stroke: COLOR.physical, width: LINE.box, opacity: r(1 - ring) });
     }
-    fig.text([STEP[step].caption], { x: PAGE.w / 2, y: g.captionY, role: 'slideBody' });
+  }
+
+  /* The frame falls in the beat from state `from` to `to`, u seconds in. The first beat grows
+     the border and spreads the colours out from it; later ones glide it and flash the box. */
+  function draw(fig, step) {
+    var g = GEO(), per = ACT.beat * FPS, id = 'mind-border-' + step;
+    var i = Math.min(BEAT.length - 1, Math.floor(step / per) + 1), u = (step - (i - 1) * per) / FPS;
+    var from = BEAT[i - 1], to = BEAT[i];
+    var first = from.border === null, x, lo, hi, drop = 1, brackets = 1;
+    if (first) {
+      x = g.borderX(to.border);
+      var spread = ease(ACT.spread, u);
+      lo = x * (1 - spread); hi = x + (PAGE.w - x) * spread;
+      drop = ease(ACT.drop, u); brackets = ease(ACT.brackets, u);
+    } else {
+      x = g.borderX(from.border) + (g.borderX(to.border) - g.borderX(from.border)) * ease(ACT.glide, u);
+      lo = 0; hi = PAGE.w;
+    }
+    layer(fig, 'idle', 0, lo, id + '-idle-l');
+    layer(fig, 'physical', lo, x, id + '-physical');
+    layer(fig, 'mind', x, hi, id + '-mind');
+    layer(fig, 'idle', hi, PAGE.w, id + '-idle-r');
+    COPY.abilities.forEach(function (a, k) {
+      fig.text([a.name], { x: g.boxX(k) + g.boxW / 2, y: g.nameY, role: 'slideBody' });
+    });
+    if (!first) {
+      var since = u - ACT.glide.start - ACT.glide.dur;
+      if (since >= 0) flash(fig, from.border, since);
+    }
+    if (drop > 0) fig.rule(x, g.borderTop, x, g.borderTop + (g.borderBottom - g.borderTop) * drop, { stroke: COLOR.border, width: LINE.border });
+    if (brackets > 0) {
+      var left = PAGE.margin + MARK.inset, right = PAGE.w - PAGE.margin - MARK.inset;
+      var inL = x - MARK.inset, inR = x + MARK.inset;
+      bracket(fig, inL - (inL - left) * brackets, inL, COPY.sides.physical, brackets);
+      bracket(fig, inR, inR + (right - inR) * brackets, COPY.sides.mind, brackets);
+    }
+    var out = 1 - clamp(u / ACT.out), into = clamp((u - ACT.out) / ACT.in);
+    fade(fig, out, function () { fig.text([from.caption], { x: PAGE.w / 2, y: g.captionY, role: 'slideBody' }); });
+    fade(fig, into, function () { fig.text([to.caption], { x: PAGE.w / 2, y: g.captionY, role: 'slideBody' }); });
   }
 
   window.MindBorderFigure = {
     width: PAGE.w,
     get height() { return GEO().h; },   /* derived from the rows */
     title: 'Mind Border', name: 'mind-border', className: 'mind-border-fig', ariaLabel: COPY.ariaLabel,
-    steps: STEP.length,
+    steps: STEP.length, autoplay: 1000 / FPS, holds: HOLDS,
     draw: draw
   };
 })();

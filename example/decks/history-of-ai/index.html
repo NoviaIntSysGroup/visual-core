@@ -44,6 +44,13 @@
 <script src="../../../drawing-kit/charts/charts.js"></script>
 <script src="../../../figure-kit/figure.js"></script>
 <script src="../../figures/mind-border/mind-border.js"></script>
+<script src="../../figures/brain/brain.js"></script>
+<script src="../../figures/penfield/penfield.js"></script>
+<script src="../../figures/broca-wernicke/broca-wernicke.js"></script>
+<script src="../../figures/neuron-zoom/neuron-zoom.js"></script>
+<script src="../../figures/boole-logic/boole-logic.js"></script>
+<script src="../../figures/program-steps/program-steps.js"></script>
+<script src="../../figures/turing-test/turing-test.js"></script>
 <script src="../../../deck-kit/widgets/badge.js"></script>
 <script src="../../../deck-kit/widgets/wash.js"></script>
 <script src="../../../deck-kit/widgets/timeline.js"></script>
@@ -93,7 +100,7 @@ const SLIDES = [
   {
     "layout": "columns",
     "title": "Could a Machine Ever Think?",
-    "lead": "It depends on which of our mental abilities are physical, a border philosophers have argued over for centuries. Descartes (1637) famously drew a sharp border:",
+    "lead": "It depends on which of our mental abilities are physical. Philosophers have argued over that border for centuries.",
     "columns": [
       {
         "blocks": [
@@ -104,12 +111,12 @@ const SLIDES = [
                 "halign": "center",
                 "blocks": [
                   {
-                    "type": "title",
-                    "text": "Matter"
+                    "type": "subhead",
+                    "text": "<span class=\"deck-accent-primary\">Matter</span>"
                   },
                   {
                     "type": "text",
-                    "text": "Everything physical: rocks, plants, and our own bodies. It works like a machine and follows the laws of nature."
+                    "text": "Works like a machine: rocks, plants, and our bodies."
                   }
                 ]
               },
@@ -117,12 +124,12 @@ const SLIDES = [
                 "halign": "center",
                 "blocks": [
                   {
-                    "type": "title",
-                    "text": "Mind"
+                    "type": "subhead",
+                    "text": "<span class=\"deck-accent-secondary\">Mind</span>"
                   },
                   {
                     "type": "text",
-                    "text": "Something that is not physical: you cannot touch it, weigh it, or point to where it is."
+                    "text": "Is not physical: you cannot touch, weigh, or locate it."
                   }
                 ]
               }
@@ -143,41 +150,43 @@ const SLIDES = [
     "lead": "Two things were missing: clues to how the brain works, and something to build an AI from.",
     "columns": [],
     "timeline": {
+      "cards": true,
       "items": [
         {
           "date": "1860s",
-          "text": "Broca &amp; Wernicke",
+          "module": "BrocaWernickeFigure",
           "branch": 0
         },
         {
-          "date": "1880s",
-          "text": "Cajal: neurons",
+          "date": "1890s",
+          "module": "NeuronZoomFigure",
           "branch": 0
         },
         {
-          "date": "1930s",
-          "text": "Penfield: evoked memories",
+          "date": "1930s–50s",
+          "module": "PenfieldFigure",
           "branch": 0
         },
         {
-          "date": "1854",
-          "text": "Boole: logic as algebra",
+          "date": "1850s",
+          "module": "BooleLogicFigure",
           "branch": 1
         },
         {
-          "date": "1930s–40s",
-          "text": "First computers",
+          "date": "1940s",
+          "module": "ProgramStepsFigure",
           "branch": 1
         },
         {
-          "date": "1950",
-          "text": "Turing: can machines think?",
+          "date": "1950s",
+          "module": "TuringTestFigure",
           "branch": 1
         },
         {
           "date": "1955",
-          "text": "Dartmouth: AI gets a name",
-          "milestone": true
+          "text": "<span class=\"deck-accent-primary\">Dartmouth</span><br>AI gets a name",
+          "milestone": true,
+          "outcome": true
         }
       ],
       "branches": [
@@ -206,16 +215,10 @@ const SLIDES = [
             "text": "The Dartmouth Proposal"
           },
           {
-            "type": "text",
-            "text": "In 1955, four researchers asked for money to spend the summer of 1956 at Dartmouth College working on \"artificial intelligence\", a term they coined for the occasion. Their starting point:"
-          },
-          {
-            "type": "quote",
-            "text": "Every aspect of learning or any other feature of intelligence can in principle be so precisely described that a machine can be made to simulate it."
-          },
-          {
-            "type": "source",
-            "text": "McCarthy, Minsky, Rochester &amp; Shannon, 31 August 1955"
+            "type": "document",
+            "title": "A PROPOSAL FOR THE DARTMOUTH SUMMER RESEARCH PROJECT ON ARTIFICIAL INTELLIGENCE",
+            "byline": "McCarthy, Minsky, Rochester, Shannon<br>August 31, 1955",
+            "text": "… every aspect of learning or any other feature of intelligence can in principle be so precisely described that a machine can be made to simulate it. …"
           }
         ]
       },
@@ -237,6 +240,10 @@ const SLIDES = [
       }
     ],
     "closing": "That is how AI can sell you a toothbrush and also star as the Terminator."
+  },
+  {
+    "layout": "toc",
+    "highlight": "Why It Took 70 Years"
   },
   {
     "layout": "columns",
