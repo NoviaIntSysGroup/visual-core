@@ -1,43 +1,51 @@
 #!/bin/sh
-# Hook that reminds the agent to read the issue-log skill. It reads the hook input on stdin
-# and answers by its event: a failed tool call, a new user message (which also resets the
-# read count), or a read call, which counts and reminds once when a turn reaches READ_LIMIT.
+# Hook that keeps the issue-log skill in play. At session start it prints the skill into
+# context. During a turn it records each tool call and failure; a new user message clears the
+# record. At the end of a turn that used tools, unless the closing message already holds an
+# "Issue check:" line, it stops the turn once and asks the agent to sweep it for anything to log.
+dir=${CLAUDE_PROJECT_DIR:-.}
 SKILL=core/skills/issue-log/SKILL.md
-READ_LIMIT=15
+[ -f "$dir/$SKILL" ] || SKILL=skills/issue-log/SKILL.md
 
 input=$(cat)
 field() {
   printf '%s' "$input" | grep -o "\"$1\" *: *\"[^\"]*\"" | head -n 1 | sed 's/.*"\([^"]*\)"$/\1/'
 }
 event=$(field hook_event_name)
-count_file="${TMPDIR:-/tmp}/claude-read-count-$(field session_id)"
-
-# Joins a reminder written across lines into one line, and prints it as hook output.
-remind() {
-  text=$(printf '%s' "$1" | tr -s '\n ' '  ')
-  printf '{"hookSpecificOutput":{"hookEventName":"%s","additionalContext":"%s"}}\n' \
-    "$event" "$text"
-}
+calls="${TMPDIR:-/tmp}/claude-turn-calls-$(field session_id)"
 
 case "$event" in
-  PostToolUseFailure)
-    remind "A tool call failed. If an instruction or the code in this repo caused it, read
-      $SKILL before moving on."
+  SessionStart)
+    printf 'The issue-log skill (%s), loaded by a hook:\n\n' "$SKILL"
+    cat "$dir/$SKILL"
     ;;
   UserPromptSubmit)
-    rm -f "$count_file"
-    remind "Read $SKILL if this message corrects you or tells you something no instruction
-      states, or if your last turn had two sources that disagreed, a surprising result, or
-      anything you had to guess, work around, or work out."
+    rm -f "$calls"
     ;;
   PostToolUse)
-    count=$(( $(cat "$count_file" 2>/dev/null || echo 0) + 1 ))
-    echo "$count" > "$count_file"
-    if [ "$count" -eq "$READ_LIMIT" ]; then
-      remind "You have made $READ_LIMIT read calls for this task. If the code took more
-        reading than the task should need, read $SKILL and consider a \`scattered\` entry
-        before moving on."
-    fi
+    echo "$(field tool_name)" >> "$calls"
+    ;;
+  PostToolUseFailure)
+    echo FAILED >> "$calls"
+    ;;
+  Stop)
+    # Already continuing from this hook's stop: let the turn end, so it stops at most once.
+    printf '%s' "$input" | grep -q '"stop_hook_active" *: *true' && exit 0
+    [ -s "$calls" ] || exit 0
+    # The closing message already reports the sweep (in the input, or the transcript tail).
+    printf '%s' "$input" | grep -q 'Issue check:' && exit 0
+    transcript=$(field transcript_path)
+    [ -f "$transcript" ] && tail -n 3 "$transcript" | grep -q 'Issue check:' && exit 0
+    total=$(grep -c . "$calls")
+    reads=$(grep -cxE 'Read|Grep|Glob' "$calls")
+    failed=$(grep -cx FAILED "$calls")
+    reason="This turn made $total tool calls ($reads Read/Grep/Glob, $failed failed). Before
+      finishing, go back through the turn, including the message that started it, and list
+      every point where you guessed, worked something out or around, read more than the task
+      needed, saw two sources disagree, or were corrected or told something no instruction
+      states. Log each with the issue-log skill; for any you skip, give the reason in one
+      clause. Then end with one line, Issue check: <what you logged, or nothing>."
+    printf '{"decision":"block","reason":"%s"}\n' "$(printf '%s' "$reason" | tr -s '\n ' '  ')"
     ;;
 esac
 exit 0

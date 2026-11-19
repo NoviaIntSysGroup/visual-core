@@ -1,0 +1,91 @@
+/* Hopfield classic app. Fills its parent with a wash and holds the open network on the right. */
+.hopfield-classic {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: var(--s8);
+}
+
+/* On a hero, the title block centres vertically and its text wraps clear of the network. */
+.hero-panel:has(.hopfield-classic) { justify-content: center; }
+.hero-panel:has(.hopfield-classic) .hero-content { padding-bottom: 0; }
+.hero-panel:has(.hopfield-classic) .hero-content p { max-width: calc(var(--s12) * 9); }
+
+/* With a note, the title block goes back to the bottom, leaving the top for the note. */
+.hero-panel:has(.hopfield-classic-note) { justify-content: flex-end; }
+.hero-panel:has(.hopfield-classic-note) .hero-content { padding-bottom: var(--s12); }
+
+/* A note written by hand, top left above the title block, slightly tilted; the same hand as
+   the unit-circle app's. System handwriting fonts: Windows, then macOS, then generic cursive. */
+.hopfield-classic-note {
+  position: absolute;
+  left: var(--s12);
+  top: var(--s10);
+  z-index: 3;
+  transform: rotate(-2deg);
+  font-family: 'Segoe Print', 'Ink Free', 'Bradley Hand', 'Noteworthy', 'Chalkboard SE', cursive;
+  font-size: var(--t-md);
+  line-height: 1.3;
+  color: var(--text-soft);
+}
+.hopfield-classic-note p { margin: 0; }
+.hopfield-classic-note .hopfield-classic-question {
+  margin-top: var(--s3);
+  color: var(--accent-strong);
+}
+
+.hopfield-classic-net {
+  position: relative;
+  width: 300px;
+}
+
+/* The grid's frame and the scramble box share one edge and fill, so they read as a pair. */
+.hopfield-classic-frame,
+.reveal .hopfield-classic-scramble {
+  border: var(--line-width-strong) solid var(--border);
+  border-radius: var(--s2);
+  background: var(--graphic-soft);
+}
+
+.hopfield-classic-frame { padding: var(--s2); }
+
+.hopfield-classic-grid {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  cursor: crosshair;
+  touch-action: none;
+  user-select: none;
+}
+
+.reveal .hopfield-classic-name {
+  margin: var(--s2) 0 0;
+  font-weight: var(--w-semibold);
+}
+
+.reveal .hopfield-classic-status {
+  margin: 0;
+  min-height: 1.4em;
+  font-size: var(--t-sm);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-soft);
+}
+
+/* The hit only tints the border, which then fades back. */
+.reveal .hopfield-classic-scramble {
+  margin: var(--s2) 0 0;
+  padding: var(--s2);
+  font-size: var(--t-sm);
+  font-weight: var(--w-medium);
+  text-align: center;
+  transition: border-color var(--dur-slow) var(--ease);
+}
+
+.reveal .hopfield-classic-scramble.is-hit {
+  border-color: var(--accent-strong);
+  transition: none;
+}

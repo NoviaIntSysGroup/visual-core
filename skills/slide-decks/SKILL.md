@@ -302,6 +302,7 @@ user (golden rule).
 | `--text-soft` | Subtitles, subcaptions, secondary text, and quiet chrome |
 | `--background` | Slide canvas background |
 | `--background-plain` | Plain white slide canvas when a slide needs to differ from the default canvas |
+| `--paper` | The sheet of a `document` block, a reproduced old document |
 | `--border` | Frame borders around cards, panels, controls, and similar boxed elements |
 | `--edges` | Connected lines in diagrams, graphs, rulers, flows, and other edge-based illustrations |
 | `--line-width` | Default width for ordinary frames, dividers, and borders |
@@ -372,6 +373,10 @@ Diagrams take the same semantic colour tokens as everything else; building one i
    first discussing with the user.
 9. Deck `index.html` content carries no inline `style` attributes — if you are writing one, the
    variant you need is missing and that is an ask-first change.
+10. It fits the canvas. A columns, toc, or references slide centres its content in 540 pt less
+    `--s5` above and below, about 500 pt, and clips what overflows at both ends, so a slide that
+    runs long loses its title; the toolbar counts the slides seen to overflow. The logo and
+    slide number sit 488–520 pt down, so content ends above them.
 
 ## Workflows
 

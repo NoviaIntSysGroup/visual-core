@@ -206,69 +206,39 @@ The rules behind the shape:
 
 `core/example/figures/example-steps/example-steps.js` is the worked stepped module.
 
-## Stepped figures
+## Stepped and played figures
 
-A figure with multiple states (e.g. an animation) declares a `STEP` array — one record per step
-(template section 7) — and changes `draw(fig)` to `draw(fig, step)`. The chrome grows Back /
-Next buttons and a "Step N of M" counter automatically:
+Motion with no input is a played figure, not an app; where the line falls is under *Apps* in
+`core/skills/slide-decks/blocks.md`. A figure with several states declares a `STEP` array, one
+record per step (template section 7), exports `steps: STEP.length`, and draws with
+`draw(fig, step)`. `mountModule` then calls `draw` with the step rather than `fig.nest()`, and
+the chrome grows Back / Next and a "Step N of M" counter; its `step` option is the state the
+page opens on, an index or `'last'`, usually the one worth exporting. `draw` is only ever
+handed a valid index, so it never clamps one. To nest a stepped figure, fix its state with
+`fig.nestModule(M, { x, y, step: 3 })`.
 
-```js
-// In the module — draw receives the step index (0-based)
-function draw(fig, step) { var s = STEP[step]; … }
-
-window.MyFigure = {
-  width: PAGE.w, height: PAGE.h,
-  title: '…', name: '…', className: '…', ariaLabel: COPY.ariaLabel,
-  steps: STEP.length,   // always the array's length — never a hand-written count
-  draw:  draw
-};
-```
-
-```js
-// In the shell — the same one call, plus where to open
-Figure.mountModule(window.MyFigure, { step: 'last' });
-```
-
-`mountModule` sees `M.steps`, so it calls `M.draw(fig, step)` directly rather than via
-`fig.nest()` (which only passes `fig`), and hands `Figure.mount` the `redraw` it needs. `step`
-picks the state the page opens on — an index, or `'last'` for the final state, usually the one
-worth exporting.
-
-Do **not** clamp the step inside `draw`: `mount` clamps the initial step and the Back/Next
-buttons are bounded, so `draw` is only ever handed a valid index. To nest a stepped figure into
-a composite, fix its state with `fig.nestModule(M, { x, y, step: 3 })`.
-
-### Played figures: `autoplay` + `holds`
-
-Some animations have a beat too small to press through — a figure that appends one word per
-frame is seventeen presses of nothing. Such a module adds two fields and is then **played** on
-a slide instead of stepped:
+On a slide each state beyond the first is one press. When a beat is too small to press through
+(one word per frame), the module is **played** instead, with two more fields:
 
 ```js
 autoplay: 300,          // ms per frame
 holds:    [0, 11, 12],  // frame indices where playback waits for the presenter
 ```
 
-The deck's `figure` block honours both: it emits **one fragment per hold** rather than one per
-state, and a timer walks the frames between them. So one press plays one segment of the
-animation and stops at the next hold. The frames themselves are ordinary steps —
-`draw(fig, step)` is unchanged, the figure page still walks them with Back / Next, and any
-frame still exports. `holds[0]` is the state the figure opens on (normally `0`).
+The `figure` block then emits one fragment per hold, and a timer walks the frames between them,
+so one press plays to the next hold. `holds[0]` is the state the figure opens on (normally
+`0`). The frames are ordinary steps: the figure page walks them one at a time with Back / Next
+or its slider, plays to the next hold with ▶ as a press would, lands on the previous hold with
+⏮, and exports whichever frame is shown. Hold the frame that sets a new scene, so the room sees
+what to look at before it moves.
 
-A hold is also how an animation gets a **beat to be read**: hold the frame that sets a new
-scene, so one press changes what is on screen and the next sets it moving. Without that, a
-segment swaps its subject and starts animating in the same press, and the room never catches
-what it was asked to look at.
-
-Generating `STEP` rather than typing it is right here — one record per frame still holds, the
-array is just built from the content — a figure that writes out example sentences word by word
-derives both `STEP` and `HOLDS` from those sentences. Nothing animates when Reveal's fragments
-are off, which covers a normal tab, `?thumb`, and `?print-pdf`: those all get the final frame,
-exactly as a stepped figure does.
-
-**Every reusable drawing is a figure**, static or stepped. One with no `steps` is a still
-drawing; one with `steps` animates. Either is imported onto a slide whole (see below) and
-nested into another figure with `fig.nestModule`.
+`STEP` may be generated from the content, still one record per frame: a figure that writes out
+sentences word by word derives `STEP` and `HOLDS` from them. Smooth motion is the same
+mechanism sampled in time: `STEP` records `{ t }` at `FPS = 25`, `autoplay: 1000 / FPS`,
+`holds: [0]`, and `draw` computes each element from `t`, easing it over its act's start and
+duration; the kit has no tweening of its own. The example's modules with `autoplay` are worked
+cases. With Reveal's fragments off (a normal tab, `?thumb`, `?print-pdf`), a stepped or played
+figure shows its final frame.
 
 ## Importing a figure onto a slide
 
@@ -291,11 +261,12 @@ deck's one import rule, `1.5 × the authored width, or the largest value that fi
 Two consequences worth authoring against:
 
 - **A slide figure types its text with `slideBody` and `slideDetail`.** `slideBody` (10.6pt)
-  lands at 15.9pt on the slide, the slide's own `--t-base`, and carries every label meant to be
-  read while you talk. `slideDetail` (8pt) lands at 12pt, the slide's `--t-sm`, for detail that
-  is deliberately secondary. The other roles (`label`, `title`, `subtitle`, `body`, `legend`,
-  `fine`) are the publication scale: a figure made for print keeps them, and shouldn't be
-  imported onto a slide as-is, where they land off the slide's sizes.
+  lands at 15.9pt on the slide, the slide's own `--t-base`, and is the default for labels read
+  while you talk. `slideDetail` (8pt) lands at 12pt, the slide's `--t-sm`, for secondary detail,
+  or for all captions when small figures share a row; figures shown together caption at one
+  size. The other roles (`label`, `title`, `subtitle`, `body`, `legend`, `fine`) are the
+  publication scale: a figure made for print keeps them, and shouldn't be imported onto a
+  slide as-is, where they land off the slide's sizes.
 - **The scale default is a slide rule.** Figure-to-figure nesting stays at 1.0
   (`fig.nestModule` with no `scale`), because in print the authored cm size *is* the real size.
   Never carry the 1.5 into a composite.
@@ -322,9 +293,10 @@ directions:
   | 3 | 279.5 pt | 186.3 pt, `cm(6.5)` |
   | 4 | 203.5 pt | 135.7 pt, `cm(4.7)` |
 
-  Each `cm` figure is rounded down, never to the nearest; use it as the module's width, so the
-  figure fills its column. Figures meant to sit side by side in one slide share it, which is
-  what keeps them one size.
+  Each `cm` figure is rounded down, never to the nearest. It is the most a figure may take:
+  in a column of fixed width, use it as the module's width, so the figure fills its column; in
+  a container as wide as its content (a timeline card), author the figure to its drawing's own
+  width. Figures meant to sit side by side share one width, which keeps them one size.
 - **Height: `PAGE.h` is at most the block's `maxHeight` ÷ 1.5.** The decks use
   `maxHeight: 330`, so 220 pt, `cm(7.7)`. When the height falls out of content (a measured
   equation stack), tune the gaps and the drawing until it fits; do not raise `maxHeight` to
@@ -340,8 +312,8 @@ On a deck, a figure that lands below its intended scale is reported as its slide
 console warning, and a "figures scaled down" notice in the toolbar whose hover text gives the
 reason.
 
-Compose the drawing to fill that width: a figure is centred in its slot, so lopsided margins
-show. A figure built for one slot is not reused in the other, or in a slide with a different
+Compose the drawing to fill the width you chose: a figure is centred in its slot, so lopsided
+margins show. A figure built for one slot is not reused in the other, or in a slide with a different
 column count, without re-authoring.
 
 An imported figure brings its page margins with it (`PAGE.margin`). A figure made to be placed
@@ -389,13 +361,15 @@ A composite is itself a module, so it too can be nested into a larger figure. Us
 place a child smaller — everything in it (text included) scales uniformly, exactly like a
 `place()`d diagram.
 
-## Landing page listing
+## Adding, renaming, removing a figure
 
-When adding a new figure under `figures/<name>/index.html`, also add a card for it to the
-project's root `index.html` Figures panel. Keep the card's metadata paragraph generic
-(`Publication figure`) and mark it with `data-figure-meta`; the figure's `?thumb` iframe posts
-its metadata to the landing page, so title and physical size stay in sync with the figure's
-actual `Figure.mount(...)` call. Do not duplicate hand-written dimensions on the landing page.
+A new figure gets a card in the project's root `index.html` Figures panel. Keep the card's
+metadata paragraph generic (`Publication figure`) and mark it with `data-figure-meta`: the
+figure's `?thumb` iframe posts its title, physical size, and step count and playing time to the
+landing page, which writes the line from them (`Animation · 2.9 s · …`, `Stepped figure · 8
+steps · …`), so nothing is written there by hand. Other files find a figure by its folder (script tags, the landing
+card) and by its global (`module` in any deck's `SLIDES`, `nestModule` in other figures): search
+for both before renaming or removing one.
 
 ## Raster images
 

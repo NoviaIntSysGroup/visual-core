@@ -59,7 +59,12 @@
      document its own origin. */
   var FORMAT = {
     deck: function (m, base) { return base + ' · ' + m.slideLabel; },
-    figure: function (m) { return 'Publication figure · ' + m.sizeLabel; }
+    figure: function (m) {
+      var kind = m.seconds ? 'Animation · ' + m.seconds + ' s'
+        : m.steps ? 'Stepped figure · ' + m.steps + ' steps'
+        : 'Publication figure';
+      return kind + ' · ' + m.sizeLabel;
+    }
   };
 
   window.addEventListener('message', function (e) {

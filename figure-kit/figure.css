@@ -104,7 +104,8 @@ body.figure-page {
   color: var(--text-soft);
 }
 
-/* Back/Next and the step counter, set apart from the exports. */
+/* Back/Next and the step counter, and a played figure's hold buttons, each set apart from
+   what follows. */
 .figure-step {
   display: flex;
   align-items: center;
@@ -113,8 +114,14 @@ body.figure-page {
   color: var(--text-soft);
 }
 
+/* A played figure's slider over every step. */
+.figure-step-slider {
+  width: 160px;
+  accent-color: var(--graphic-primary);
+}
+
 .figure-step-label {
-  min-width: 9ch;
+  min-width: 13ch;
   text-align: center;
   font-variant-numeric: tabular-nums;
 }

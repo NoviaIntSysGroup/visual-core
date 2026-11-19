@@ -308,6 +308,74 @@
         +   '<path class="icon-line icon-line-thin" d="M14 72 L38 52 L52 64 L64 54 L86 72"/>'
         +   '<line class="icon-line" x1="12" y1="86" x2="88" y2="14"/>'
         + '</g>'
+    },
+
+    /* The mental abilities, one each, for a row of them: moving, sensing,
+       remembering, learning, reasoning and being aware. Conversing is `chat`. */
+    moving: {
+      box: [15, 8, 56, 83],
+      svg: ''
+        + '<circle class="icon-fill" cx="60" cy="17" r="9"/>'
+        + '<g class="icon-line icon-round icon-join">'
+        +   '<path d="M55 32 L45 58"/>'
+        +   '<path d="M33 40 L52 32 L68 46"/>'
+        +   '<path d="M45 58 L62 70 L58 88"/>'
+        +   '<path d="M45 58 L34 75 L18 77"/>'
+        + '</g>'
+    },
+
+    sensing: {
+      box: [7, 28, 86, 44],
+      svg: ''
+        + '<g class="icon-line icon-round icon-join">'
+        +   '<path d="M10 50 Q50 12 90 50 Q50 88 10 50 Z"/>'
+        +   '<circle cx="50" cy="50" r="14"/>'
+        + '</g>'
+        + '<circle class="icon-fill" cx="50" cy="50" r="6"/>'
+    },
+
+    /* A clock face with an arrow turning back: going back in time. */
+    remembering: {
+      box: [15, 17, 70, 70],
+      svg: ''
+        + '<g class="icon-line icon-round icon-join">'
+        +   '<path d="M22.3 36 C30.3 22.1 47.4 16.3 62.2 22.4 C77.1 28.6 85.1 44.8 80.9 60.3'
+        +     ' C76.8 75.8 61.7 85.8 45.8 83.7 C29.9 81.6 18 68.1 18 52"/>'
+        +   '<path d="M20.2 24.2 L22.3 36 L33.6 31.9"/>'
+        +   '<path d="M50 34 V52 L62 60"/>'
+        + '</g>'
+    },
+
+    /* A mortarboard: a graduate's cap with its tassel. */
+    learning: {
+      box: [7, 19, 86, 57.5],
+      svg: ''
+        + '<g class="icon-round icon-join">'
+        +   '<path class="icon-line" d="M28 50 V67 Q50 80 72 67 V50"/>'
+        +   '<path class="icon-card" d="M50 22 L90 40 L50 58 L10 40 Z"/>'
+        +   '<path class="icon-line icon-line-thin" d="M84 43 V64"/>'
+        + '</g>'
+    },
+
+    /* A light bulb: an idea worked out. */
+    reasoning: {
+      box: [21, 11, 58, 83],
+      svg: ''
+        + '<g class="icon-line icon-round icon-join">'
+        +   '<path d="M38 66 Q24 56 24 40 C24 5.3 76 5.3 76 40 Q76 56 62 66 V72 H38 Z"/>'
+        +   '<line x1="40" y1="82" x2="60" y2="82"/>'
+        +   '<line x1="44" y1="91" x2="56" y2="91"/>'
+        + '</g>'
+    },
+
+    /* A head in profile with a dot inside: a self that knows it is there. */
+    'being-aware': {
+      box: [17, 9, 72, 84],
+      svg: ''
+        + '<g class="icon-line icon-round icon-join">'
+        +   '<path d="M36 90 V74 Q20 64 20 44 Q20 12 50 12 Q78 12 78 42 L86 56 L78 58 V68 Q78 76 70 76 H60 V90"/>'
+        + '</g>'
+        + '<circle class="icon-fill" cx="50" cy="42" r="9"/>'
     }
   };
 

@@ -18,23 +18,25 @@ so far. A rule is only as simple as the code behind it, so the fix is often ther
 
 ## The pass
 
-1. **Gather.** List `issues/` and group the entries by subject and section. Several entries on
-   one section usually share one cause. With no entries, start from the doc the user named.
+1. **Gather.** List `issues/` and group the entries by subject, then look across the groups:
+   entries in different docs often share one cause, such as one rule written in several places
+   or code that fails without a word. With no entries, start from the doc the user named.
 2. **Read the whole section, and the code it describes.** Check what is true now, and reproduce
    a code problem where you can; the entry records what one agent saw, and its `guess` names
    the case it hit, not the fix.
 3. **Find the cause.** Ask what general problem the entry is one case of, and why the agent was
-   misled: a false claim, a rule hidden in a long list, two places saying different things, a
-   heading that sends readers elsewhere, detail that buries the point, or code with no rule a
-   reader could guess. The answer decides the edit; adding a sentence is rarely it, and a code
+   misled: a false claim, a rule written as the one case that prompted it, a rule hidden in a
+   long list, two places saying different things, a heading that sends readers elsewhere,
+   detail that buries the point, or code with no rule a reader could guess. The answer decides the edit; adding a sentence is rarely it, and a code
    cause is fixed in the code, so that one rule describes it. `memory` entries are hints, not
    fixes: weigh them together and consolidate only what recurs or clusters. Then fold it into
    the doc readers already open when most tasks there need it, add a lookup file beside that
    skill when few do, or write a new skill when the cluster has none. Leave the rest to gather
    evidence.
-4. **Propose.** For each subject, say in a line or two what is wrong, the rule the fix
-   establishes, and what you will change, with the length before and after. Agree the proposal
-   with the user before editing.
+4. **Propose.** For each cause, not each entry, say in a line or two what is wrong, the rule
+   the fix establishes, and what you will change. A good batch leaves the docs it touches
+   shorter: give each doc's length before and after, and a reason for any that grows. Agree
+   the proposal with the user before editing.
 5. **Edit** a doc by the rules below, and code by the skill that governs it.
 6. **Close.** Each entry ends one of three ways, and the two archives beside `issues/` are the
    cases `issue-log` is evaluated against. If you made its fix, move it to `issues-fixed/` and

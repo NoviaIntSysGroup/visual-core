@@ -52,14 +52,15 @@
     var highlight = highlightIndex(cols.map(function (c) {
       return [].concat.apply([], c.blocks || []);   // a column's blocks, groups flattened
     }), slide.highlight, 'slide ' + i);
-    var rendered = grid(cols, slide, '', function (c, j) {
+    // No columns, no grid: an empty one would still take a slide gap on each side.
+    var rendered = cols.length ? grid(cols, slide, '', function (c, j) {
       return {
         id: 'deck-col-' + i + '_' + j,
         path: i + '/columns/' + j,
         fragment: fragments && c.fragment !== false,
         dim: highlight != null && j !== highlight
       };
-    });
+    }) : '';
 
     // The slide's lead-in, over the whole row rather than inside the first
     // column: the framing the columns are an answer to. It carries no fragment
@@ -275,11 +276,14 @@
       throw new Error('column ' + opts.path + ' has no blocks');
     }
     // A `blocks` entry is a block, or an array of them: a bracketed group. A group is
-    // what steps: when the column would fade in as one unit (`opts.fragment`), that
-    // press goes to each group instead, and the column and its plain blocks render at
-    // once.
-    var hasGroups = column.blocks.some(function (item) { return Array.isArray(item); });
-    var fragment = (opts.fragment && !hasGroups) ? ' fragment fade-up' : '';
+    // what steps, here or in a nested `columns` block: when the column would fade in as
+    // one unit (`opts.fragment`), that press goes to each group instead, and the column
+    // and its plain blocks render at once. A nested column (`opts.nested`) never fades.
+    var hasGroups = column.blocks.some(function (item) {
+      return Array.isArray(item) || (item && item.type === 'columns'
+        && (item.columns || []).some(function (c) { return (c.blocks || []).some(Array.isArray); }));
+    });
+    var fragment = (opts.fragment && !hasGroups && !opts.nested) ? ' fragment fade-up' : '';
     var groupIndex = 0;
     var rendered = column.blocks.map(function (item, k) {
       if (Array.isArray(item)) {
@@ -373,6 +377,16 @@
     // so authored spaces and <br> line breaks render as written; <b> still
     // works for calling out one key.
     if (type === 'code') return textBlock(block, opts.path, 'pre', 'deck-code');
+    // A reproduced typed document on a sheet of paper: its `title`, a `byline` of
+    // authors and date, and an excerpt of its `text`. Each part is optional and
+    // editable; all three are prose on the slide, so each is a `p`.
+    if (type === 'document') {
+      var part = function (key) {
+        return block[key] == null ? '' : '<p class="deck-document-' + key + '"'
+          + window.Deck.editAttr(opts.path && opts.path + '/' + key) + '>' + block[key] + '</p>';
+      };
+      return '<div class="deck-document">' + part('title') + part('byline') + part('text') + '</div>';
+    }
     // A three-step gauge: `level` (1-3) ascending bars lit in the primary hue,
     // beside a plain-text label. The lit count is the message, so it is a shape,
     // not glyphs in the text, which could not take a colour of their own.
@@ -478,8 +492,8 @@
         + window.Deck.caption(block, opts.path)
         + '</div>';
     }
-    // The slide's column grid one level down, inside a column. Its columns are the
-    // slide's columns, but never step: the column holding them steps around them.
+    // The slide's column grid one level down, inside a column. Its columns never fade
+    // in on their own, but their groups step when the column holding them steps.
     // One level only, so a nested column may not hold another `columns` block.
     if (type === 'columns') {
       var cols = block.columns || [];
@@ -492,11 +506,12 @@
         return {
           id: (opts.id || 'deck-block') + '-' + j,
           path: opts.path ? opts.path + '/columns/' + j : '',
-          fragment: false
+          fragment: opts.fragment,
+          nested: true
         };
       });
     }
-    return '';
+    throw new Error('block ' + opts.path + ' has unknown type "' + type + '"');
   }
 
   // Caps a raw drawing SVG string (a chart) to a slide's title-to-footer

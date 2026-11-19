@@ -11,7 +11,8 @@ builder:
 - **`place(svgString, { x, y, w, h? })`** — drop a diagram-kit SVG string
   (`Diagram.create(…).render()`) at `(x, y)` scaled to width `w` (height follows its aspect
   unless `h` is given). The drawing is wrapped in a `<g transform>`, used verbatim via its own
-  viewBox.
+  viewBox. This is also how a figure draws icons: icon-only nodes (`icon`, with
+  `appearance: Diagram.iconApp(color)`) on one diagram the figure's size, placed at `(0, 0)`.
 - **`image(href, { x, y, w, h })`** — a raster (a partner logo, a photograph) at `(x, y)`,
   sized `w × h`. `<image>` is native SVG, not `foreignObject`, so it exports and nests like any
   other element. `href` is the ordinary relative path, rewritten to a data URI on export — see
@@ -71,15 +72,18 @@ title, or a step count. `step` opens the page on a given state (an index or `'la
 
 ### `mount(opts)` — the underlying chrome
 
-`Figure.mount({ figure, title, name, steps, step, redraw })` renders a figure and injects the
-toolbar (title, physical size, **Export SVG** / **Export PNG** / **Export PDF**, and the
-**Debug** toggle) — the figure-side equivalent of `Deck` injecting `#deck-chrome`. Inside an
-iframe it also posts its metadata (`name`, `title`, `widthCm`, `heightCm`, `sizeLabel`) to the
-parent, for landing-page thumbnails. `name` is the download basename. For stepped figures,
-`steps` (total count) and `redraw(step)` (returns a figure object) grow Back / Next buttons and
-a "Step N of M" counter, and `step` sets the initial state (see *Stepped figures* in
-`core/skills/figures/SKILL.md`). **Call `mountModule` instead** unless a document genuinely
-needs to assemble its own figure object.
+`Figure.mount({ figure, title, name, steps, step, redraw, autoplay, holds })` renders a figure
+and injects the toolbar (title, physical size, **Export SVG** / **Export PNG** / **Export
+PDF**, and the **Debug** toggle) — the figure-side equivalent of `Deck` injecting
+`#deck-chrome`. Inside an iframe it also posts its metadata (`name`, `title`, `widthCm`,
+`heightCm`, `sizeLabel`, `steps`, `seconds`) to the parent, for landing-page thumbnails. `name`
+is the download basename. For stepped figures, `steps` (total count) and `redraw(step)`
+(returns a figure object) grow Back / Next buttons and a "Step N of M" counter, and `step` sets
+the initial state; `autoplay` (ms per step) and `holds` add a slider and the two hold buttons
+of a played figure (see *Stepped and played figures* in `core/skills/figures/SKILL.md`).
+`Figure.play(ms, at, target, show)` is the loop behind ▶, shared with the deck's `figure`
+block. **Call `mountModule` instead** unless a document genuinely needs to assemble its own
+figure object.
 
 ## Debug frames
 

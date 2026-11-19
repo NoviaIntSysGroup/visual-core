@@ -15,9 +15,11 @@ editing, running, and presenting workflow is in `core/README.md`.
 5. Comments say what the code does, nothing else. Five lines max, fewer is better.
 6. Compose from existing shared pieces. Anything new is ask-first: plan, agree, then build.
 7. Read the skill that governs the files you are about to touch, before touching them.
-8. Only inspect a page visually when asked to do so, with `core/skills/page-check/SKILL.md`.
+8. Only inspect a page visually when asked to do so, or while drawing a figure (its source art
+   and its own frames), with `core/skills/page-check/SKILL.md`.
 9. Always work in the current checkout, only create a git worktree if asked to do so.
-10. Stay inside the repo. Never search, read, or write outside the working directory.
+10. Stay inside the repo. Never search, read, or write outside the working directory; scratch
+    files go in `tmp/<task>/` at its root, one folder per task, since sessions share `tmp/`.
 11. The shell starts in the working directory: never `cd` into it, use paths relative to it.
 
 ## Observing while you work
@@ -27,8 +29,9 @@ editing, running, and presenting workflow is in `core/README.md`.
    needed, code that breaks a *Human-first architecture* rule, or anything you had to guess,
    work around, work out, or be told that no instruction states are signals.
 
-2. A suspicion is enough. On any signal, read `core/skills/issue-log/SKILL.md` before deciding
-   it was nothing; it decides whether to log, and how.
+2. A hook loads `core/skills/issue-log/SKILL.md` into every session, and at the end of each
+   turn that used tools asks you to sweep the turn for anything to log. A suspicion is enough:
+   on any signal, that skill decides whether to log, and how.
 
 3. Then keep working on your original task. Don't patch anything mid-task.
 
@@ -55,7 +58,8 @@ editing, running, and presenting workflow is in `core/README.md`.
 **Ask first (rule 6).** Anything other projects might use — the core's kits, theme, tools, and
 skills — needs a concise plan and the user's agreement before it changes. So does a new deck,
 figure, slide template, block, widget, app, icon, or colour. `core/example/` is the exception:
-change it freely. Compose from what already exists unless the user agrees to a new piece.
+change it freely. Compose from what already exists unless the user agrees to a new piece. Plan
+a new look for a shared piece as an option beside the current one, unless asked to replace it.
 
 **Which skill (rule 7).** These are the authoring skills for this repo, not background reading.
 Read the skill's `SKILL.md` before the work; it names its reference files, and you open one
@@ -68,7 +72,7 @@ only when the task needs it.
 | `core/skills/figures/SKILL.md` | `figures/`, `core/figure-kit/` | building or editing a publication figure or the figure kit |
 | `core/skills/style/SKILL.md` | the house style: what a slide or drawing says, wording, colour and form | writing slide copy, or designing or editing a figure or diagram |
 | `core/skills/illustrations/SKILL.md` | `visuals/image-prompt.md`, `visuals/assets/generated/` | writing an image-generation prompt; only the SCENE block is written fresh |
-| `core/skills/issue-log/SKILL.md` | `issues/` | as soon as you suspect a problem in the repo's instructions or code (see *Observing while you work*) |
+| `core/skills/issue-log/SKILL.md` | `issues/` | loaded by a hook at session start (see *Observing while you work*) |
 | `core/skills/issue-fix/SKILL.md` | instructions: skills, `AGENTS.md`, `README.md`, code comments, kit doc headers | changing any instruction, or working through `issues/`, code entries included |
 | `core/skills/page-check/SKILL.md` | headless screenshots and figure exports | looking at a page or exporting a figure, only when the user asks |
 
