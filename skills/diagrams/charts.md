@@ -15,8 +15,8 @@ A slide places it with one `chart` block (`core/skills/slide-decks/blocks.md`); 
 
 | `kind` | Fields |
 |---|---|
-| `scatter` | `x: { title, from, to, ticks }` (points at `"YYYY-MM"` or `"YYYY-MM-DD"`; ticks every quarter, or `ticks: "year"` for a tick at each new year with the year centred over its span), `y: { title, unit, min, max, ticks }` (`ticks` lists the values to mark, e.g. `[0, 1]`; default four even steps; `grid: false` drops the gridlines), `series: [{ label, muted, points: [{ label, labelPos, x, y, size }] }]`, `size: { max }`, `legend` (`false` to leave it to a shared `legend`), `width`, `height` |
-| `legend` | `items: [label \| { label, muted }]` — a row of series keys in hue order, for charts that share it |
+| `scatter` | `x: { title, from, to, ticks }` (points at `"YYYY-MM"` or `"YYYY-MM-DD"`; ticks every quarter, or `ticks: "year"` for a tick at each new year with the year centred over its span), `y: { title, unit, min, max, ticks }` (`ticks` lists the values to mark, e.g. `[0, 1]`; default four even steps; `grid: false` drops the gridlines), `series: [{ label, muted, marker, points: [{ label, labelPos, x, y, size }] }]`, `size: { max }`, `labels` (`false` keeps point labels off the plot, in the aria label only), `legend` (`false` to leave it to a shared `legend`), `width`, `height` |
+| `legend` | `items: [label \| { label, muted, marker }]` — a row of series keys in hue order, for charts that share it |
 
 Rules:
 
@@ -31,11 +31,15 @@ Rules:
 - **Size is area.** A point's `size` (a model's parameter count, say) sets its dot's area, up
   to `Charts.defaults.dotMax` radius at `size.max`. Charts that sit side by side share one
   `size.max` so equal sizes draw equal dots.
+- **A size that would swamp the plot gets a fixed marker.** A series with `marker: "diamond"`
+  draws every point as one fixed-size diamond (a default dot's area), whatever its `size`, and
+  its legend key is the same diamond. Use it when a series' sizes are unknown or off the scale
+  of the rest.
 - **A legend only for two or more series.** A single series is named by the title placed around
   the chart (a slide column title, a figure's `fig.text`). Charts that share one key (same
   series, same order) each set `legend: false` and one `legend` chart is placed beside them, so
   a hue means one thing.
 - **Labels never collide by luck.** A scatter label sits right of its dot by default;
   `labelPos` (`left`, `above`, `below`) moves one that would overlap. The plot narrows itself
-  so every right-hand label stays on the canvas.
+  so every mark and every right-hand label stays on the canvas.
 - Label size is `Config.figure.type.slideBody` (10.6 pt, 15.9 pt on a slide).
