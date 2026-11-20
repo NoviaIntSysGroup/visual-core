@@ -152,6 +152,7 @@ no step model); never reorder or rename one.
 
   /* 7 · Steps -------- ONE RECORD PER STEP, reading down like a storyboard */
   var STEP = [ { active: [], job: null }, … ];
+  /* played: var BEAT = [ {…}, { dur: 0.8, … }, … ], PLAY = window.Figure.beats(BEAT); */
 
   /* 8 · Derived ------ memoized; `var g = GEO();` at the top of every draw */
   var _geo;
@@ -163,7 +164,7 @@ no step model); never reorder or rename one.
   window.<Name>Figure = {
     width: PAGE.w, height: PAGE.h,
     title: '…', name: '…', className: '…', ariaLabel: COPY.ariaLabel,
-    steps: STEP.length,     // stepped figures only
+    steps: STEP.length,     // stepped figures only; played: PLAY.steps, autoplay, holds
     images: IMAGES,         // figures that draw rasters only — see Raster images
     draw: draw
   };
@@ -196,7 +197,10 @@ The rules behind the shape:
   three different ways.
 - **`GEO()` is a memoized function**, called once at the top of `draw`. Being a function costs
   one line and makes the cross-module case (a figure that reads another figure's exported
-  layout) the same shape as every other figure rather than a special case.
+  layout) the same shape as every other figure rather than a special case. Section 7 may call
+  it at load time when steps or timings follow from the layout (a hold set by how far the text
+  wraps), provided `GEO()` reads only this file's sections 2–6; see
+  `core/example/figures/dartmouth-proposal/`.
 - **No debug toggle.** The kits draw the frames — see *Debug frames* in
   `core/skills/figures/figure-api.md`.
 - **Positioning rules are the diagram kit's, unchanged:** one named delta for everything in a
@@ -233,12 +237,29 @@ or its slider, plays to the next hold with ▶ as a press would, lands on the pr
 what to look at before it moves.
 
 `STEP` may be generated from the content, still one record per frame: a figure that writes out
-sentences word by word derives `STEP` and `HOLDS` from them. Smooth motion is the same
-mechanism sampled in time: `STEP` records `{ t }` at `FPS = 25`, `autoplay: 1000 / FPS`,
-`holds: [0]`, and `draw` computes each element from `t`, easing it over its act's start and
-duration; the kit has no tweening of its own. The example's modules with `autoplay` are worked
-cases. With Reveal's fragments off (a normal tab, `?thumb`, `?print-pdf`), a stepped or played
-figure shows its final frame.
+sentences word by word derives `STEP` and `HOLDS` from them.
+
+**Smooth motion** is the same mechanism sampled in time, and section 7 holds `BEAT` instead of
+`STEP`: one record per press, the state it plays to, with the seconds it takes as `dur` (beat
+0, the opening state, has none). `var PLAY = window.Figure.beats(BEAT);` turns them into frames
+at 25 a second, and the module exports `steps: PLAY.steps, autoplay: PLAY.autoplay, holds:
+PLAY.holds`. `draw` reads `PLAY.at(step)` → `{ t, i, u, from, to }`: seconds from the start,
+the beat playing, seconds into it, and the states on either side. A hold's frame is the next
+beat at `u` 0, still showing the beat before, so a change that switches rather than eases waits
+for `u > 0` (`hopfield-heart-equations` does). Three kit calls compute each element from those
+times:
+
+- `Figure.ease(t, start, dur)` — progress through an act, 0 → 1, eased in and out.
+- `Figure.mix(a, b, k)` — `k` of the way from `a` to `b`, numbers or `{ x, y }` points: a move,
+  a growing size, a line drawing itself out, a corner rounding from square to circle.
+- `fig.fade(alpha, drawFn)` — a group at an opacity: fade in, fade out, or one text giving way
+  to the next.
+
+The kit interpolates nothing else (no colour blends or path morphs); a curve that changes shape
+is drawn from a number that `ease` moves. `hopfield-landscape` and `mind-border` in the example
+are worked beat-by-beat cases; a figure that plays one run with a single hold passes `[{}, {
+dur: hold }, { dur: end - hold }]` and reads `t`. With Reveal's fragments off (a normal tab,
+`?thumb`, `?print-pdf`), a stepped or played figure shows its final frame.
 
 ## Importing a figure onto a slide
 
@@ -295,8 +316,9 @@ directions:
 
   Each `cm` figure is rounded down, never to the nearest. It is the most a figure may take:
   in a column of fixed width, use it as the module's width, so the figure fills its column; in
-  a container as wide as its content (a timeline card), author the figure to its drawing's own
-  width. Figures meant to sit side by side share one width, which keeps them one size.
+  a timeline, its slot sets the cap (`core/skills/slide-decks/blocks.md`), and the figure is
+  authored to its drawing's own width under it. Figures meant to sit side by side share one
+  width, which keeps them one size.
 - **Height: `PAGE.h` is at most the block's `maxHeight` ÷ 1.5.** The decks use
   `maxHeight: 330`, so 220 pt, `cm(7.7)`. When the height falls out of content (a measured
   equation stack), tune the gaps and the drawing until it fits; do not raise `maxHeight` to

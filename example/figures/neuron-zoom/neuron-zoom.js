@@ -56,7 +56,6 @@
      ends under the second line. */
   var CAPTION = { y: BRAIN.y + B.height + ROW.line };
   var PAGE = { w: cm(4.0) * K, h: CAPTION.y + ROW.line + TEXT.label / 3 };
-  var FPS = 25;
 
   /* 6 · Content ------------------------------------------------------------ */
   /* Seconds. The zoom opens; the cells appear `each` apart, each over `fade`; playback waits
@@ -73,10 +72,9 @@
   };
 
   /* 7 · Steps -------------------------------------------------------------- */
-  /* One frame per 1/FPS s. Two presses: frame 0, the brain and its lens, plays to the cells
-     in place; that frame plays the signal. */
-  var STEP = [];
-  for (var f = 0; f <= ACT.end * FPS; f++) STEP.push({ t: f / FPS });
+  /* Two presses: the brain and its lens play to the cells in place; that frame plays the
+     signal. */
+  var PLAY = window.Figure.beats([{}, { dur: ACT.hold }, { dur: ACT.end - ACT.hold }]);
 
   /* 8 · Derived ------------------------------------------------------------ */
   var _geo;
@@ -126,8 +124,6 @@
   /* 9 · Helpers → draw → export ------------------------------------------- */
   function r(v) { return Math.round(v * 100) / 100; }
   function clamp(v) { return Math.max(0, Math.min(1, v)); }
-  /* Progress through [start, start + dur] at t, eased in and out. */
-  function ease(start, dur, t) { var p = clamp((t - start) / dur); return p * p * (3 - 2 * p); }
   function deg(a) { a = a * Math.PI / 180; return { x: Math.cos(a), y: Math.sin(a) }; }
   function unit(p, q) { var d = Math.hypot(q.x - p.x, q.y - p.y); return { x: (q.x - p.x) / d, y: (q.y - p.y) / d }; }
   function along(p, u, len) { return { x: p.x + u.x * len, y: p.y + u.y * len }; }
@@ -136,10 +132,6 @@
     var acc = [0];
     for (var i = 1; i < pts.length; i++) acc.push(acc[i - 1] + Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y));
     return acc;
-  }
-  function circle(c, rad) {
-    return 'M ' + r(c.x - rad) + ',' + r(c.y) + ' A ' + r(rad) + ',' + r(rad) + ' 0 1 0 ' + r(c.x + rad) + ',' + r(c.y)
-      + ' A ' + r(rad) + ',' + r(rad) + ' 0 1 0 ' + r(c.x - rad) + ',' + r(c.y) + ' Z';
   }
   function polyline(pts) {
     return pts.map(function (p, i) { return (i ? 'L ' : 'M ') + r(p.x) + ',' + r(p.y); }).join(' ');
@@ -169,8 +161,8 @@
           { fill: 'none', stroke: COLOR.quiet, width: LINE.detail });
       });
     }
-    fig.path(circle(g.lens, LENS.r), { fill: 'none', stroke: COLOR.line, width: LINE.outline });
-    if (k > 0) fig.path(circle(c, rad), { fill: COLOR.body, stroke: COLOR.line, width: LINE.outline });
+    fig.circle(g.lens.x, g.lens.y, LENS.r, { fill: 'none', stroke: COLOR.line, width: LINE.outline });
+    if (k > 0) fig.circle(c.x, c.y, rad, { fill: COLOR.body, stroke: COLOR.line, width: LINE.outline });
   }
 
   /* One cell at time t: its dendrites, axon and body, blue where the pulse has been while
@@ -192,15 +184,15 @@
       [-1, 0, 1].forEach(function (side) {
         var tip = along(end, turn(b.u, side * TERMINAL.spread), TERMINAL.len);
         fig.path(polyline([end, tip]), { fill: 'none', stroke: paint, width: LINE.outline });
-        fig.path(circle(tip, TERMINAL.knob), { fill: paint });
+        fig.circle(tip.x, tip.y, TERMINAL.knob, { fill: paint });
       });
     });
-    fig.path(circle(s, SOMA.r), { fill: active ? COLOR.fired : COLOR.body, stroke: hue, width: LINE.outline });
+    fig.circle(s.x, s.y, SOMA.r, { fill: active ? COLOR.fired : COLOR.body, stroke: hue, width: LINE.outline });
     if (fired) {
       var since = t - s.fire, flash = 1 - clamp(since / ACT.flash), ring = clamp(since / ACT.ring);
-      if (flash > 0) fig.path(circle(s, SOMA.r), { fill: COLOR.signal, opacity: r(flash) });
+      if (flash > 0) fig.circle(s.x, s.y, SOMA.r, { fill: COLOR.signal, opacity: r(flash) });
       if (ring < 1) {
-        fig.path(circle(s, SOMA.r * (1 + ring * (PULSE.ring - 1))),
+        fig.circle(s.x, s.y, SOMA.r * (1 + ring * (PULSE.ring - 1)),
           { fill: 'none', stroke: COLOR.signal, width: LINE.outline, opacity: r(1 - ring) });
       }
     }
@@ -214,17 +206,17 @@
       var fade = run < b.length ? 1 : 1 - clamp((t - b.arrive) / ACT.cross);
       if (fade <= 0) return;
       var pts = upTo(b, Math.min(run, b.length)), at = pts[pts.length - 1];
-      fig.path(circle(at, PULSE.glow), { fill: COLOR.signal, opacity: r(0.35 * fade) });
-      fig.path(circle(at, PULSE.r), { fill: COLOR.signal, opacity: r(fade) });
+      fig.circle(at.x, at.y, PULSE.glow, { fill: COLOR.signal, opacity: r(0.35 * fade) });
+      fig.circle(at.x, at.y, PULSE.r, { fill: COLOR.signal, opacity: r(fade) });
     });
   }
 
   function draw(fig, step) {
-    var g = GEO(), t = STEP[step].t;
+    var g = GEO(), t = PLAY.at(step).t;
     fig.nestModule(window.BrainFigure, { x: BRAIN.x, y: BRAIN.y });
-    zoom(fig, g, ease(ACT.zoom.start, ACT.zoom.dur, t));
+    zoom(fig, g, window.Figure.ease(t, ACT.zoom.start, ACT.zoom.dur));
     g.cells.forEach(function (s) {
-      var k = ease(s.appear, ACT.cells.fade, t);
+      var k = window.Figure.ease(t, s.appear, ACT.cells.fade);
       if (k <= 0) return;
       /* A cell grows into place from its body as it fades in. */
       var size = 0.6 + 0.4 * k;
@@ -242,7 +234,7 @@
     width: PAGE.w, height: PAGE.h,
     title: 'Neuron Zoom', name: 'neuron-zoom', className: 'neuron-zoom-fig',
     ariaLabel: COPY.ariaLabel,
-    steps: STEP.length, autoplay: 1000 / FPS, holds: [0, Math.round(ACT.hold * FPS)],
+    steps: PLAY.steps, autoplay: PLAY.autoplay, holds: PLAY.holds,
     draw: draw
   };
 })();

@@ -1,6 +1,6 @@
-/* Timeline: an optional h2 over dated entries on one axis, each in an equal column, labelled
-   above or below on a stem, its date over the stem; at an end no track runs past, the entry
-   sits on the edge, and an outcome ends the axis in a card on it. Named branches run above or
+/* Timeline: an optional h2 over dated entries on one axis, each in an equal slot, labelled
+   above or below on a stem, its date over the stem; an outcome ends the axis in a card on
+   it. The slots fill the width edge to edge with even gaps. Named branches run above or
    below the axis, as in a git graph, leaving it on a curve or from the left edge, rejoining it
    on a curve or running to the right edge. Tracks are solid through the past, dashed from
    halfway to the first future entry. Exposes window.Timeline. */
@@ -69,16 +69,10 @@
         to: b.to === 'edge' || e === stretches.length - 1 ? null : stretches[e].end + 0.5
       };
     });
-    // An end is open when a branch runs on to that edge; a lone step counts as open both ways.
-    var steps = at + width;
-    var open = {
-      left: steps === 1 || ends.some(function (e) { return e && e.from === null; }),
-      right: steps === 1 || ends.some(function (e) { return e && e.to === null; })
-    };
-    return { steps: steps, place: place, ends: ends, open: open };
+    return { steps: at + width, place: place, ends: ends };
   }
 
-  // The HTML of `timeline`, { title, cards, branches, items }, its fields as listed under `timeline`
+  // The HTML of `timeline`, { title, cards, from, to, branches, items }, its fields as listed under `timeline`
   // in core/skills/slide-decks/blocks.md. With `opts.fragment` the section arrives with its
   // title, tracks and first entry, then each later entry.
   function row(timeline, opts) {
@@ -87,29 +81,24 @@
     var items = timeline.items || [];
     var branches = timeline.branches || [];
     var plan = layout(items, branches);
-    // Each step owns an equal column; `pos` is the middle of step `at`'s, as a fraction of
-    // the width. An entry sits there, or, in the end column at a closed end, on the edge;
-    // an outcome always sits in its column's middle.
-    function pos(at) { return (at + 0.5) / plan.steps; }
-    var flush = plan.place.map(function (p, k) {
-      return items[k].outcome ? ''
-        : p.at === 0 && !plan.open.left ? 'start' : p.at === plan.steps - 1 && !plan.open.right ? 'end' : '';
-    });
-    // An outcome's card is as wide as the widest figure's.
-    var figureWidth = Math.max.apply(null, items.map(function (item) {
-      return item.module ? window[item.module].width : 0;
-    }));
-    var x = plan.place.map(function (p, k) {
-      return flush[k] === 'start' ? 0 : flush[k] === 'end' ? 1 : pos(p.at);
-    });
+    // Each step owns an equal slot, the first and last flush with the edges and the gaps
+    // between them even (timeline.css). `at(t)` is the middle of step t's slot, as a CSS
+    // length; a fractional t falls between slots, and -Infinity and Infinity are the edges.
+    // A lone step sits in the middle.
+    function at(t) {
+      if (plan.steps === 1 && isFinite(t)) t = 0.5;
+      return t === -Infinity ? '0px' : t === Infinity ? '100%'
+        : '(' + t + ' * var(--timeline-pitch) + var(--timeline-slot) / 2)';
+    }
+    var x = plan.place.map(function (p) { return p.at; });
     var firstFuture = items.findIndex(function (item) { return item.future; });
-    var splitX = firstFuture < 0 ? 1 : firstFuture === 0 ? 0 : (x[firstFuture - 1] + x[firstFuture]) / 2;
+    var splitX = firstFuture < 0 ? Infinity : firstFuture === 0 ? -Infinity : (x[firstFuture - 1] + x[firstFuture]) / 2;
 
-    // A track from a to b, solid up to splitX and dashed after; the offsets
+    // A track from step a to step b, solid up to splitX and dashed after; the offsets
     // (CSS lengths) move only its outer ends.
     function span(cls, a, b, aOff, bOff) {
-      return '<span class="timeline-track ' + cls + '" style="left:calc(' + a * 100 + '% + ' + aOff
-        + ');right:calc(' + (1 - b) * 100 + '% - ' + bOff + ')"></span>';
+      return '<span class="timeline-track ' + cls + '" style="left:calc(' + at(a) + ' + ' + aOff
+        + ');right:calc(100% - ' + at(b) + ' - ' + bOff + ')"></span>';
     }
     function track(cls, a, b, aOff, bOff) {
       var s = Math.min(Math.max(splitX, a), b);
@@ -119,50 +108,41 @@
 
     var meets = [];
     plan.ends.forEach(function (e) {
-      if (e) [e.from, e.to].forEach(function (m) { if (m !== null) meets.push(pos(m)); });
+      if (e) [e.from, e.to].forEach(function (m) { if (m !== null) meets.push(m); });
     });
-    // The axis spans its entries and the bends; an end at a bend stops where the curve meets it.
+    // The axis spans its entries and the bends, or runs to an edge where the timeline's
+    // `from`/`to` is 'edge'; an end at a bend stops where the curve meets it.
     var half = 'var(--timeline-bend) / 2';
     var axisEntries = x.filter(function (v, k) { return !plan.place[k].branch; });
     var axisX = axisEntries.concat(meets);
-    var a0 = Math.min.apply(null, axisX), a1 = Math.max.apply(null, axisX);
+    var a0 = timeline.from === 'edge' ? -Infinity : Math.min.apply(null, axisX);
+    var a1 = timeline.to === 'edge' ? Infinity : Math.max.apply(null, axisX);
     var tracks = axisX.length ? track('', a0, a1,
-      axisEntries.indexOf(a0) < 0 ? 'calc(' + half + ')' : '0px',
-      axisEntries.indexOf(a1) < 0 ? 'calc(-1 * ' + half + ')' : '0px') : '';
+      meets.indexOf(a0) >= 0 && axisEntries.indexOf(a0) < 0 ? 'calc(' + half + ')' : '0px',
+      meets.indexOf(a1) >= 0 && axisEntries.indexOf(a1) < 0 ? 'calc(-1 * ' + half + ')' : '0px') : '';
     // A bend is an S-curve between the axis and a branch, centred where they meet;
     // it rises towards the branch above, or falls towards the branch below.
     function bend(side, m, leaving) {
       var rise = (side === 'above') === leaving;
       return '<svg class="timeline-bend timeline-bend-' + side + (m > splitX ? ' timeline-dashed' : '')
-        + '" style="left:' + m * 100 + '%" viewBox="0 0 1 1" preserveAspectRatio="none" aria-hidden="true">'
+        + '" style="left:calc(' + at(m) + ')" viewBox="0 0 1 1" preserveAspectRatio="none" aria-hidden="true">'
         + '<path vector-effect="non-scaling-stroke" d="' + (rise ? 'M0,1 C.5,1 .5,0 1,0' : 'M0,0 C.5,0 .5,1 1,1') + '"/></svg>';
     }
     branches.forEach(function (b, i) {
       var e = plan.ends[i];
       if (!e) return;
-      var a = e.from === null ? 0 : pos(e.from), z = e.to === null ? 1 : pos(e.to);
+      var a = e.from === null ? -Infinity : e.from, z = e.to === null ? Infinity : e.to;
       tracks += track('timeline-branch-' + b.side, a, z,
           e.from === null ? '0px' : 'calc(' + half + ')', e.to === null ? '0px' : 'calc(-1 * ' + half + ')')
         + (e.from === null ? '' : bend(b.side, a, true))
         + (e.to === null ? '' : bend(b.side, z, false))
         + '<p class="timeline-branch-name timeline-branch-name-' + b.side + '" style="left:'
-        + (e.from === null ? '0px' : 'calc(' + a * 100 + '% + ' + half + ')') + '"'
+        + 'calc(' + at(a) + (e.from === null ? '' : ' + ' + half) + ')' + '"'
         + window.Deck.editAttr(path && path + '/branches/' + i + '/name') + '>' + b.name + '</p>';
     });
 
     var entries = items.map(function (item, k) {
       var p = plan.place[k];
-      // A label may run, in steps, from the edges to halfway between its column's middle and
-      // its nearest neighbours' on the same side. A centred one takes the same both ways; one
-      // at a closed end hangs inward from the edge.
-      var c = p.at + 0.5, lo = 0, hi = plan.steps;
-      plan.place.forEach(function (q, i) {
-        if (i === k || items[i].outcome || q.above !== p.above) return;
-        if (q.at < p.at) lo = Math.max(lo, (c + q.at + 0.5) / 2);
-        else hi = Math.min(hi, (c + q.at + 0.5) / 2);
-      });
-      var room = (item.outcome ? 1 : flush[k] === 'start' ? hi : flush[k] === 'end' ? plan.steps - lo
-        : 2 * Math.min(c - lo, hi - c)) / plan.steps;
       var itemPath = path ? path + '/items/' + k : '';
       var label = '<p class="timeline-date"' + window.Deck.editAttr(itemPath && itemPath + '/date') + '>' + item.date + '</p>'
         + '<div class="timeline-content">'
@@ -179,13 +159,10 @@
       return ''
         + '<li class="timeline-entry ' + (item.outcome ? 'timeline-outcome' : p.above ? 'timeline-above' : 'timeline-below')
         +   (p.branch ? ' timeline-on-' + p.branch.side : '')
-        +   (flush[k] ? ' timeline-flush-' + flush[k] : '')
         +   (item.milestone ? ' timeline-milestone' : '')
         +   (item.future ? ' timeline-future' : '')
         +   (opts.fragment && k > 0 ? ' fragment fade-up' : '')
-        +   '" style="--x:' + x[k] * 100 + '%;--timeline-label-width:' + room * 100 + '%'
-        +   (item.module ? ';--timeline-figure-width:' + window[item.module].width + 'px'
-            : item.outcome && figureWidth ? ';--timeline-figure-width:' + figureWidth + 'px' : '') + '">'
+        +   '" style="--x:calc(' + at(x[k]) + ')">'
         +   (item.outcome ? '' : mark)
         +   '<div class="timeline-label' + (card ? ' timeline-card' : '') + '">' + label + (item.outcome ? mark : '') + '</div>'
         + '</li>';
@@ -196,7 +173,7 @@
       : '';
     return '<div class="timeline-section' + (opts.fragment ? ' fragment fade-up' : '') + '">'
       + title
-      + '<div class="timeline' + (branches.length ? ' timeline-with-branches' : '') + '">'
+      + '<div class="timeline' + (branches.length ? ' timeline-with-branches' : '') + '" style="--timeline-steps:' + plan.steps + '">'
       +   '<div class="timeline-tracks">' + tracks + '</div>'
       +   '<ol class="timeline-entries">' + entries.join('') + '</ol>'
       + '</div>'

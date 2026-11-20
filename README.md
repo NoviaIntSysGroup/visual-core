@@ -119,8 +119,8 @@ git init my-project
 cd my-project
 git commit --allow-empty -m "start project"
 git subtree add --prefix=core https://github.com/NoviaIntSysGroup/visual-core.git main --squash
-mkdir .claude
-cp core/.claude/settings.json .claude/
+mkdir -p .claude
+cp -r core/.claude/. .claude/
 cp core/example/.claude/launch.json .claude/
 ```
 
@@ -220,27 +220,29 @@ collaborators need no access to the core repo.
 git subtree pull --prefix=core https://github.com/NoviaIntSysGroup/visual-core.git main --squash -m "update core"
 ```
 
+The pull refuses to run while any tracked file has uncommitted changes, inside `core/` or not:
+commit them, or `git stash` before and `git stash pop` after.
+
 An update can change every deck and figure. Restart the dev server, which never reloads its own
 code, look through the landing page, and undo the merge if something broke.
 
-An update does not touch the project's copied guardrails. Compare them, and copy over any
-change:
-
-```bash
-git diff --no-index core/.claude/settings.json .claude/settings.json
-git diff --no-index core/example/.claude/launch.json .claude/launch.json
-```
+An update does not touch the project's copied guardrails. Copy them again with the last three
+lines under [Start A New Project](#start-a-new-project), then check `git diff .claude` for
+anything the core changed.
 
 ### Change The Core From A Project
 
 A change to the core's kits, theme, tools, or skills can reach every project, so agree on it
-first; `example/` can change freely. The simplest way is to change a clone of the core repo and
-pull it, as above. To send back a change made in a project's `core/`, keep it in commits that
-touch nothing else and push them to a branch:
+first; `example/` can change freely. Every change reaches `main` as a pull request on a branch,
+merged with **Squash and merge**, so `main` gains one commit per change and no merge commits.
+
+The simplest way is to work on a branch in a clone of the core repo, open the pull request, and
+pull the result into projects as above. To send back a change made in a project's `core/`, keep
+it in commits that touch nothing else and push them to a branch:
 
 ```bash
 git subtree push --prefix=core https://github.com/NoviaIntSysGroup/visual-core.git <branch-name>
 ```
 
-Merge that branch in the core repo, then pull. Pushing needs write access; without it, send the
-change to whoever has it.
+Then open a pull request from that branch, squash-merge it, and pull. Pushing needs write
+access; without it, send the change to whoever has it.

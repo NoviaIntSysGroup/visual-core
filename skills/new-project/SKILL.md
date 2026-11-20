@@ -52,8 +52,8 @@ Run from the new project's folder. If `core/` exists, start at step 2.
    make it exit at startup.
 
    ```bash
-   mkdir .claude
-   cp core/.claude/settings.json .claude/
+   mkdir -p .claude
+   cp -r core/.claude/. .claude/
    cp core/example/.claude/launch.json .claude/
    ```
 
@@ -131,7 +131,7 @@ Before reporting the project ready:
    so does every `../../visuals/` and `../../figures/` path in their `.js` and `.css`. The
    showcase's Missing Media slide links missing files on purpose; drop it from a copied deck.
 4. The deck's `storageKey` differs from the project it came from.
-5. `.claude/settings.json` matches `core/.claude/settings.json`, and `.claude/launch.json`
+5. `.claude/` holds every file in `core/.claude/`, unchanged except `launch.json`, which
    matches `core/example/.claude/launch.json`.
 
 Opening the pages is the user's step (rule 8): tell them to double-click `index.html`.

@@ -375,8 +375,9 @@ Diagrams take the same semantic colour tokens as everything else; building one i
    variant you need is missing and that is an ask-first change.
 10. It fits the canvas. A columns, toc, or references slide centres its content in 540 pt less
     `--s5` above and below, about 500 pt, and clips what overflows at both ends, so a slide that
-    runs long loses its title; the toolbar counts the slides seen to overflow. The logo and
-    slide number sit 488–520 pt down, so content ends above them.
+    runs long loses its title; the toolbar counts the slides seen to overflow, or to hold text
+    wider than its box. The logo and slide number sit 488–520 pt down, so content ends above
+    them.
 
 ## Workflows
 
