@@ -1,8 +1,9 @@
 /* Hopfield Heart Equations — figure composition modules.
-   Three stepped 6.5 × 3.3 cm figures, one per equation: one heart, the links of one neuron
+   Three played 6.5 × 3.3 cm figures, one per equation: one heart, the links of one neuron
    (green where it shares a value with the stored heart, yellow where it differs) and a key
-   beside it. Each steps from an empty first state through one colour of link at a time, the
-   other faded, counting as it goes; the key stays, its rows of the other colour faded. */
+   beside it. Each press goes from an empty first state through one colour of link at a time,
+   its links flying out from the neuron, the other faded, counting as they land; the key
+   stays, its rows of the other colour faded. */
 (function () {
   /* ---- Imports ----------------------------------------------------------- */
   var cm   = window.Units.cm;
@@ -69,21 +70,23 @@
       ariaLabel: 'The marked neuron is off in a damaged heart. The votes of its green links and then of its yellow links are shown, most of them for on, and then the neuron is on.' }
   };
 
-  /* ---- Steps --------------------------------------------------------------
-     One record per step, the first empty (`blank`): the state shown, and the links drawn: a colour ('same' is green, 'differ'
-     yellow), as 'full' or 'faded' in `looks`. */
-  COPY.weight.steps = [
+  /* ---- Beats --------------------------------------------------------------
+     One record per press, the first empty (`blank`): the state shown, and the links drawn: a colour ('same' is green, 'differ'
+     yellow), as 'full' or 'faded' in `looks`. A press that brings a colour in flies its links out from the neuron over `fly`
+     seconds, the longest taking all of it; any other press switches at once, in `cut` (one frame). */
+  var ACT = { fly: 0.5, cut: 0.04 };
+  COPY.weight.beats = [
     { blank: true }, { looks: {} }, { looks: { same: 'full' } },
     { looks: { same: 'faded', differ: 'full' } }, { looks: { same: 'faded', differ: 'faded' } }
   ];
-  COPY.energy.steps = ['stored', 'damaged'].reduce(function (steps, state) {
-    return steps.concat(state === 'damaged' ? [{ state: state, looks: {} }] : [], [
+  COPY.energy.beats = ['stored', 'damaged'].reduce(function (beats, state) {
+    return beats.concat(state === 'damaged' ? [{ state: state, looks: {} }] : [], [
       { state: state, looks: { same: 'full' } },
       { state: state, looks: { same: 'faded', differ: 'full' } },
       { state: state, looks: { same: 'faded', differ: 'faded' }, conclude: true }
     ]);
   }, [{ blank: true }, { state: 'stored', looks: {} }]);   /* then the pixels and the key alone, to explain the key first */
-  COPY.update.steps = [
+  COPY.update.beats = [
     { blank: true },
     { state: 'damaged', looks: {} },   /* the pixels and the key alone, to explain the voting first */
     { state: 'damaged', looks: { same: 'full' } },
@@ -91,10 +94,25 @@
     { state: 'fixed',   looks: { same: 'faded', differ: 'faded' }, conclude: true }
   ];
 
+  /* Whether the press from beat `a` to `b` brings links of `kind` in. */
+  function flies(a, b, kind) {
+    return !!(b.looks && b.looks[kind] === 'full' && !(a.looks && a.looks[kind]));
+  }
+  [COPY.weight, COPY.energy, COPY.update].forEach(function (m) {
+    m.beats.forEach(function (b, i) {
+      if (i) b.dur = flies(m.beats[i - 1], b, 'same') || flies(m.beats[i - 1], b, 'differ') ? ACT.fly : ACT.cut;
+    });
+    m.play = window.Figure.beats(m.beats);
+  });
+
   /* ---- Derived geometry --------------------------------------------------- */
+  /* far: the longest link, from the neuron to the farthest pixel's centre */
   var _geo;
   function GEO() {
-    return _geo || (_geo = { size: 4 * GRID.pitch + GRID.pixel });
+    if (_geo) return _geo;
+    var far = 0;
+    for (var r = 0; r < 5; r++) for (var c = 0; c < 5; c++) far = Math.max(far, linkLength(r, c));
+    return (_geo = { size: 4 * GRID.pitch + GRID.pixel, far: far });
   }
 
   /* ---- Helpers ------------------------------------------------------------ */
@@ -163,6 +181,40 @@
     return { x: GRID.x + c * GRID.pitch + GRID.pixel / 2, y: GRID.top + r * GRID.pitch + GRID.pixel / 2 };
   }
 
+  function linkLength(r, c) {
+    var a = centre(COPY.hub.row, COPY.hub.col), b = centre(r, c);
+    return Math.hypot(b.x - a.x, b.y - a.y);
+  }
+
+  /* What frame `step` of module `m` shows: `s`, the beat shown (the next one from the first frame after its press);
+     `landed`, the beat whose counts are shown (the next one once its links are all in); and reach(r, c), how much of a
+     pixel's link is drawn, 0 → 1, as its colour flies out at one pace for every link. */
+  function frameOf(m, step) {
+    var now = m.play.at(step), s = now.u > 0 ? now.to : now.from;
+    return {
+      s: s,
+      landed: now.u >= now.to.dur ? now.to : now.from,
+      reach: function (r, c) {
+        if (s === now.from || !flies(now.from, now.to, linkKind(r, c))) return 1;
+        return window.Figure.ease(now.u, 0, ACT.fly * linkLength(r, c) / GEO().far);
+      }
+    };
+  }
+
+  /* The link from the neuron at `a` to `b`, drawn `k` of its way along the path it ends on: straight, or bowed by `bow`
+     to the left of travel as the kit bows a positive bulge, so a growing arc traces its own final circle. */
+  function link(d, a, b, bow, k, look) {
+    if (k <= 0) return;
+    if (!bow) { d.edge(a, window.Figure.mix(a, b, k), look); return; }
+    var dx = b.x - a.x, dy = b.y - a.y, chord = Math.hypot(dx, dy);
+    var radius = (chord * chord / 4 + bow * bow) / (2 * bow), half = Math.asin(chord / (2 * radius));
+    var turn = half * (1 - k), along = 2 * radius * Math.sin(k * half);
+    var ux = dx / chord, uy = dy / chord, cos = Math.cos(turn), sin = Math.sin(turn);
+    var end = { x: a.x + along * (ux * cos + uy * sin), y: a.y + along * (uy * cos - ux * sin) };
+    look.route = 'arc'; look.bulge = radius * (1 - Math.cos(k * half));
+    d.edge(a, end, look);
+  }
+
   function newDiagram(m) {
     return window.Diagram.create(PAGE.w, PAGE.h, { className: 'hopfield-heart-equations', ariaLabel: m.ariaLabel, fontSize: TEXT.label });
   }
@@ -198,21 +250,22 @@
     fig.text(text, { x: x, y: y, align: 'start', role: 'slideBody', cls: faded ? 'hopfield-heart-faded' : '' });
   }
 
-  /* One state: the neuron's links as `looks` gives them, then the pixels, each marked when `marked` and its link is drawn. */
-  function heart(d, rows, looks, marked) {
+  /* One state: the neuron's links as `looks` gives them, each `reach(r, c)` of its way out, then the pixels, each marked
+     when `marked` and its link has reached it. */
+  function heart(d, rows, looks, marked, reach) {
     var hub = COPY.hub;
     for (var r = 0; r < 5; r++) {
       for (var c = 0; c < 5; c++) {
         if ((r === hub.row && c === hub.col) || !looks[linkKind(r, c)]) continue;
         var look = { gap: 0, appearance: { color: linkColor(linkKind(r, c), looks[linkKind(r, c)]), width: LINE.link } };
-        if (greatestDivisor(Math.abs(r - hub.row), Math.abs(c - hub.col)) > 1) { look.route = 'arc'; look.bulge = LINK.bow; }
-        d.edge(centre(hub.row, hub.col), centre(r, c), look);
+        var bow = greatestDivisor(Math.abs(r - hub.row), Math.abs(c - hub.col)) > 1 ? LINK.bow : 0;
+        link(d, centre(hub.row, hub.col), centre(r, c), bow, reach(r, c), look);
       }
     }
     for (r = 0; r < 5; r++) {
       for (c = 0; c < 5; c++) {
         var on = isOn(rows, r, c), isHub = r === hub.row && c === hub.col;
-        var shown = marked && !isHub && looks[linkKind(r, c)];
+        var shown = marked && !isHub && looks[linkKind(r, c)] && reach(r, c) >= 1;
         var right = agrees(rows, r, c);
         d.node('p-' + r + '-' + c, {
           x: GRID.x + c * GRID.pitch, y: GRID.top + r * GRID.pitch, w: GRID.pixel, h: GRID.pixel, frame: true, radius: GRID.radius,
@@ -229,29 +282,29 @@
 
   /* ---- Draw --------------------------------------------------------------- */
   function drawWeight(fig, step) {
-    var m = COPY.weight, looks = m.steps[step].looks;
+    var m = COPY.weight, f = frameOf(m, step), looks = f.s.looks;
     if (!looks) return;
     var d = newDiagram(m);
-    var rows = m.legend.filter(function (row) { return looks[row.kind]; });
-    heart(d, COPY.stored, looks, false);
+    heart(d, COPY.stored, looks, false, f.reach);
     var edgeX = KEY.x + PAIR_W + KEY.gap;
-    rows.forEach(function (row, i) {
-      keyPairs(d, row.kind, [row.pair], 'k' + i, KEY.y[i]);
-      keyEdge(d, row.kind, edgeX, KEY.y[i], KEY.link);
+    m.legend.forEach(function (row, i) {
+      var faded = rowFaded(row.kind, looks);
+      keyPairs(d, row.kind, [row.pair], 'k' + i, KEY.y[i], faded);
+      keyEdge(d, row.kind, edgeX, KEY.y[i], KEY.link, faded);
     });
     fig.place(d.render(m.name + '-' + step), { x: 0, y: 0, w: PAGE.w });
     caption(fig, m.caption);
-    rows.forEach(function (row, i) {
-      fig.text(row.text, { x: edgeX + KEY.link + KEY.gap, y: KEY.y[i] + TEXT.label / 3, align: 'start', role: 'slideBody' });
+    m.legend.forEach(function (row, i) {
+      keyText(fig, row.text, edgeX + KEY.link + KEY.gap, KEY.y[i] + TEXT.label / 3, rowFaded(row.kind, looks));
     });
   }
 
   function drawEnergy(fig, step) {
-    var m = COPY.energy, s = m.steps[step];
+    var m = COPY.energy, f = frameOf(m, step), s = f.s;
     if (s.blank) return;
     var d = newDiagram(m);
-    var rows = stateRows(s.state), counts = tally(rows, s.looks);
-    heart(d, rows, s.looks, true);
+    var rows = stateRows(s.state), counts = tally(rows, f.landed.looks || {});
+    heart(d, rows, s.looks, true, f.reach);
     m.key.forEach(function (row, i) {
       keyPairs(d, row.kind, row.pairs, 'k' + i, KEY.y[i], rowFaded(row.kind, s.looks));
     });
@@ -269,11 +322,11 @@
 
   /* The key reads: a neighbour box and its edge, `vote`, the neuron ?, `=`, and the vote's box. */
   function drawUpdate(fig, step) {
-    var m = COPY.update, s = m.steps[step];
+    var m = COPY.update, f = frameOf(m, step), s = f.s;
     if (s.blank) return;
     var d = newDiagram(m);
-    var counts = votes(stateRows('damaged'), s.looks), countY = CAPTION.y - TEXT.label / 3;
-    heart(d, stateRows(s.state), s.looks, false);
+    var counts = votes(stateRows('damaged'), f.landed.looks || {}), countY = CAPTION.y - TEXT.label / 3;
+    heart(d, stateRows(s.state), s.looks, false, f.reach);
     var counted = counts.on + counts.off > 0;
     if (counted) [true, false].forEach(function (on, i) { box(d, 'c' + i, GRID.x + i * CAPTION.gap, countY, on); });
     var verdictX = GRID.x + CAPTION.conclusion;
@@ -304,7 +357,7 @@
   function figureModule(m, draw) {
     return {
       width: PAGE.w, height: PAGE.h, title: m.title, name: m.name, className: m.name + '-fig',
-      ariaLabel: m.ariaLabel, steps: m.steps.length, draw: draw
+      ariaLabel: m.ariaLabel, steps: m.play.steps, autoplay: m.play.autoplay, holds: m.play.holds, draw: draw
     };
   }
 

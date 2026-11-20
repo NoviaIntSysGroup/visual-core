@@ -2,7 +2,9 @@
    entry's circle and stem; the rows above and below hold the labels, each row as tall as
    its tallest label. The track is solid through the past and dashed into the future;
    future circles are hollow. A branch runs --timeline-half off the axis, leaving and
-   rejoining it on S-curves --timeline-bend wide. Extra air sets it apart from columns above. */
+   rejoining it on S-curves --timeline-bend wide. Extra air sets it apart from columns above.
+   Each step's slot is --timeline-slot-max wide, narrowed until the gaps between slots are
+   at least --timeline-gap-min; the first and last slots touch the edges, the gaps even. */
 .timeline-section {
   --timeline-line: 2px;
   --timeline-dot: 12px;
@@ -10,8 +12,9 @@
   --timeline-label-gap: var(--s2);
   --timeline-branch-offset: var(--s8);
   --timeline-bend: var(--s10);
-  --timeline-card-gap: var(--s2);
   --timeline-card-stem: var(--s3);
+  --timeline-slot-max: 200px;
+  --timeline-gap-min: var(--s6);
 }
 
 .deck-columns-grid + .timeline-section {
@@ -27,6 +30,10 @@
   display: grid;
   grid-template-rows: auto calc(2 * (var(--timeline-half) + var(--timeline-reach))) auto;
   grid-template-columns: minmax(0, 1fr);
+  /* A slot's width, and the distance from one slot's start to the next's. */
+  --timeline-slot: min(var(--timeline-slot-max),
+    (100% - (var(--timeline-steps) - 1) * var(--timeline-gap-min)) / var(--timeline-steps));
+  --timeline-pitch: (100% - var(--timeline-slot)) / max(var(--timeline-steps) - 1, 1);
 }
 
 .timeline-with-branches {
@@ -144,35 +151,23 @@
   background: var(--background);
 }
 
-.timeline-milestone .timeline-stem {
-  border-left-color: var(--graphic-primary);
+.timeline-milestone .timeline-stem,
+.timeline-milestone .timeline-card {
+  border-color: var(--graphic-primary);
 }
 
-/* A label is centred on its stem, and one wider than its room overflows evenly both ways. */
+/* A label fills its slot, centred on its stem, its text wrapping inside. */
 .timeline-label {
   position: relative;
-  margin-left: calc(var(--x) - var(--timeline-label-width) / 2);
+  box-sizing: border-box;
+  margin-left: calc(var(--x) - var(--timeline-slot) / 2);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--s1);
-  width: var(--timeline-label-width);
+  width: var(--timeline-slot);
   text-align: center;
-  white-space: nowrap;
   pointer-events: auto;
-}
-
-/* At a closed end the label hangs inward from its stem, flush with it. */
-.timeline-flush-start .timeline-label {
-  margin-left: var(--x);
-  align-items: flex-start;
-  text-align: left;
-}
-
-.timeline-flush-end .timeline-label {
-  margin-left: calc(var(--x) - var(--timeline-label-width));
-  align-items: flex-end;
-  text-align: right;
 }
 
 .timeline-above .timeline-label {
@@ -200,32 +195,15 @@
   color: var(--text);
 }
 
-/* With `cards`, an entry with a picture or figure is a card: as wide as its content, at most
-   its room less --timeline-card-gap, centred on its stem. Its date heads it on the axis side,
-   and it reaches into the axis row, leaving --timeline-card-stem of stem. */
+/* With `cards`, an entry with a picture or figure is a card framing its slot. Its date heads
+   it on the axis side, and it reaches into the axis row, leaving --timeline-card-stem of
+   stem. */
 .timeline-card {
-  box-sizing: border-box;
-  margin-left: var(--x);
-  translate: -50%;
-  width: max-content;
-  max-width: calc(var(--timeline-label-width) - var(--timeline-card-gap));
   padding: var(--s1) var(--s2);
   border: var(--timeline-line) solid var(--edges);
   border-radius: var(--s2);
   background: var(--background-plain);
 }
-
-/* A figure's card is as wide as the figure imports, at most its room: the import rule needs a
-   definite width, which max-content does not give it. Sized by its content box, so its frame
-   and padding sit outside the figure. */
-.timeline-card:has(.figure-import) {
-  box-sizing: content-box;
-  width: calc(var(--timeline-figure-width) * var(--diagram-scale));
-  max-width: calc(var(--timeline-label-width) - var(--timeline-card-gap) - 2 * var(--s2) - 2 * var(--timeline-line));
-}
-
-.timeline-flush-start .timeline-card { translate: 0; }
-.timeline-flush-end .timeline-card { margin-left: var(--x); translate: -100%; }
 
 .timeline-above .timeline-card { margin-bottom: calc(var(--timeline-card-stem) - var(--timeline-reach)); }
 .timeline-below .timeline-card { margin-top: calc(var(--timeline-card-stem) - var(--timeline-reach)); }
@@ -234,18 +212,14 @@
   color: var(--text-soft);
 }
 
-/* An outcome ends the axis in a card centred on it, in its own column, as wide as the widest
-   figure's card. Its circle sits on the card's left edge, where the axis meets it. */
+/* An outcome ends the axis in a card on it, in its own slot. Its circle sits on the card's
+   left edge, where the axis meets it. */
 .timeline-outcome .timeline-label {
   grid-row: 2;
   align-self: center;
 }
 
 .timeline-outcome .timeline-card {
-  box-sizing: content-box;
-  width: calc(var(--timeline-figure-width, 0px) * var(--diagram-scale));
-  min-width: max-content;
-  max-width: calc(var(--timeline-label-width) - var(--timeline-card-gap) - 2 * var(--s2) - 2 * var(--timeline-line));
   padding-block: var(--s3);
 }
 
@@ -263,9 +237,9 @@
   color: var(--text);
 }
 
-/* A picture or figure keeps its text under it on both sides of the axis, wrapped at the
-   label's width. A figure's content spans the label, so the import rule's min(100%, …) has a
-   definite width to resolve against. */
+/* A picture or figure keeps its text under it on both sides of the axis. A figure's content
+   spans the label, so the import rule's min(100%, …) has a definite width to resolve
+   against. */
 .timeline-content {
   display: flex;
   flex-direction: column;
@@ -273,10 +247,6 @@
 
 .timeline-content:has(.figure-import) {
   align-self: stretch;
-}
-
-.timeline-content:has(.timeline-image, .figure-import) .timeline-text {
-  white-space: normal;
 }
 
 .timeline-image,

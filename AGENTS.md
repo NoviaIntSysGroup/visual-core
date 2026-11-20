@@ -17,7 +17,9 @@ editing, running, and presenting workflow is in `core/README.md`.
 7. Read the skill that governs the files you are about to touch, before touching them.
 8. Only inspect a page visually when asked to do so, or while drawing a figure (its source art
    and its own frames), with `core/skills/page-check/SKILL.md`.
-9. Always work in the current checkout, only create a git worktree if asked to do so.
+9. Always work in the current checkout, only create a git worktree if asked to do so. Other
+   sessions may share it: never revert or overwrite changes you did not make, and ask before
+   editing a file someone else is changing.
 10. Stay inside the repo. Never search, read, or write outside the working directory; scratch
     files go in `tmp/<task>/` at its root, one folder per task, since sessions share `tmp/`.
 11. The shell starts in the working directory: never `cd` into it, use paths relative to it.
@@ -88,10 +90,11 @@ moving a deck between projects, follows `core/skills/new-project/SKILL.md`.
 
 ## Conventions & Constraints
 
-- **`file://` must keep working.** Use classic `<script>` tags, no ES modules, no `fetch`, and
-  keep every deck and figure document exactly **two levels deep** (`decks/<name>/index.html`,
-  `figures/<name>/index.html`) so shared paths stay `../../core/...`. The core's own `example/`
-  is the one exception: laid out like a project one level deeper, it links `../../../`.
+- **`file://` must keep working.** Use classic `<script>` tags (modern syntax is fine; only
+  modules are out), no `fetch`, and keep every deck and figure document exactly **two levels
+  deep** (`decks/<name>/index.html`, `figures/<name>/index.html`) so shared paths stay
+  `../../core/...`. The core's own `example/` is the one exception: laid out like a project one
+  level deeper, it links `../../../`.
 - **Presentations must work offline.** Everything a deck needs to run is local: Reveal is in
   `core/deck-kit/reveal/`, and fonts are system fonts. Remote media is allowed, and any picture
   or clip that fails to load shows a stand-in. Never link a script or stylesheet from a CDN.
@@ -170,7 +173,7 @@ rather than to one deck:
 
 ## Running It
 
-There is no build, test, or lint step. Validation is opening the page.
+There is no build, test, or lint step. Validation is a parse check, then opening the page.
 
 | Task | Command |
 |---|---|
@@ -178,6 +181,7 @@ There is no build, test, or lint step. Validation is opening the page.
 | Dev server for the core alone, from the core folder; `/` redirects to `/example/` | `bun run tools/serve.js` |
 | Regenerate icon bounding boxes | `bun run core/tools/icon-metrics.js` |
 | Ink coverage for optically sized marks | `bun run core/tools/mark-coverage.js <file\|folder>...` |
+| Check a script parses, without a browser | `bun build --no-bundle <file> >/dev/null` |
 
 Opening any deck's or figure's `index.html` directly also works; you lose auto-refresh,
 editing, and exporting figures with images (see **Dev-server only**). Without a project, open

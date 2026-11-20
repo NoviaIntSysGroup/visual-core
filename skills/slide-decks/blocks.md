@@ -26,7 +26,7 @@ Blocks and widgets are always core. What a project adds is a figure, or an app i
 | `layout`   | Use                                              | Fields |
 | ---------- | ------------------------------------------------ | ------ |
 | `hero`     | Cover slide — one big title with optional badges | `badges` (string[]), `title`, `subtitle`, `byline` (string; optional line under the subtitle), `background` (`"Wash"`, taking `seed`, `variant`, `hue`, and `strength` as slide fields, or a loaded app's global: see **Apps**; plain without one) |
-| `columns`  | **Generic default** — title + a row of 1–N equal columns/cards | `title`, `columns` (array), `lead` (string; the framing line over the whole row), `closing` (string; the closing line under the whole row), `timeline` (`{ title, cards, branches, items }`, items `{ date, text, milestone, future, branch, outcome }`, plus `{ src, alt, height }` for a picture or `{ module }` for a figure; a full-width axis of dated entries under the grid), `fragments` (bool, default **true** — the opposite of `toc`), `dividers` (bool, or a per-gap `bool[]` of length `columns.length - 1`; default true), `halign` (`"center"` when the columns should sit centred) |
+| `columns`  | **Generic default** — title + a row of 1–N equal columns/cards | `title`, `columns` (array), `lead` (string; the framing line over the whole row), `closing` (string; the closing line under the whole row), `timeline` (`{ title, cards, from, to, branches, items }`, items `{ date, text, milestone, future, branch, outcome }`, plus `{ src, alt, height }` for a picture or `{ module }` for a figure; a full-width axis of dated entries under the grid), `fragments` (bool, default **true** — the opposite of `toc`), `dividers` (bool, or a per-gap `bool[]` of length `columns.length - 1`; default true), `halign` (`"center"` when the columns should sit centred) |
 | `toc`      | Table of contents — a numbered list of the deck's sections | `title`, `items` (array of `{ title, text }`), `highlight` (an item's `title`, or its index; optional), `fragments` (bool, default **false** — the opposite of `columns`) |
 | `references` | Printout page — the deck's sources, grouped by topic | `title`, `groups` (array of `{ title, items }`, items `{ name, title, href }`) |
 
@@ -85,42 +85,41 @@ premise; a slide whose columns speak for themselves doesn't need one, and two or
 sentences is the budget before the row below it gets squeezed.
 
 `timeline` is a full-width row **under** the grid, above `closing`: dated entries on one axis,
-in time order, each in an equal column, for a history the columns sit in. An optional `title`
+in time order, each in an equal slot, for a history the columns sit in. An optional `title`
 heads the row as an `h2`. Labels alternate above and below the axis, each on a short stem from
-its circle, headed by its date over the stem. An entry sits in the middle of its column, its label
-centred; at an end no branch runs on past, the end entry sits on the edge instead, its label
-hanging inward from the stem, so the last gap there is one and a half columns. A label reaches
-halfway to its nearest neighbour's column middle on the same side (two columns wide when they
-alternate on a plain axis), and a text label never wraps, so a long one overlaps its neighbour.
-For histories that part and meet, `branches` adds named tracks `{ name, side, from, to }`
-beside the axis, drawn like a git graph, `side` `"above"` or `"below"`: a branch leaves the
-axis on a curve before its first entry and merges back after its last, or, with `from: "edge"`
-or `to: "edge"`, starts at the left edge or runs to the right one. An item with `branch: i`
-sits on that branch with its label on the branch's side; an axis item's label takes the side no
-branch is on. A branch runs between the axis items either side of its own, and there each
-track's n-th entry shares a column with the others' n-th, whatever their dates. Two branches
-`from: "edge"` on both sides, with the axis starting where they meet, show two histories
-merging; one branch per side at a time. Spacing is deliberately not to scale: bunched dates
-would crowd the axis. Mark each upcoming entry `future: true`: its circle is hollow, and the
-track turns dashed halfway between the last past entry and the first future one. An entry with
-`milestone: true` gets an accent circle and stem; one with `src` (and `alt`) shows that picture
-at the stem's end, `height` points tall (default 64). One with `module` shows that figure there
-instead, sized like any imported figure and stepping or playing on its own presses once its
-entry has arrived; a picture's or figure's `text`, if any, sits under it, wrapped at the
-label's width. Author a figure no wider than its label's room ÷ 1.5. It takes no `maxHeight`:
-to resize it, re-author the module. With `cards: true` on the timeline, each entry with a
-picture or figure becomes a card instead: a framed box headed by its date on the axis side, as
-wide as its content and at most its room less a small gap, so a figure is authored no wider
-than that room less the card's padding and frame, 2 × 10 pt, ÷ 1.5 (on a four-step track of 912
-pt, `cm(4.7)`). Use it when wide pictures or figures leave unclear which date each belongs to.
-The last item, on the axis, may be the `outcome: true` the timeline leads to: a card centred on
-the axis in its own column, the axis ending in its circle on the card's left edge, its date
-over its `text`. It is as wide as the timeline's widest figure card, so its gaps match theirs;
-with no figures, as wide as its text. Use it when the branches merge into one result.
-Each side of the axis is as tall as its tallest label, so the axis sits off centre when the
-sides differ. Split the slide past about twelve items. With `fragments`, the section (its
-title, axis and first entry) arrives on one press after the columns, and each later entry on
-its own.
+its circle, headed by its date over the stem. The slots fill the row edge to edge, the first
+and last touching its sides and the gaps between them even: each slot is 200 pt wide, narrowed
+until the gaps are at least 24 pt (`--timeline-slot-max` and `--timeline-gap-min` in
+`timeline.css`), so on the 912 pt row up to four slots keep the full 200 pt. An entry's stem is
+in the middle of its slot, and its label fills the slot, centred, its text wrapping inside;
+break a line with `<br>` to choose where. For histories that part and meet, `branches` adds
+named tracks `{ name, side, from, to }` beside the axis, drawn like a git graph, `side`
+`"above"` or `"below"`: a branch leaves the axis on a curve before its first entry and merges
+back after its last, or, with `from: "edge"` or `to: "edge"`, starts at the left edge or runs
+to the right one. An item with `branch: i` sits on that branch with its label on the branch's
+side; an axis item's label takes the side no branch is on. A branch runs between the axis items
+either side of its own, and there each track's n-th entry shares a slot with the others' n-th,
+whatever their dates. The axis itself stops at its first and last entries; `from: "edge"` or
+`to: "edge"` on the timeline runs it on to that edge. Two branches `from: "edge"` on both
+sides, with the axis starting where they meet, show two histories merging; one branch per side
+at a time. Spacing is deliberately not to scale: bunched dates would crowd the axis. Mark each upcoming entry `future: true`: its
+circle is hollow, and the track turns dashed halfway between the last past entry and the first
+future one. An entry with `milestone: true` gets an accent circle, stem, and card frame; one
+with `src` (and `alt`) shows that picture at the stem's end, `height` points tall (default 64).
+One with `module` shows that figure there instead, sized like any imported figure and stepping
+or playing on its own presses once its entry has arrived; a picture's or figure's `text`, if
+any, sits under it, wrapped at the slot's width. Author a figure no wider than its slot ÷ 1.5.
+It takes no `maxHeight`: to resize it, re-author the module. With `cards: true` on the
+timeline, each entry with a picture or figure becomes a card instead: a framed box filling its
+slot, headed by its date on the axis side, so a figure is authored no wider than the slot less
+the card's padding and frame, 2 × 10 pt, ÷ 1.5 (a full 200 pt slot: 120 pt, `cm(4.2)`). Use it
+when wide pictures or figures leave unclear which date each belongs to. The last item, on the
+axis, may be the `outcome: true` the timeline leads to: a card on the axis filling its own
+slot, the axis ending in its circle on the card's left edge, its date over its `text`. Use it
+when the branches merge into one result. Each side of the axis is as tall as its tallest label,
+so the axis sits off centre when the sides differ. Split the slide past about twelve items.
+With `fragments`, the section (its title, axis and first entry) arrives on one press after the
+columns, and each later entry on its own.
 
 `closing` is the slide's closing line, rendered as one full-width row **under** the grid rather
 than inside the last column — a "so what" that answers all the columns belongs to none of them,

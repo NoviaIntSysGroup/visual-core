@@ -60,8 +60,9 @@ way in the source.
 - **Encode each distinction once.** When colour already separates two categories, a second cue
   (dash, weight, opacity, shape) must carry a meaning of its own or go. Re-check old cues
   whenever the encoding changes.
-- **Colour means something.** A `--graphic-*` hue names one category, the same on the slide
-  and in its figures; a word in the text takes the hue of what it names. An element that
+- **Colour means something.** A `--graphic-*` hue names one category, on the slide, in its
+  figures, and for the rest of the deck; a word in the text takes the hue of what it names.
+  Items that order or position already sets apart need no hues of their own. An element that
   belongs to no category (a divider, a border between regions) takes `--edges` or `--text`,
   never `--accent`, which in the default theme is the same blue as `--graphic-primary`.
 - **Reuse one treatment.** As few line widths, strokes, fills, and corner styles as possible,

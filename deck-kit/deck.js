@@ -197,8 +197,9 @@
   }
 
   /* Overflow check. Each slide shown is measured once it settles: in-flow content past the
-     slide's padding box is clipped. The toolbar counts the slides seen to overflow, with
-     how far on hover, as FigureImport counts scaled-down figures. */
+     slide's padding box is clipped, and text wider than the element holding it runs out of
+     its box. The toolbar counts the slides seen to overflow, with how on hover, as
+     FigureImport counts scaled-down figures. */
   function initOverflowCheck() {
     const over = {};
     function check() {
@@ -217,6 +218,10 @@
       const n = Reveal.getIndices().h + 1, past = [];
       if (high < top - 0.5) past.push(Math.round(top - high) + ' pt past the top');
       if (low > bottom + 0.5) past.push(Math.round(low - bottom) + ' pt past the bottom');
+      const narrow = [...slide.querySelectorAll('*')].filter(el => el instanceof HTMLElement
+        && el.scrollWidth > el.clientWidth + 1
+        && [...el.childNodes].some(node => node.nodeType === 3 && node.textContent.trim())).length;
+      if (narrow) past.push(narrow + (narrow === 1 ? ' box too narrow for its text' : ' boxes too narrow for their text'));
       if (past.length) over[n] = 'Slide ' + n + ': ' + past.join(', ') + '.';
       else delete over[n];
       showOverflow(over);

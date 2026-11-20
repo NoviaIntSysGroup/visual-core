@@ -128,11 +128,12 @@
     /* Inline paint for the primitives below. Everything is optional: with no
        options a rule keeps its .figure-rule styling and a rect its CSS default,
        so appearance stays in CSS unless a figure deliberately overrides it.
-       o: { fill, stroke, width, opacity } */
-    /* A class attribute, or nothing at all when there are no classes — so the
-       primitives never emit an empty class="" or a trailing space. */
-    function clsAttr() {
-      var cls = [].slice.call(arguments).filter(Boolean).join(' ').trim();
+       o: { fill, stroke, width, opacity, line, cls }; `line: 'dashed' | 'dotted'`
+       sets the stroke style through the theme's .line-* classes. */
+    /* A class attribute holding `base`, the line style and o.cls, or nothing at
+       all when there are none — so no primitive emits an empty class="". */
+    function clsAttr(base, o) {
+      var cls = [base, o.line && 'line-' + o.line, o.cls].filter(Boolean).join(' ').trim();
       return cls ? ' class="' + cls + '"' : '';
     }
 
@@ -146,19 +147,19 @@
     }
 
     /* A straight rule (e.g. a column divider). Styled via .figure-rule; the paint
-       options override it for one line, and `line: 'dashed' | 'dotted'` sets its style. */
+       options override it for one line. */
     function rule(x1, y1, x2, y2, o) {
       o = o || {};
-      parts.push('<line' + clsAttr('figure-rule', o.line && 'line-' + o.line, o.cls) + ' x1="' + r(x1) + '" y1="' + r(y1)
+      parts.push('<line' + clsAttr('figure-rule', o) + ' x1="' + r(x1) + '" y1="' + r(y1)
         + '" x2="' + r(x2) + '" y2="' + r(y2) + '"' + paint(o) + '/>');
       return api;
     }
 
     /* A filled rect (a band, a zebra row, a bar, a colour chip).
-       o: { fill, opacity, stroke, width, radius, cls } */
+       o: the paint options, and radius */
     function rect(x, y, w, h, o) {
       o = o || {};
-      parts.push('<rect' + clsAttr(o.cls) + ' x="' + r(x) + '" y="' + r(y)
+      parts.push('<rect' + clsAttr(null, o) + ' x="' + r(x) + '" y="' + r(y)
         + '" width="' + r(w) + '" height="' + r(h) + '"'
         + (o.radius != null ? ' rx="' + r(o.radius) + '"' : '') + paint(o) + '/>');
       return api;
@@ -181,7 +182,25 @@
        milestone diamond). `d` is authored by the caller in figure coordinates. */
     function path(d, o) {
       o = o || {};
-      parts.push('<path' + clsAttr(o.cls) + ' d="' + d + '"' + paint(o) + '/>');
+      parts.push('<path' + clsAttr(null, o) + ' d="' + d + '"' + paint(o) + '/>');
+      return api;
+    }
+
+    /* A circle centred on (x, y). Takes the paint options. */
+    function circle(x, y, rad, o) {
+      o = o || {};
+      parts.push('<circle' + clsAttr(null, o) + ' cx="' + r(x) + '" cy="' + r(y) + '" r="' + r(rad) + '"'
+        + paint(o) + '/>');
+      return api;
+    }
+
+    /* Draw `drawFn()` at opacity `alpha` (0 → 1) as one group; at 0 nothing is drawn. */
+    function fade(alpha, drawFn) {
+      if (alpha <= 0) return api;
+      if (alpha >= 1) { drawFn(); return api; }
+      parts.push('<g style="opacity:' + Math.round(alpha * 1000) / 1000 + '">');
+      drawFn();
+      parts.push('</g>');
       return api;
     }
 
@@ -246,8 +265,8 @@
 
     api = {
       background: background, place: place, text: text, math: math, image: image,
-      rule: rule, rect: rect, path: path,
-      nest: nest, nestModule: nestModule, debugFrame: debugFrame,
+      rule: rule, rect: rect, path: path, circle: circle,
+      fade: fade, nest: nest, nestModule: nestModule, debugFrame: debugFrame,
       raw: raw, render: render, width: W, height: H
     };
     return api;
@@ -558,6 +577,43 @@
     return run;
   }
 
+  /* Progress through the act from `start` to `start + dur` at time t: 0 → 1, eased in and
+     out, held at 0 before and 1 after. A played figure's draw() times its motion with it. */
+  function ease(t, start, dur) {
+    var p = Math.max(0, Math.min(1, (t - start) / dur));
+    return p * p * (3 - 2 * p);
+  }
+
+  /* `k` of the way from a to b: two numbers, or two { x, y } points. */
+  function mix(a, b, k) {
+    if (typeof a === 'number') return a + (b - a) * k;
+    return { x: a.x + (b.x - a.x) * k, y: a.y + (b.y - a.y) * k };
+  }
+
+  /* A played figure's frames, from its beats: beat 0 is the state it opens on, and each later
+     beat waits for a press, then plays from the one before over its `dur` seconds, in whole
+     frames at 25 a second. Gives the module its steps, holds and autoplay, and at(step) → { t,
+     i, u, from, to }: seconds from the start, the beat playing, seconds into it (0 at its hold,
+     `dur` on its last frame, which is the next hold), and the beats either side. */
+  function beats(list) {
+    var FPS = 25, start = [0], frame = [0];
+    for (var b = 1; b < list.length; b++) {
+      start.push(start[b - 1] + list[b].dur);
+      frame.push(frame[b - 1] + Math.max(1, Math.round(list[b].dur * FPS)));
+    }
+    return {
+      steps: frame[list.length - 1] + 1,
+      holds: frame.slice(0, -1),
+      autoplay: 1000 / FPS,
+      at: function (step) {
+        var i = 1;
+        while (i < list.length - 1 && step >= frame[i]) i++;
+        var u = (step - frame[i - 1]) / (frame[i] - frame[i - 1]) * list[i].dur;
+        return { t: start[i - 1] + u, i: i, u: u, from: list[i - 1], to: list[i] };
+      }
+    };
+  }
+
   /* ---- shared chrome --------------------------------------------------------
      Build the figure-page toolbar (title, physical size, Export SVG / PNG) and
      render the figure, so each figures/<name>/index.html only declares its
@@ -756,7 +812,7 @@
 
   window.Figure = {
     create: create,
-    preload: preload, imageSize: imageSize, svgText: serialize, play: play,
+    preload: preload, imageSize: imageSize, svgText: serialize, play: play, ease: ease, mix: mix, beats: beats,
     mount: mount, mountModule: mountModule
   };
 })();

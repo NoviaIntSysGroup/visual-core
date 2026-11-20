@@ -23,10 +23,12 @@ The browser is Bun's `Bun.WebView`, driving Chromium: `BUN_CHROME_PATH`, or the 
   transparent edges, draw that SVG onto a canvas in the page and return `canvas.toDataURL()`.
 - A figure's frames: on its page, for each step clear the body, `await
   Figure.mountModule(window.<Global>, { step: n })`, take `Figure.svgText` of its SVG, and lay
-  the strings out as `<img>`s in one grid page for one screenshot.
+  the strings out as `<img>`s in one grid page, written to `tmp/<task>/grid.html` and opened
+  through the server for one screenshot (a `data:` URL fails to load).
 - One slide: only the current slide is laid out, so others measure 0. Go to it with
   `Reveal.slide(h, v, 99)` (every step shown), wait about 1.5 s for steps and figures to
   settle, then screenshot or measure; `getBoundingClientRect()` ÷ `Reveal.getScale()` is points.
+  The deck's own fit report is `#slide-overflow-status`'s `title`, absent while every slide fits.
 - Headless Chromium falls back to a wider face than the user's system font, so text wraps
   sooner and a slide can run up to ~40 pt taller there; an overflow that small is a near-fit,
   the user's to judge in their browser.

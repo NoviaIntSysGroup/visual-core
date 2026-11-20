@@ -34,13 +34,14 @@ builder:
   slide** (see *Importing a figure onto a slide* in `core/skills/figures/SKILL.md`): they read
   15.9pt and 12pt at the 1.5× import, the slide's `--t-base` and `--t-sm`. The other roles are
   for publication figures. `size`/`weight`/`style` override the role; `cls` adds classes.
-- **`rule(x1, y1, x2, y2, opts?)`** — a `<line>` (e.g. a column divider), styled by
-  `.figure-rule`. `opts: { stroke, width, opacity, line, cls }` overrides that for one line;
-  `line: 'dashed' | 'dotted'` sets its style, as on a diagram edge.
-- **`rect(x, y, w, h, opts)`** — a filled rect: a band, a zebra row, a bar, a colour chip.
-  `opts: { fill, opacity, stroke, width, radius, cls }`.
-- **`path(d, opts)`** — an arbitrary path for shapes the above don't cover (a milestone
-  diamond), same paint options.
+- **`rule(x1, y1, x2, y2, opts?)`**, **`rect(x, y, w, h, opts)`**, **`circle(x, y, r,
+  opts)`**, **`path(d, opts)`** — a `<line>` styled by `.figure-rule` (a column divider), a
+  filled rect (a band, a bar, a colour chip; `radius` rounds it), a circle, and a path for
+  shapes the others don't cover (a milestone diamond). All four take the paint options `{ fill,
+  stroke, width, opacity, line, cls }`; `line: 'dashed' | 'dotted'` sets the stroke style, as
+  on a diagram edge.
+- **`fade(alpha, drawFn)`** — run `drawFn()` at opacity `alpha` as one group, so overlapping
+  parts fade together; at 0 nothing is drawn.
 - **`nest({ x, y, scale? }, drawFn)`** — run `drawFn(fig)` and wrap everything it appends in
   one `<g transform="translate(x y) scale(s)">`, so a child composition authored in local
   coordinates lands at `(x, y)`. The basis of figure nesting.
@@ -50,7 +51,7 @@ builder:
   state.
 - **`render()`** → the figure `<svg>` string. **`mount(...)`** usually calls this for you.
 
-Use `rule`/`rect`/`path` rather than building SVG strings by hand with `raw()`. They round
+Use `rule`/`rect`/`circle`/`path` rather than building SVG strings by hand with `raw()`. They round
 coordinates the same way the rest of the kit does and keep appearance in one place; hand-built
 markup is how `.toFixed(2)` noise and stray `stroke-dasharray` attributes accumulated here
 before.
@@ -82,8 +83,9 @@ is the download basename. For stepped figures, `steps` (total count) and `redraw
 the initial state; `autoplay` (ms per step) and `holds` add a slider and the two hold buttons
 of a played figure (see *Stepped and played figures* in `core/skills/figures/SKILL.md`).
 `Figure.play(ms, at, target, show)` is the loop behind ▶, shared with the deck's `figure`
-block. **Call `mountModule` instead** unless a document genuinely needs to assemble its own
-figure object.
+block. A played module's own timing uses `Figure.beats(BEAT)`, `Figure.ease(t, start, dur)`
+and `Figure.mix(a, b, k)`, described under *Stepped and played figures* there. **Call
+`mountModule` instead** unless a document genuinely needs to assemble its own figure object.
 
 ## Debug frames
 
