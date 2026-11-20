@@ -15,6 +15,7 @@
     titleGap: 8,         // tick labels -> axis title, top row -> plot
     dot: 4,              // scatter dot radius, and legend dots
     dotMax: 8,           // radius of the largest dot when points carry a `size`
+    diamond: 5,          // half-diagonal of a fixed-size diamond: a default dot's area
     yTicks: 4            // value-axis divisions
   };
 
@@ -49,6 +50,24 @@
     return '<line class="' + cls + '" x1="' + n(x1) + '" y1="' + n(y1) + '" x2="' + n(x2) + '" y2="' + n(y2) + '"/>';
   }
 
+  /* A series' marker: a circle of radius r, or a `diamond` of fixed size whatever
+     the point's `size`, for a series whose sizes would swamp the plot. */
+  var MARKERS = {
+    circle: function (cls, x, y, r) {
+      return '<circle class="' + cls + '" cx="' + n(x) + '" cy="' + n(y) + '" r="' + n(r) + '"/>';
+    },
+    diamond: function (cls, x, y) {
+      var d = DEFAULTS.diamond;
+      return '<path class="' + cls + '" d="M' + n(x) + ' ' + n(y - d) + 'L' + n(x + d) + ' ' + n(y)
+        + 'L' + n(x) + ' ' + n(y + d) + 'L' + n(x - d) + ' ' + n(y) + 'Z"/>';
+    }
+  };
+  function marker(name, kind) {
+    if (!MARKERS[name || 'circle']) throw new Error('Charts.' + kind + ': unknown marker "' + name + '"');
+    return name || 'circle';
+  }
+  function markerRadius(name, r) { return name === 'diamond' ? DEFAULTS.diamond : r; }
+
   function svg(w, h, aria, body) {
     return '<svg class="chart" width="' + n(w) + '" height="' + n(h) + '"'
       + ' viewBox="0 0 ' + n(w) + ' ' + n(h) + '" xmlns="http://www.w3.org/2000/svg"'
@@ -77,10 +96,12 @@
   }
 
   /* ---- scatter -------------------------------------------------------------
-     Dates on x, values on y. `muted` series are grey; `size` sets dot area.
-     spec: { x: { title, from, to, ticks }, size: { max },
+     Dates on x, values on y. `muted` series are grey; `size` sets dot area,
+     except in a series with `marker: 'diamond'`, drawn at one fixed size.
+     `labels: false` keeps point labels in the aria label only, off the plot.
+     spec: { x: { title, from, to, ticks }, size: { max }, labels,
        y: { title, unit, min, max, ticks, grid },
-       series: [{ label, muted, points: [{ label, labelPos, x, y, size }] }] } */
+       series: [{ label, muted, marker, points: [{ label, labelPos, x, y, size }] }] } */
   function scatter(spec) {
     var t = type(), xs = spec.x || {}, ys = spec.y || {}, series = spec.series || [];
     var classes = seriesClasses(series, 'scatter');
@@ -91,14 +112,16 @@
     var points = [];
     series.forEach(function (s, k) {
       (s.points || []).forEach(function (p) {
-        points.push({ p: p, cls: classes[k], muted: !!s.muted, fx: (month(p.x) - x0) / (x1 - x0) });
+        points.push({ p: p, cls: classes[k], muted: !!s.muted, marker: marker(s.marker, 'scatter'),
+          fx: (month(p.x) - x0) / (x1 - x0) });
       });
     });
     var sizeMax = (spec.size && spec.size.max)
-      || Math.max.apply(null, points.map(function (q) { return q.p.size || 0; }));
+      || Math.max.apply(null, points.map(function (q) { return q.marker === 'circle' && q.p.size || 0; }));
     points.forEach(function (q) {
-      q.r = q.p.size ? DEFAULTS.dotMax * Math.sqrt(q.p.size / sizeMax) : DEFAULTS.dot;
+      q.r = markerRadius(q.marker, q.p.size ? DEFAULTS.dotMax * Math.sqrt(q.p.size / sizeMax) : DEFAULTS.dot);
     });
+    var labelled = spec.labels !== false;
 
     // y ticks: `y.ticks` lists them, else min..max in DEFAULTS.yTicks steps.
     var yTicks = ys.ticks ? ys.ticks.slice() : [];
@@ -117,15 +140,16 @@
     }
 
     // Plot box: left clears the y tick labels, the right edge is the widest
-    // that still keeps every right-hand point label on the canvas.
+    // that still keeps every mark, and its right-hand label, on the canvas.
     var left = Math.max.apply(null, yTicks.map(function (v) { return textWidth(v + unit, t); }))
       + DEFAULTS.gap + DEFAULTS.tick;
     var top = row + DEFAULTS.titleGap;
     var bottom = H - (DEFAULTS.tick + DEFAULTS.gap + row + (xs.title ? DEFAULTS.titleGap + row : 0));
     var plotW = W - left;
     points.forEach(function (q) {
-      if (q.muted || !q.p.label || (q.p.labelPos || 'right') !== 'right' || !q.fx) return;
-      var room = W - left - q.r - DEFAULTS.gap - textWidth(q.p.label, t);
+      if (!q.fx) return;
+      var right = labelled && !q.muted && q.p.label && (q.p.labelPos || 'right') === 'right';
+      var room = W - left - q.r - (right ? DEFAULTS.gap + textWidth(q.p.label, t) : 0);
       plotW = Math.min(plotW, room / q.fx);
     });
     function px(mo) { return left + plotW * (mo - x0) / (x1 - x0); }
@@ -165,8 +189,8 @@
     function mark(q) {
       var x = px(month(q.p.x)), y = py(Number(q.p.y));
       var at = (LABEL[q.p.labelPos] || LABEL.right)(x, y, q.r + DEFAULTS.gap);
-      return '<circle class="' + q.cls + '" cx="' + n(x) + '" cy="' + n(y) + '" r="' + n(q.r) + '"/>'
-        + (q.p.label && !q.muted ? text(at[0], at[1], q.p.label, '', at[2], t) : '');
+      return MARKERS[q.marker](q.cls, x, y, q.r)
+        + (labelled && q.p.label && !q.muted ? text(at[0], at[1], q.p.label, '', at[2], t) : '');
     }
     var marks = points.filter(function (q) { return q.muted; })
       .concat(points.filter(function (q) { return !q.muted; }))
@@ -179,16 +203,17 @@
     return { svg: svg(W, H, aria, grid + titles + legend + marks), width: W, height: H };
   }
 
-  /* A row of dot + label entries from x = 0, centred on y, hued like the
-     series they key. `items` are series, or labels. Returns { body, width }. */
+  /* A row of marker + label entries from x = 0, centred on y, hued and shaped
+     like the series they key. `items` are series, or labels. Returns { body, width }. */
   function legendRow(items, y, t) {
     items = items.map(function (it) { return typeof it === 'string' ? { label: it } : it; });
     var classes = seriesClasses(items, 'legend');
     var x = 0, space = DEFAULTS.titleGap * 2;
     var body = items.map(function (it, k) {
-      var entry = '<circle class="' + classes[k] + '" cx="' + n(x + DEFAULTS.dot) + '" cy="' + n(y) + '" r="' + DEFAULTS.dot + '"/>'
-        + text(x + 2 * DEFAULTS.dot + DEFAULTS.gap, y, it.label, '', 'start', t);
-      x += 2 * DEFAULTS.dot + DEFAULTS.gap + textWidth(it.label, t) + space;
+      var m = marker(it.marker, 'legend'), r = markerRadius(m, DEFAULTS.dot);
+      var entry = MARKERS[m](classes[k], x + r, y, r)
+        + text(x + 2 * r + DEFAULTS.gap, y, it.label, '', 'start', t);
+      x += 2 * r + DEFAULTS.gap + textWidth(it.label, t) + space;
       return entry;
     }).join('');
     return { body: body, width: Math.max(0, x - space) };
@@ -197,7 +222,7 @@
   /* ---- legend --------------------------------------------------------------
      The series key on its own, for several charts that share one: their series
      in the same order, each drawn with `legend: false`.
-     spec: { items: [label | { label, muted }] } */
+     spec: { items: [label | { label, muted, marker }] } */
   function legend(spec) {
     var t = type(), items = spec.items || [];
     var H = t.size * DEFAULTS.lineHeight;
