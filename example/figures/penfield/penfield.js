@@ -20,10 +20,11 @@
 
   /* 4 · Colour ------------------------------------------------------------- */
   /* Primary marks what happens: the stimulated spots and what each brings about. */
-  var COLOR = { line: 'var(--text)', event: 'var(--graphic-primary)', body: 'var(--graphic-soft)' };
+  var COLOR = { line: 'var(--text)', event: 'var(--graphic-primary)', ability: 'var(--graphic-secondary)',
+                body: 'var(--graphic-soft)' };
 
   /* 5 · Layout knobs ------------------------------------------------------- */
-  var LINE = { outline: 'var(--line-width-strong)', live: 'var(--line-width-very-strong)' };
+  var LINE = { outline: 'var(--line-width-strong)', beam: 'var(--line-width-very-strong)' };
   /* Lengths are in points for a brain `markedAt` tall (figures/brain/), sized by `B.scaled`.
      Placed as Broca and Wernicke: the brain's top-left, a bubble in each top corner, and the
      text's baseline under the brain. The stimulated spots are the brain's motor and memory
@@ -51,7 +52,6 @@
      ends under the second line. */
   var CAPTION = { y: BRAIN.y + B.height + ROW.line };
   var PAGE = { w: cm(4.0) * B.scale, h: CAPTION.y + ROW.line + TEXT.label / 3 };
-  var FPS = 25;
 
   /* 6 · Content ------------------------------------------------------------ */
   /* Seconds. Each touch: the electrode closes in over `dur` from `start`, and the effect fades
@@ -69,11 +69,9 @@
   };
 
   /* 7 · Steps -------------------------------------------------------------- */
-  /* One frame per 1/FPS s; frame 0, the electrode off the motor cortex, holds until the first
-     press, and the frame after the first effect until the second. */
-  var STEP = [];
-  for (var f = 0; f <= ACT.end * FPS; f++) STEP.push({ t: f / FPS });
-  var HOLDS = [0, Math.round(ACT.hold * FPS)];
+  /* Two presses: the electrode off the motor cortex plays to the first effect, then on to the
+     second. */
+  var PLAY = window.Figure.beats([{}, { dur: ACT.hold }, { dur: ACT.end - ACT.hold }]);
 
   /* 8 · Derived ------------------------------------------------------------ */
   var _geo;
@@ -99,7 +97,7 @@
     var to = { x: corner, y: b.y + BUBBLE.h }, clear = SPARK.outer + TRAIL.gap;
     var dx = to.x - spot.x, dy = to.y - spot.y, len = Math.hypot(dx, dy);
     var from = { x: spot.x + dx / len * clear, y: spot.y + dy / len * clear };
-    var paint = { fill: COLOR.body, stroke: COLOR.event, width: LINE.outline };
+    var paint = { fill: COLOR.body, stroke: COLOR.ability, width: LINE.outline };
     TRAIL_AT.forEach(function (at, i) {
       var x = from.x + (to.x - from.x) * at, y = from.y + (to.y - from.y) * at;
       fig.path(ellipse(x, y, TRAIL.r[i], TRAIL.r[i]), paint);
@@ -111,7 +109,7 @@
   function mover(fig, step) {
     var b = BUBBLE.motor, d = window.Diagram.create(PAGE.w, PAGE.h, { className: 'penfield-icons' });
     d.node('mover', { x: b.x + (BUBBLE.w - BUBBLE.icon) / 2, y: b.y + (BUBBLE.h - BUBBLE.icon) / 2,
-      w: BUBBLE.icon, h: BUBBLE.icon, icon: 'moving', appearance: window.Diagram.iconApp(COLOR.event) });
+      w: BUBBLE.icon, h: BUBBLE.icon, icon: 'moving', appearance: window.Diagram.iconApp(COLOR.ability) });
     fig.place(d.render('penfield-icons-' + step), { x: 0, y: 0, w: PAGE.w });
   }
 
@@ -120,11 +118,11 @@
     var cx = BUBBLE.memory.x + BUBBLE.w / 2, cy = BUBBLE.memory.y + BUBBLE.h / 2;
     var heads = NOTE.heads.map(function (o) { return { x: cx + o.x, y: cy + o.y }; });
     heads.forEach(function (h) {
-      fig.path(ellipse(h.x, h.y, NOTE.rx, NOTE.ry), { fill: COLOR.event });
-      fig.rule(h.x + NOTE.rx, h.y, h.x + NOTE.rx, h.y - NOTE.stem, { stroke: COLOR.event, width: LINE.outline });
+      fig.path(ellipse(h.x, h.y, NOTE.rx, NOTE.ry), { fill: COLOR.ability });
+      fig.rule(h.x + NOTE.rx, h.y, h.x + NOTE.rx, h.y - NOTE.stem, { stroke: COLOR.ability, width: LINE.outline });
     });
     fig.path('M ' + r(heads[0].x + NOTE.rx) + ',' + r(heads[0].y - NOTE.stem) + ' L ' + r(heads[1].x + NOTE.rx) + ','
-      + r(heads[1].y - NOTE.stem), { fill: 'none', stroke: COLOR.event, width: 'var(--line-width-very-strong)' });
+      + r(heads[1].y - NOTE.stem), { fill: 'none', stroke: COLOR.ability, width: LINE.beam });
   }
 
   /* The stimulated spot: a dot with a ring of short rays flashing out from it. */
@@ -142,7 +140,7 @@
     var b = STIMULATOR, from = { x: b.x + b.w, y: b.y + b.h / 2 }, hue = live ? COLOR.event : COLOR.line;
     fig.path('M ' + r(from.x) + ',' + r(from.y) + ' C ' + r(from.x + b.slack) + ',' + r(from.y) + ' '
       + r(end.x + out.x * b.slack) + ',' + r(end.y + out.y * b.slack) + ' ' + r(end.x) + ',' + r(end.y),
-      { fill: 'none', stroke: hue, width: live ? LINE.live : LINE.outline });
+      { fill: 'none', stroke: hue, width: LINE.outline });
     fig.rect(b.x, b.y, b.w, b.h, { radius: b.radius, fill: COLOR.body, stroke: COLOR.line, width: LINE.outline });
     fig.path(BOLT.map(function (q, i) {
       return (i ? 'L ' : 'M ') + r(b.x + q[0] * b.w) + ',' + r(b.y + q[1] * b.h);
@@ -161,33 +159,27 @@
     return z;
   }
 
-  function clamp(v) { return Math.max(0, Math.min(1, v)); }
-  /* Progress through [start, start + dur] at t, eased in and out. */
-  function ease(start, dur, t) { var p = clamp((t - start) / dur); return p * p * (3 - 2 * p); }
-  function mix(p, q, k) { return { x: p.x + (q.x - p.x) * k, y: p.y + (q.y - p.y) * k }; }
 
   /* Where the electrode's tip is at t, how far off its spot, and the spot it touches, if any. */
   function probe(g, t) {
     var u = DIR, keys = ['motor', 'memory'], a = ACT;
-    var glide = ease(a.glide.start, a.glide.dur, t), second = t >= a.glide.start + a.glide.dur;
-    var off = second ? 1 - ease(a.touch[1].start, a.touch[1].dur, t)
-      : t < a.lift.start ? 1 - ease(a.touch[0].start, a.touch[0].dur, t) : ease(a.lift.start, a.lift.dur, t);
-    var spot = mix(g.spot.motor, g.spot.memory, glide), back = off * ELECTRODE.back;
+    var glide = window.Figure.ease(t, a.glide.start, a.glide.dur), second = t >= a.glide.start + a.glide.dur;
+    var off = second ? 1 - window.Figure.ease(t, a.touch[1].start, a.touch[1].dur)
+      : t < a.lift.start ? 1 - window.Figure.ease(t, a.touch[0].start, a.touch[0].dur) : window.Figure.ease(t, a.lift.start, a.lift.dur);
+    var spot = window.Figure.mix(g.spot.motor, g.spot.memory, glide), back = off * ELECTRODE.back;
     return { tip: { x: spot.x + u.x * back, y: spot.y + u.y * back },
              touching: off === 0 ? keys[second ? 1 : 0] : null };
   }
 
   function draw(fig, step) {
-    var g = GEO(), t = STEP[step].t, p = probe(g, t);
+    var g = GEO(), t = PLAY.at(step).t, p = probe(g, t);
     fig.nestModule(window.BrainFigure, { x: BRAIN.x, y: BRAIN.y });
     ['motor', 'memory'].forEach(function (key, i) {
-      var k = clamp((t - ACT.touch[i].start - ACT.touch[i].dur) / ACT.fade);
-      if (k <= 0) return;
-      fig.raw('<g style="opacity:' + r(k) + '">');
-      bubble(fig, key, g.spot[key]);
-      if (key === 'motor') mover(fig, step); else note(fig);
-      fig.text([COPY[key]], { x: PAGE.w / 2, y: CAPTION.y + i * ROW.line, role: 'slideDetail' });
-      fig.raw('</g>');
+      fig.fade(window.Figure.ease(t, ACT.touch[i].start + ACT.touch[i].dur, ACT.fade), function () {
+        bubble(fig, key, g.spot[key]);
+        if (key === 'motor') mover(fig, step); else note(fig);
+        fig.text([COPY[key]], { x: PAGE.w / 2, y: CAPTION.y + i * ROW.line, role: 'slideDetail' });
+      });
     });
     var end = electrode(fig, p.tip, DIR);
     stimulator(fig, end, DIR, !!p.touching);
@@ -198,7 +190,7 @@
     width: PAGE.w, height: PAGE.h,
     title: 'Penfield: Stimulation', name: 'penfield', className: 'penfield-fig',
     ariaLabel: COPY.ariaLabel,
-    steps: STEP.length, autoplay: 1000 / FPS, holds: HOLDS,
+    steps: PLAY.steps, autoplay: PLAY.autoplay, holds: PLAY.holds,
     draw: draw
   };
 })();

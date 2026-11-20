@@ -37,7 +37,6 @@
   var STACK = { x: 34, y: [14, 36] };
   var DOUBT = { r: 5.4, rise: 9.5 };   /* the question mark's bubble, and its height over the judge */
   var CAPTION = { y: 54 };
-  var FPS = 25;
 
   /* 6 · Content ------------------------------------------------------------ */
   /* Seconds. Questions cross over `ask`, answers come back over `answer`; playback holds at
@@ -53,11 +52,8 @@
   };
 
   /* 7 · Steps -------------------------------------------------------------- */
-  /* One frame per 1/FPS s; frame 0, the scene, holds until the first press, and the frame with
-     both answers in until the second. */
-  var STEP = [];
-  for (var f = 0; f <= ACT.end * FPS; f++) STEP.push({ t: f / FPS });
-  var HOLDS = [0, Math.round(ACT.hold * FPS)];
+  /* Two presses: the scene plays to both answers in, then on to the doubt. */
+  var PLAY = window.Figure.beats([{}, { dur: ACT.hold }, { dur: ACT.end - ACT.hold }]);
 
   /* 8 · Derived ------------------------------------------------------------ */
   var _geo;
@@ -74,14 +70,6 @@
 
   /* 9 · Helpers → draw → export ------------------------------------------- */
   function r(v) { return Math.round(v * 100) / 100; }
-  function clamp(v) { return Math.max(0, Math.min(1, v)); }
-  /* Progress through [start, start + dur] at t, eased in and out. */
-  function ease(start, dur, t) { var p = clamp((t - start) / dur); return p * p * (3 - 2 * p); }
-  function mix(p, q, k) { return { x: p.x + (q.x - p.x) * k, y: p.y + (q.y - p.y) * k }; }
-  function circle(c, rad) {
-    return 'M ' + r(c.x - rad) + ',' + r(c.y) + ' A ' + r(rad) + ',' + r(rad) + ' 0 1 0 ' + r(c.x + rad) + ',' + r(c.y)
-      + ' A ' + r(rad) + ',' + r(rad) + ' 0 1 0 ' + r(c.x - rad) + ',' + r(c.y) + ' Z';
-  }
 
   /* A typed note centred at c: a small page with two lines of text. */
   function note(fig, c) {
@@ -104,29 +92,27 @@
   }
 
   function draw(fig, step) {
-    var g = GEO(), t = STEP[step].t;
+    var g = GEO(), t = PLAY.at(step).t;
     fig.rect(g.wall.x, WALL.y, WALL.w, WALL.h, { radius: WALL.radius, fill: COLOR.wall, stroke: COLOR.line, width: LINE.outline });
     people(fig, step);
-    var ask = ease(ACT.ask.start, ACT.ask.dur, t), answer = ease(ACT.answer.start, ACT.answer.dur, t);
+    var ask = window.Figure.ease(t, ACT.ask.start, ACT.ask.dur), answer = window.Figure.ease(t, ACT.answer.start, ACT.answer.dur);
     g.inbox.forEach(function (inbox, i) {
       if (t < ACT.ask.start) return;
-      if (t < ACT.answer.start) note(fig, mix(SEND, inbox, ask));
-      else note(fig, mix(inbox, g.stack[i], answer));
+      if (t < ACT.answer.start) note(fig, window.Figure.mix(SEND, inbox, ask));
+      else note(fig, window.Figure.mix(inbox, g.stack[i], answer));
     });
-    var doubt = ease(ACT.doubt.start, ACT.doubt.dur, t);
+    var doubt = window.Figure.ease(t, ACT.doubt.start, ACT.doubt.dur);
     if (doubt > 0) {
       fig.raw('<g style="opacity:' + r(doubt) + '">');
-      fig.path(circle(g.doubt, DOUBT.r), { fill: COLOR.body, stroke: COLOR.talk, width: LINE.outline });
+      fig.circle(g.doubt.x, g.doubt.y, DOUBT.r, { fill: COLOR.body, stroke: COLOR.talk, width: LINE.outline });
       fig.text([[{ t: '?', cls: 'fig-accent-secondary' }]],
         { x: g.doubt.x, y: g.doubt.y + TEXT.mark * 0.36, size: TEXT.mark, role: 'slideBody' });
       fig.raw('</g>');
     }
     [[COPY.asked, ACT.ask.start], [COPY.doubt, ACT.doubt.start]].forEach(function (c, i) {
-      var k = clamp((t - c[1]) / ACT.fade);
-      if (k <= 0) return;
-      fig.raw('<g style="opacity:' + r(k) + '">');
-      fig.text([c[0]], { x: PAGE.w / 2, y: CAPTION.y + i * ROW.line, role: 'slideDetail' });
-      fig.raw('</g>');
+      fig.fade(window.Figure.ease(t, c[1], ACT.fade), function () {
+        fig.text([c[0]], { x: PAGE.w / 2, y: CAPTION.y + i * ROW.line, role: 'slideDetail' });
+      });
     });
   }
 
@@ -134,7 +120,7 @@
     width: PAGE.w, height: PAGE.h,
     title: 'Turing Test', name: 'turing-test', className: 'turing-test-fig',
     ariaLabel: COPY.ariaLabel,
-    steps: STEP.length, autoplay: 1000 / FPS, holds: HOLDS,
+    steps: PLAY.steps, autoplay: PLAY.autoplay, holds: PLAY.holds,
     draw: draw
   };
 })();

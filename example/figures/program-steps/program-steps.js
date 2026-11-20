@@ -20,10 +20,10 @@
   var ROW = { line: TEXT.label * 1.25 };   /* between the two lines of text */
 
   /* 4 · Colour ------------------------------------------------------------- */
-  /* Secondary marks the program being followed: the step that runs, its tick, the lit lamps. */
+  /* Primary marks the machine at work: the step that runs, its tick, the lit lamps. */
   var COLOR = { line: 'var(--text)', body: 'var(--graphic-soft)', paper: 'var(--background)',
-                writing: 'var(--edges)', live: 'var(--graphic-secondary)' };
-  var TINT = { live: 'var(--graphic-secondary-tint)' };
+                writing: 'var(--edges)', live: 'var(--graphic-primary)' };
+  var TINT = { live: 'var(--graphic-primary-tint)' };
 
   /* 5 · Layout knobs ------------------------------------------------------- */
   var LINE = { outline: 'var(--line-width-strong)', tick: 'var(--line-width-very-strong)' };
@@ -41,7 +41,6 @@
   var LAMP = { cols: 2, rows: 6, pitch: 5, r: 1.3, top: 6, lit: 0.45 };   /* lit: share lit */
   var PERSON = { size: 14, gap: 1 };
   var CAPTION = { y: 54 };
-  var FPS = 25;
 
   /* 6 · Content ------------------------------------------------------------ */
   /* Seconds. The steps are written in over `write`, one after another; playback holds at
@@ -50,8 +49,8 @@
               fade: 0.3, end: 3.9 };
   var COPY = {
     steps: ['1', '2', '3'],
-    lines: [[{ t: 'Program', cls: 'fig-accent-secondary' }, { t: ' → steps to follow' }],
-            [{ t: 'Machine', cls: 'fig-accent-secondary' }, { t: ' → runs the program' }]],
+    lines: [[{ t: 'Program', cls: 'fig-accent-primary' }, { t: ' → steps to follow' }],
+            [{ t: 'Machine', cls: 'fig-accent-primary' }, { t: ' → runs the program' }]],
     ariaLabel: 'A program as a recipe card: three numbered steps are written on it. Beside it a '
       + '1940s computer, a row of cabinets taller than the person next to it, then follows the '
       + 'steps on its own, one at a time, ticking each off, its lamps flickering, until it stops '
@@ -59,11 +58,8 @@
   };
 
   /* 7 · Steps -------------------------------------------------------------- */
-  /* One frame per 1/FPS s; frame 0, a blank card, holds until the first press, and the
-     written card until the second. */
-  var STEP = [];
-  for (var f = 0; f <= ACT.end * FPS; f++) STEP.push({ t: f / FPS });
-  var HOLDS = [0, Math.round(ACT.hold * FPS)];
+  /* Two presses: a blank card plays to the written card, then on to the end. */
+  var PLAY = window.Figure.beats([{}, { dur: ACT.hold }, { dur: ACT.end - ACT.hold }]);
 
   /* 8 · Derived ------------------------------------------------------------ */
   var _geo;
@@ -98,10 +94,6 @@
   function clamp(v) { return Math.max(0, Math.min(1, v)); }
   /* A fixed pseudo-random number in [0, 1) for each integer pair: which lamps are lit. */
   function hash(a, b) { var s = Math.sin(a * 127.1 + b * 311.7) * 43758.5453; return s - Math.floor(s); }
-  function circle(x, y, rad) {
-    return 'M ' + r(x - rad) + ',' + r(y) + ' A ' + r(rad) + ',' + r(rad) + ' 0 1 0 ' + r(x + rad) + ',' + r(y)
-      + ' A ' + r(rad) + ',' + r(rad) + ' 0 1 0 ' + r(x - rad) + ',' + r(y) + ' Z';
-  }
 
   /* Where the story is at t: how far each step is written (0 → 1), and the step the machine
      is on (-1 before it starts, the step count once done). */
@@ -156,7 +148,7 @@
     });
     g.lamps.forEach(function (l, i) {
       var lit = (running && hash(i, frame) < LAMP.lit) || (done && hash(i, -1) < LAMP.lit);
-      fig.path(circle(l.x, l.y, LAMP.r), { fill: lit ? COLOR.live : COLOR.body, stroke: COLOR.line, width: LINE.outline });
+      fig.circle(l.x, l.y, LAMP.r, { fill: lit ? COLOR.live : COLOR.body, stroke: COLOR.line, width: LINE.outline });
     });
     var d = window.Diagram.create(PAGE.w, PAGE.h, { className: 'program-steps-icons' });
     d.node('person', { x: g.person.x, y: g.person.y, w: PERSON.size, h: PERSON.size, icon: 'person',
@@ -165,7 +157,7 @@
   }
 
   function draw(fig, step) {
-    var g = GEO(), t = STEP[step].t, s = state(t);
+    var g = GEO(), t = PLAY.at(step).t, s = state(t);
     card(fig, g, s);
     arrow(fig, g);
     machine(fig, g, s, step);
@@ -182,7 +174,7 @@
     width: PAGE.w, height: PAGE.h,
     title: 'Program Steps', name: 'program-steps', className: 'program-steps-fig',
     ariaLabel: COPY.ariaLabel,
-    steps: STEP.length, autoplay: 1000 / FPS, holds: HOLDS,
+    steps: PLAY.steps, autoplay: PLAY.autoplay, holds: PLAY.holds,
     draw: draw
   };
 })();

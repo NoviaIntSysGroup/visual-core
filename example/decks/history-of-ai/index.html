@@ -17,6 +17,7 @@
   <link rel="stylesheet" href="../../../drawing-kit/diagram/diagram.css">
   <link rel="stylesheet" href="../../../drawing-kit/charts/charts.css">
   <link rel="stylesheet" href="../../../figure-kit/figure.css">
+  <link rel="stylesheet" href="../../figures/dartmouth-proposal/dartmouth-proposal.css">
   <link rel="stylesheet" href="../../../deck-kit/widgets/badge.css">
   <link rel="stylesheet" href="../../../deck-kit/widgets/wash.css">
   <link rel="stylesheet" href="../../../deck-kit/widgets/timeline.css">
@@ -51,6 +52,10 @@
 <script src="../../figures/boole-logic/boole-logic.js"></script>
 <script src="../../figures/program-steps/program-steps.js"></script>
 <script src="../../figures/turing-test/turing-test.js"></script>
+<script src="../../figures/dartmouth-name/dartmouth-name.js"></script>
+<script src="../../figures/dartmouth-proposal/dartmouth-proposal.js"></script>
+<script src="../../figures/ai-vision/ai-vision.js"></script>
+<script src="../../figures/ai-umbrella/ai-umbrella.js"></script>
 <script src="../../../deck-kit/widgets/badge.js"></script>
 <script src="../../../deck-kit/widgets/wash.js"></script>
 <script src="../../../deck-kit/widgets/timeline.js"></script>
@@ -147,7 +152,7 @@ const SLIDES = [
   {
     "layout": "columns",
     "title": "Two Lines Meet",
-    "lead": "Two things were missing: clues to how the brain works, and something to build an AI from.",
+    "lead": "Two things were missing: how the brain works, and something to build AI from.",
     "columns": [],
     "timeline": {
       "cards": true,
@@ -184,7 +189,7 @@ const SLIDES = [
         },
         {
           "date": "1955",
-          "text": "<span class=\"deck-accent-primary\">Dartmouth</span><br>AI gets a name",
+          "module": "DartmouthNameFigure",
           "milestone": true,
           "outcome": true
         }
@@ -201,8 +206,7 @@ const SLIDES = [
           "from": "edge"
         }
       ]
-    },
-    "closing": "Computers could finally mimic what seemed central to thinking."
+    }
   },
   {
     "layout": "columns",
@@ -215,10 +219,8 @@ const SLIDES = [
             "text": "The Dartmouth Proposal"
           },
           {
-            "type": "document",
-            "title": "A PROPOSAL FOR THE DARTMOUTH SUMMER RESEARCH PROJECT ON ARTIFICIAL INTELLIGENCE",
-            "byline": "McCarthy, Minsky, Rochester, Shannon<br>August 31, 1955",
-            "text": "… every aspect of learning or any other feature of intelligence can in principle be so precisely described that a machine can be made to simulate it. …"
+            "type": "figure",
+            "module": "DartmouthProposalFigure"
           }
         ]
       },
@@ -230,16 +232,24 @@ const SLIDES = [
           },
           {
             "type": "text",
-            "text": "AI is the name of a vision: machines that do what our minds do. It was never defined as one particular technology."
+            "text": "AI is the name of a vision: thinking machines that can do what our minds do."
+          },
+          {
+            "type": "figure",
+            "module": "AiVisionFigure"
           },
           {
             "type": "text",
-            "text": "AI is also the name for every technology built to move towards that vision, from simple rules to today's large models."
+            "text": "Over time, AI also became the name for everything we built on the way there."
+          },
+          {
+            "type": "figure",
+            "module": "AiUmbrellaFigure"
           }
         ]
       }
     ],
-    "closing": "That is how AI can sell you a toothbrush and also star as the Terminator."
+    "closing": "That is how AI can both exist in a toothbrush and star as the Terminator."
   },
   {
     "layout": "toc",

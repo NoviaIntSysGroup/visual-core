@@ -11,7 +11,6 @@
 
   /* 2 · Canvas ------------------------------------------------------------- */
   var PAGE = { w: cm(20.8), margin: cm(0.3) };
-  var FPS = 25;
 
   /* 3 · Type --------------------------------------------------------------- */
   var TEXT = { body: TYPE.slideBody.size };
@@ -75,10 +74,9 @@
     { border: 5, caption: 'Further right still: so could reasoning.' },
     { border: 6, caption: 'Far enough right, all we usually call intelligence could be built.' }
   ];
-  /* One frame per 1/FPS s; playback holds at the start of each beat. */
-  var STEP = [], HOLDS = [];
-  for (var f = 0; f <= (BEAT.length - 1) * ACT.beat * FPS; f++) STEP.push({ t: f / FPS });
-  for (var b = 0; b < BEAT.length - 1; b++) HOLDS.push(Math.round(b * ACT.beat * FPS));
+  /* Each press plays one beat. */
+  BEAT.slice(1).forEach(function (b) { b.dur = ACT.beat; });
+  var PLAY = window.Figure.beats(BEAT);
 
   /* 8 · Derived ------------------------------------------------------------ */
   var _geo;
@@ -108,14 +106,8 @@
   /* 9 · Helpers → draw → export -------------------------------------------- */
   function r(v) { return Math.round(v * 1000) / 1000; }
   function clamp(v) { return Math.max(0, Math.min(1, v)); }
-  /* Progress through an act { start, dur } at time u, eased in and out. */
-  function ease(act, u) { var p = clamp((u - act.start) / act.dur); return p * p * (3 - 2 * p); }
-  function fade(fig, alpha, drawFn) {
-    if (alpha <= 0) return;
-    fig.raw('<g style="opacity:' + r(alpha) + '">'); drawFn(); fig.raw('</g>');
-  }
 
-  /* Every box and icon in one side's colour, shown only between x0 and x1. */
+  /* Every icon in one side's colour, on its tinted box unless idle, shown only between x0 and x1. */
   function layer(fig, kind, x0, x1, id) {
     var g = GEO();
     if (x1 - x0 <= 0) return;
@@ -124,9 +116,7 @@
       + '" height="' + r(g.h) + '"/></clipPath><g clip-path="url(#' + id + '-clip)">');
     COPY.abilities.forEach(function (a, i) {
       var x = g.boxX(i);
-      fig.rect(x, g.boxTop, g.boxW, g.boxH, {
-        fill: TINT[kind] || 'none', stroke: COLOR[kind], width: LINE.box, radius: BOX.radius
-      });
+      if (TINT[kind]) fig.rect(x, g.boxTop, g.boxW, g.boxH, { fill: TINT[kind], radius: BOX.radius });
       d.node('ability-' + i, {
         x: x + g.boxW / 2 - BOX.icon / 2, y: g.iconTop, w: BOX.icon, h: BOX.icon, icon: a.icon,
         appearance: window.Diagram.iconApp(COLOR[kind], { surface: TINT[kind] })
@@ -142,7 +132,7 @@
     fig.path('M' + r(x0) + ' ' + r(y - MARK.tick) + ' V' + r(y) + ' H' + r(x1) + ' V' + r(y - MARK.tick), {
       fill: 'none', stroke: COLOR.bracket, width: LINE.bracket
     });
-    fade(fig, alpha, function () { fig.text([label], { x: (x0 + x1) / 2, y: g.sideY, role: 'slideBody' }); });
+    fig.fade(alpha, function () { fig.text([label], { x: (x0 + x1) / 2, y: g.sideY, role: 'slideBody' }); });
   }
 
   /* Box i's flash once the border has crossed it, `since` seconds ago: its tint, then a ring. */
@@ -151,26 +141,25 @@
     var glow = 1 - clamp(since / ACT.flash), ring = clamp(since / ACT.ring), rad = BOX.icon / 2 * (1 + ring * (FLASH.ring - 1));
     if (glow > 0) fig.rect(x, g.boxTop, g.boxW, g.boxH, { fill: COLOR.physical, opacity: r(FLASH.peak * glow), radius: BOX.radius });
     if (ring < 1) {
-      fig.path('M ' + r(c.x - rad) + ',' + r(c.y) + ' a ' + r(rad) + ',' + r(rad) + ' 0 1 0 ' + r(2 * rad) + ',0'
-        + ' a ' + r(rad) + ',' + r(rad) + ' 0 1 0 ' + r(-2 * rad) + ',0 Z',
-        { fill: 'none', stroke: COLOR.physical, width: LINE.box, opacity: r(1 - ring) });
+      fig.circle(c.x, c.y, rad, { fill: 'none', stroke: COLOR.physical, width: LINE.box, opacity: r(1 - ring) });
     }
   }
 
   /* The frame falls in the beat from state `from` to `to`, u seconds in. The first beat grows
      the border and spreads the colours out from it; later ones glide it and flash the box. */
   function draw(fig, step) {
-    var g = GEO(), per = ACT.beat * FPS, id = 'mind-border-' + step;
-    var i = Math.min(BEAT.length - 1, Math.floor(step / per) + 1), u = (step - (i - 1) * per) / FPS;
-    var from = BEAT[i - 1], to = BEAT[i];
+    var g = GEO(), id = 'mind-border-' + step;
+    var now = PLAY.at(step), u = now.u, from = now.from, to = now.to;
     var first = from.border === null, x, lo, hi, drop = 1, brackets = 1;
     if (first) {
       x = g.borderX(to.border);
-      var spread = ease(ACT.spread, u);
+      var spread = window.Figure.ease(u, ACT.spread.start, ACT.spread.dur);
       lo = x * (1 - spread); hi = x + (PAGE.w - x) * spread;
-      drop = ease(ACT.drop, u); brackets = ease(ACT.brackets, u);
+      drop = window.Figure.ease(u, ACT.drop.start, ACT.drop.dur);
+      brackets = window.Figure.ease(u, ACT.brackets.start, ACT.brackets.dur);
     } else {
-      x = g.borderX(from.border) + (g.borderX(to.border) - g.borderX(from.border)) * ease(ACT.glide, u);
+      var glide = window.Figure.ease(u, ACT.glide.start, ACT.glide.dur);
+      x = g.borderX(from.border) + (g.borderX(to.border) - g.borderX(from.border)) * glide;
       lo = 0; hi = PAGE.w;
     }
     layer(fig, 'idle', 0, lo, id + '-idle-l');
@@ -192,15 +181,15 @@
       bracket(fig, inR, inR + (right - inR) * brackets, COPY.sides.mind, brackets);
     }
     var out = 1 - clamp(u / ACT.out), into = clamp((u - ACT.out) / ACT.in);
-    fade(fig, out, function () { fig.text([from.caption], { x: PAGE.w / 2, y: g.captionY, role: 'slideBody' }); });
-    fade(fig, into, function () { fig.text([to.caption], { x: PAGE.w / 2, y: g.captionY, role: 'slideBody' }); });
+    fig.fade(out, function () { fig.text([from.caption], { x: PAGE.w / 2, y: g.captionY, role: 'slideBody' }); });
+    fig.fade(into, function () { fig.text([to.caption], { x: PAGE.w / 2, y: g.captionY, role: 'slideBody' }); });
   }
 
   window.MindBorderFigure = {
     width: PAGE.w,
     get height() { return GEO().h; },   /* derived from the rows */
     title: 'Mind Border', name: 'mind-border', className: 'mind-border-fig', ariaLabel: COPY.ariaLabel,
-    steps: STEP.length, autoplay: 1000 / FPS, holds: HOLDS,
+    steps: PLAY.steps, autoplay: PLAY.autoplay, holds: PLAY.holds,
     draw: draw
   };
 })();

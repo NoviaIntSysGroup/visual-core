@@ -2,7 +2,7 @@
    4.0 × 2.35 cm with a 38 pt brain, three steps. A brain seen from the side. Step 1: a lesion
    above the front of the lateral sulcus, an arrow to a bubble of halting dashes, and its line
    of text (Broca). Step 2: one below the sulcus's back end, an arrow to a bubble of scribble,
-   and its line (Wernicke). Each lesion, its arrow, its speech and its text share one hue. The
+   and its line (Wernicke). Lesions and arrows are matter's hue, the speech the mind's. The
    brain is the shared `BrainFigure` (figures/brain/), which must load first. */
 (function () {
   /* 1 · Imports ------------------------------------------------------------ */
@@ -18,11 +18,11 @@
 
   /* 4 · Colour ------------------------------------------------------------- */
   var COLOR = { line: 'var(--text)', body: 'var(--graphic-soft)',
-                broca: 'var(--graphic-tertiary)', wernicke: 'var(--graphic-secondary)' };
+                damage: 'var(--graphic-primary)', speech: 'var(--graphic-secondary)' };
 
   /* 5 · Layout knobs ------------------------------------------------------- */
   var LINE = { outline: 'var(--line-width-strong)', detail: 'var(--line-width)',
-               speech: 'var(--line-width-strong)', link: 'var(--line-width-very-strong)' };
+               speech: 'var(--line-width-strong)', link: 'var(--line-width-strong)' };
   /* Lengths are in points for a brain `markedAt` tall (figures/brain/), sized by `B.scaled`. */
   var BRAIN = B.scaled({ x: 29.8, y: 6 });   /* where the brain's top-left lands */
   /* Each region: its landmark, and its size in source units. JAG gives a lesion's ragged
@@ -53,8 +53,8 @@
 
   /* 6 · Content ------------------------------------------------------------ */
   var COPY = {
-    broca:    [{ t: 'Damage', cls: 'fig-accent-tertiary' }, { t: ' → halting speech' }],
-    wernicke: [{ t: 'Damage', cls: 'fig-accent-secondary' }, { t: ' → fluent nonsense' }],
+    broca:    [{ t: 'Damage', cls: 'fig-accent-primary' }, { t: ' → halting speech' }],
+    wernicke: [{ t: 'Damage', cls: 'fig-accent-primary' }, { t: ' → fluent nonsense' }],
     ariaLabel: 'A brain seen from the side. Damage to a region at the front leaves speech '
       + 'halting; damage to a region further back leaves it fluent but meaningless. An arrow '
       + 'runs from each damaged region to the speech it breaks.'
@@ -99,7 +99,7 @@
       var a = 2 * Math.PI * i / JAG.length;
       return GEO().at({ cx: q.cx + Math.cos(a) * q.rx * j, cy: q.cy + Math.sin(a) * q.ry * j });
     });
-    fig.path(polyline(pts, true), { fill: COLOR[key], stroke: COLOR.line, width: LINE.detail });
+    fig.path(polyline(pts, true), { fill: COLOR.damage, stroke: COLOR.line, width: LINE.detail });
   }
 
 
@@ -112,7 +112,7 @@
 
   /* One row of speech, from x0 to x1 at y, broken the way that region's damage takes it. */
   function row(fig, key, x0, x1, y) {
-    var paint = { fill: 'none', stroke: COLOR[key], width: LINE.speech };
+    var paint = { fill: 'none', stroke: COLOR.speech, width: LINE.speech };
     if (key === 'broca') {
       /* Halting: the row splits into short dashes with wide gaps. */
       var n = SPEECH.halting, cell = (x1 - x0) / n, dash = cell * (1 - SPEECH.gap);
@@ -128,7 +128,7 @@
   }
 
   function bubble(f, key) {
-    var b = GEO().bubble[key], hue = COLOR[key];
+    var b = GEO().bubble[key], hue = COLOR.speech;
     var right = b.x + BUBBLE.w, bottom = b.y + BUBBLE.h;
     var base = b.side > 0 ? right - BUBBLE.base.right : b.x + BUBBLE.base.left, p = BUBBLE.patch;
     f.path('M ' + r(base) + ',' + r(bottom) + ' L ' + r(b.tip.x) + ',' + r(b.tip.y) + ' L ' + r(base + BUBBLE.base.w) + ',' + r(bottom),
@@ -148,9 +148,9 @@
     var dx = z.x - a.x, dy = z.y - a.y, len = Math.hypot(dx, dy), ux = dx / len, uy = dy / len;
     var reach = len - ARROW.standoff, end = { x: a.x + ux * reach, y: a.y + uy * reach };
     var h = ARROW.head, back = { x: end.x - ux * h, y: end.y - uy * h };
-    fig.rule(a.x, a.y, back.x, back.y, { stroke: COLOR[key], width: LINE.link });
+    fig.rule(a.x, a.y, back.x, back.y, { stroke: COLOR.damage, width: LINE.link });
     fig.path(polyline([end, { x: back.x - uy * h * 0.6, y: back.y + ux * h * 0.6 },
-      { x: back.x + uy * h * 0.6, y: back.y - ux * h * 0.6 }], true), { fill: COLOR[key] });
+      { x: back.x + uy * h * 0.6, y: back.y - ux * h * 0.6 }], true), { fill: COLOR.damage });
   }
 
   function draw(fig, step) {

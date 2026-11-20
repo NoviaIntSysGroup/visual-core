@@ -1,0 +1,4 @@
+/* Dartmouth Proposal — the sheet is typewritten, in the theme's typewriter face, and the
+   typewriter's body has rounded corners like the kit's rects. */
+.figure.dartmouth-proposal-fig .dartmouth-proposal-type { font-family: var(--f-typewriter); }
+.figure.dartmouth-proposal-fig .dartmouth-proposal-round { stroke-linejoin: round; }
