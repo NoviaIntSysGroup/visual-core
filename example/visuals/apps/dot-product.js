@@ -3,7 +3,8 @@
    between them marked by an arc, and cos θ, the projection's length, and x · w shown live.
    Exposes window.DotProduct.render(spec), placed with an `app` block, and redraws on slider input;
    also its plane drawing, `plane(state, unit)`: a square of side `side(unit)` points, `unit` points
-   per unit length (its own `unit` when left out); strokes, heads, and θ keep their size at any unit. */
+   per unit length (its own `unit` when left out); strokes, heads, and θ keep their size at any unit;
+   and `typeset(html)`, which draws each $…$ in markup. */
 (function () {
   var START = { wLength: 1, wAngle: 0, xLength: 1, xAngle: 90 };
   var SIZE = 240;                 /* plane side, in points */
@@ -195,5 +196,5 @@
     app.querySelector('.dot-product-plane').innerHTML = plane(s);
   });
 
-  window.DotProduct = { render: render, plane: plane, side: sideAt };
+  window.DotProduct = { render: render, plane: plane, side: sideAt, typeset: typeset };
 })();

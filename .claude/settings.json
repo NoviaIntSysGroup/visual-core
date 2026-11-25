@@ -20,7 +20,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "sh \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/issue-reminders.sh"
+            "command": "sh \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/observation-sweep.sh"
           }
         ]
       }
@@ -30,27 +30,18 @@
         "hooks": [
           {
             "type": "command",
-            "command": "sh \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/issue-reminders.sh"
+            "command": "sh \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/observation-sweep.sh"
           }
         ]
       }
     ],
     "PostToolUse": [
       {
+        "matcher": "Read|Grep|Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "sh \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/issue-reminders.sh"
-          }
-        ]
-      }
-    ],
-    "PostToolUseFailure": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "sh \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/issue-reminders.sh"
+            "command": "sh \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/observation-sweep.sh"
           }
         ]
       }
@@ -60,7 +51,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "sh \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/issue-reminders.sh"
+            "command": "sh \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/observation-sweep.sh"
           }
         ]
       }

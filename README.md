@@ -153,11 +153,14 @@ You never need to read the skills, but they are where the detail lives:
 | [`figures`](skills/figures/SKILL.md) | Composing publication figures and exporting them |
 | [`illustrations`](skills/illustrations/SKILL.md) | Writing prompts for generated illustrations |
 | [`new-project`](skills/new-project/SKILL.md) | Setting up a project, or moving a deck between projects |
-| [`issue-log`](skills/issue-log/SKILL.md) | Logging instruction and code problems an agent hit, to `issues/` |
-| [`issue-fix`](skills/issue-fix/SKILL.md) | Fixing logged problems at their cause; docs by rewriting, not appending |
+| [`observation-log`](skills/observation-log/SKILL.md) | Logging problems, opportunities and lessons an agent noticed, to `observations/` |
+| [`observation-review`](skills/observation-review/SKILL.md) | Acting on logged observations at their cause; docs by rewriting, not appending |
+| [`session-log`](skills/session-log/SKILL.md) | Naming each turn's task, logged with the files the turn read to `sessions/` |
 | [`page-check`](skills/page-check/SKILL.md) | Screenshotting pages and exporting figures headlessly, when asked |
 
 [AGENTS.md](AGENTS.md) holds the rules every agent session follows, and the file-by-file map.
+[docs/agent-feedback-loop.md](docs/agent-feedback-loop.md) explains why the two observation
+skills split the work the way they do.
 
 ## Editing, Presenting, And Exporting A Deck
 
@@ -226,9 +229,10 @@ commit them, or `git stash` before and `git stash pop` after.
 An update can change every deck and figure. Restart the dev server, which never reloads its own
 code, look through the landing page, and undo the merge if something broke.
 
-An update does not touch the project's copied guardrails. Copy them again with the last three
-lines under [Start A New Project](#start-a-new-project), then check `git diff .claude` for
-anything the core changed.
+An update does not touch what the project copied from the core. Copy the guardrails again with
+the last three lines under [Start A New Project](#start-a-new-project) and check
+`git diff .claude`, then merge any new lines from `diff core/.gitignore .gitignore` into
+`.gitignore`.
 
 ### Change The Core From A Project
 

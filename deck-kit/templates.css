@@ -105,21 +105,32 @@
 }
 
 /* Dividers between columns: a border-left on every column after the first, so a
-   divider steps in with the column on its right. Where that column is already on
-   screen (`fragment: false`), the stepping column on the left carries it as a
+   divider steps in with the column on its right. A column steps in whole
+   (`.fragment`) or with its first group (`data-arrives`). Where the right column is
+   already on screen, the stepping one on the left carries the divider as a
    border-right: a divider belongs to whichever of its two columns appears last. */
 .deck-columns-grid[data-dividers="true"] > * + * {
   border-left: var(--line-width) solid var(--edges);
 }
 
-.deck-columns-grid[data-dividers="true"] > .fragment:has(+ :not(.fragment)) {
+.deck-columns-grid[data-dividers="true"] > :is(.fragment, [data-arrives]):has(+ :not(.fragment, [data-arrives])) {
   border-right: var(--line-width) solid var(--edges);
 }
 
 /* ...and the always-on column on its right must then not draw one too, or the
    boundary would carry two rules. */
-.deck-columns-grid[data-dividers="true"] > .fragment:has(+ :not(.fragment)) + * {
+.deck-columns-grid[data-dividers="true"] > :is(.fragment, [data-arrives]):has(+ :not(.fragment, [data-arrives])) + * {
   border-left: 0;
+}
+
+/* A column arriving with its first group keeps its divider clear until that group's
+   press, then fades it in with the group. */
+.deck-columns-grid[data-dividers="true"] > [data-arrives] {
+  transition: border-color var(--dur-mid) var(--ease);
+}
+
+.deck-columns-grid[data-dividers="true"] > [data-arrives]:has(> .deck-block-group:first-child:not(.visible)) {
+  border-color: transparent;
 }
 
 /* Per-gap dividers (`"dividers": [false, true, false]`): the template marks the

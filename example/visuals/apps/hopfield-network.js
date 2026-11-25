@@ -6,12 +6,11 @@
 (function () {
   var COLS = 35;
   var SIZE = COLS * COLS;
-  var GAIN = 2.5;                 /* steepness of each unit's response to its field */
   var SHARPNESS = 12;             /* how strongly the energy favours the closest shape */
   var NOISE = 0.25;
   var RATE = 0.007;               /* each step moves a unit this fraction of the way to its target */
   var STEP = 1 / 60;              /* seconds per simulation step */
-  var SETTLED = { share: 0.9, overlap: 0.9 };   /* overlap as a fraction of the shape's own steady overlap */
+  var SETTLED = { share: 0.9, overlap: 0.9 };   /* a stored shape's overlap with itself is 1 */
   var DISSOLVE_STEPS = 70;        /* about a second */
   var TILT = { start: 0.3, fade: 0.9982 };
   var CURSOR = { radius: COLS * 0.2, fullSpeed: 0.7, rate: 0.6, held: 0.7 };   /* radius and speed in cells */
@@ -136,9 +135,9 @@
     return soft;
   }
 
-  /* Modern Hopfield network: energy E = -(1/SHARPNESS) log sum exp(SHARPNESS m), where m is the state's overlap
-     with each stored shape. Each unit follows dx/dt = -x + tanh(GAIN * field), the field being the energy's
-     gradient, plus noise. */
+  /* Modern Hopfield network (Ramsauer et al. 2020), per unit: E = -(1/SHARPNESS) lse(SHARPNESS m) + |x|²/2N,
+     where m = Xᵀx/N is the state's overlap with each stored shape. Each step moves the state a fraction RATE
+     towards the paper's update X softmax(SHARPNESS m), which descends E, plus noise. */
   function createNet(el) {
     var canvas = el.querySelector('.hopfield-grid');
     var status = el.querySelector('.hopfield-status');
@@ -148,11 +147,6 @@
     var ink = style.getPropertyValue('--text').trim();
     var accent = style.getPropertyValue('--accent-strong').trim();
     var stored = SHAPES.map(storedPattern);
-    var steady = stored.map(function (pattern) {
-      var sum = 0;
-      for (var i = 0; i < SIZE; i++) sum += pattern[i] * Math.tanh(GAIN * pattern[i]);
-      return sum / SIZE;
-    });
     var state = new Float32Array(SIZE);
     var overlap = new Float32Array(SHAPES.length);
     var share = new Float32Array(SHAPES.length);
@@ -194,7 +188,7 @@
 
     function step(cursor) {
       disturb(cursor);
-      var m, i, top = -Infinity, total = 0;
+      var m, i, top = -Infinity, total = 0, norm = 0;
       if (dissolving > 0) {
         for (i = 0; i < SIZE; i++) state[i] += (speckle[i] - state[i]) * 0.05;
         dissolving--;
@@ -212,7 +206,8 @@
         total += share[m];
       }
       tilt *= TILT.fade;
-      energy = -(top + Math.log(total) / SHARPNESS);
+      for (i = 0; i < SIZE; i++) norm += state[i] * state[i];
+      energy = -(top + Math.log(total) / SHARPNESS) + norm / (2 * SIZE);
       field.fill(0);
       for (m = 0; m < SHAPES.length; m++) {
         share[m] /= total;
@@ -220,7 +215,7 @@
       }
       var kick = NOISE * Math.sqrt(RATE) * 3.46;
       for (i = 0; i < SIZE; i++) {
-        state[i] += (Math.tanh(GAIN * field[i]) - state[i]) * RATE + (Math.random() - 0.5) * kick;
+        state[i] += (field[i] - state[i]) * RATE + (Math.random() - 0.5) * kick;
       }
     }
 
@@ -250,14 +245,14 @@
       }
       drawnSize = width;
       drawCells(width / COLS, Math.max(1, (width / COLS) * 0.12));
-      var settled = dissolving === 0 && winner >= 0 && share[winner] > SETTLED.share && overlap[winner] > SETTLED.overlap * steady[winner];
+      var settled = dissolving === 0 && winner >= 0 && share[winner] > SETTLED.share && overlap[winner] > SETTLED.overlap;
       status.textContent = STILL
         ? 'Steady state: ' + SHAPES[0].name
         : (settled ? 'Steady state: ' + SHAPES[winner].name : 'Settling') + ' · energy ' + energy.toFixed(2);
     }
 
     if (STILL) {
-      for (var i = 0; i < SIZE; i++) state[i] = stored[0][i] > 0 ? 1 : -1;
+      state.set(stored[0]);
     } else {
       scramble(true);
       box.addEventListener('pointerenter', function () {

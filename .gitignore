@@ -10,10 +10,13 @@ Thumbs.db
 .claude/.cc-writes
 .claude/settings.local.json
 
-# Issue entries
-issues/
-issues-fixed/
-issues-dismissed/
+# Observation entries
+observations/
+observations-applied/
+observations-dismissed/
+
+# Session logs
+sessions/
 
 # Scratch files
 tmp/

@@ -60,7 +60,7 @@
 /* The projection is x's shadow, not a vector: x's hue, faded back. */
 .dot-product-shadow { stroke-width: 4; stroke-linecap: round; opacity: var(--opacity-dim); }
 
-/* One hue per vector: its arrow, its legend key, and its sliders; on the unit-circle cover too. */
+/* One hue per vector: its arrow, its legend key, and its sliders; on the unit circle too. */
 :is(.dot-product, .unit-circle) .is-w { --dot-product-hue: var(--graphic-primary); }
 :is(.dot-product, .unit-circle) .is-x { --dot-product-hue: var(--graphic-tertiary); }
 .dot-product-key { background: var(--dot-product-hue); }

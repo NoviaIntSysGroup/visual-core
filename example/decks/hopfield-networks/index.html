@@ -23,6 +23,8 @@
   <link rel="stylesheet" href="../../../deck-kit/widgets/timeline.css">
   <link rel="stylesheet" href="../../visuals/apps/hopfield-network.css">
   <link rel="stylesheet" href="../../visuals/apps/hopfield-classic.css">
+  <link rel="stylesheet" href="../../visuals/apps/dot-product.css">
+  <link rel="stylesheet" href="../../visuals/apps/unit-circle.css">
   <link rel="stylesheet" href="../../../deck-kit/figure-import.css">
   <link rel="stylesheet" href="../../../deck-kit/image.css">
   <link rel="stylesheet" href="../../../deck-kit/templates.css">
@@ -48,11 +50,14 @@
 <script src="../../figures/hopfield-state/hopfield-state.js"></script>
 <script src="../../figures/hopfield-landscape/hopfield-landscape.js"></script>
 <script src="../../figures/hopfield-heart-equations/hopfield-heart-equations.js"></script>
+<script src="../../figures/hopfield-heart-similarity/hopfield-heart-similarity.js"></script>
 <script src="../../../deck-kit/widgets/badge.js"></script>
 <script src="../../../deck-kit/widgets/wash.js"></script>
 <script src="../../../deck-kit/widgets/timeline.js"></script>
 <script src="../../visuals/apps/hopfield-network.js"></script>
 <script src="../../visuals/apps/hopfield-classic.js"></script>
+<script src="../../visuals/apps/dot-product.js"></script>
+<script src="../../visuals/apps/unit-circle.js"></script>
 <script src="../../../deck-kit/figure-import.js"></script>
 <script src="../../../deck-kit/deck.js"></script>
 <script src="../../../deck-kit/image.js"></script>
@@ -116,50 +121,137 @@ const SLIDES = [
     "columns": [
       {
         "blocks": [
-          {
-            "type": "title",
-            "text": "Storing Images"
-          },
-          {
-            "type": "text",
-            "text": "The weight $w_{ij}$ is positive if two neurons agree, negative if not.$$\\vphantom{\\left(\\sum_{j \\neq i} w_{ij} s_j\\right)} w_{ij} = \\sum_{\\mu} \\xi_i^{\\mu} \\xi_j^{\\mu}, \\quad w_{ii} = 0$$<span class=\"deck-note\">$w_{ij}$: weight of neurons $i$ and $j$.<br>$\\xi_i^{\\mu}$: pixel $i$ of stored image $\\mu$.</span>"
-          },
-          {
-            "type": "figure",
-            "module": "HopfieldHeartWeightFigure"
-          }
+          [
+            {
+              "type": "title",
+              "text": "Storing Images"
+            },
+            {
+              "type": "text",
+              "text": "The weight $w_{ij}$ is positive if two neurons agree, negative if not.$$\\vphantom{\\left(\\sum_{j \\neq i} w_{ij} s_j\\right)} w_{ij} = \\sum_{\\mu} \\xi_i^{\\mu} \\xi_j^{\\mu}, \\quad w_{ii} = 0$$<span class=\"deck-note\">$w_{ij}$: weight of neurons $i$ and $j$.<br>$\\xi_i^{\\mu}$: pixel $i$ of stored image $\\mu$.</span>"
+            }
+          ],
+          [
+            {
+              "type": "figure",
+              "module": "HopfieldHeartWeightFigure"
+            }
+          ]
         ]
       },
       {
         "blocks": [
-          {
-            "type": "title",
-            "text": "The Energy of a State"
-          },
-          {
-            "type": "text",
-            "text": "Pairs that fit their weight lower $E$, pairs that clash raise it.$$\\vphantom{\\left(\\sum_{j \\neq i} w_{ij} s_j\\right)} E = -\\frac{1}{2} \\sum_{i \\neq j} w_{ij} s_i s_j$$<span class=\"deck-note\">$E$: energy of the state.<br>$s_i$: value of neuron $i$, either $+1$ or $-1$.</span>"
-          },
-          {
-            "type": "figure",
-            "module": "HopfieldHeartEnergyFigure"
-          }
+          [
+            {
+              "type": "title",
+              "text": "The Energy of a State"
+            },
+            {
+              "type": "text",
+              "text": "Pairs that fit their weight lower $E$, pairs that clash raise it.$$\\vphantom{\\left(\\sum_{j \\neq i} w_{ij} s_j\\right)} E = -\\frac{1}{2} \\sum_{i \\neq j} w_{ij} s_i s_j$$<span class=\"deck-note\">$E$: energy of the state.<br>$s_i$: value of neuron $i$, either $+1$ or $-1$.</span>"
+            }
+          ],
+          [
+            {
+              "type": "figure",
+              "module": "HopfieldHeartEnergyFigure"
+            }
+          ]
         ]
       },
       {
         "blocks": [
-          {
-            "type": "title",
-            "text": "The Update Rule"
-          },
-          {
-            "type": "text",
-            "text": "Neuron $i$ sums the votes $w_{ij}s_j$ of all others and takes the sign.$$\\vphantom{\\left(\\sum_{j \\neq i} w_{ij} s_j\\right)} s_i = \\mathrm{sign}\\left(\\sum_{j \\neq i} w_{ij} s_j\\right)$$<span class=\"deck-note\">$s_i$: new value of neuron $i$.<br>$j$: every other neuron.</span>"
-          },
-          {
-            "type": "figure",
-            "module": "HopfieldHeartUpdateFigure"
-          }
+          [
+            {
+              "type": "title",
+              "text": "The Update Rule"
+            },
+            {
+              "type": "text",
+              "text": "Neuron $i$ sums the votes $w_{ij}s_j$ of all others and takes the sign.$$\\vphantom{\\left(\\sum_{j \\neq i} w_{ij} s_j\\right)} s_i = \\mathrm{sign}\\left(\\sum_{j \\neq i} w_{ij} s_j\\right)$$<span class=\"deck-note\">$s_i$: new value of neuron $i$.<br>$j$: every other neuron.</span>"
+            }
+          ],
+          [
+            {
+              "type": "figure",
+              "module": "HopfieldHeartUpdateFigure"
+            }
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "layout": "columns",
+    "below": true,
+    "title": "The Energy Measures Similarity to Each Memory",
+    "closing": "Both the energy and the update rule come down to similarity with each stored memory.",
+    "columns": [
+      {
+        "blocks": [
+          [
+            {
+              "type": "title",
+              "text": "The Dot Product"
+            },
+            {
+              "type": "text",
+              "text": "A weighted sum of products:$$\\mathbf{a} \\cdot \\mathbf{b} = \\sum_{i} a_i b_i = \\lVert \\mathbf{a} \\rVert \\, \\lVert \\mathbf{b} \\rVert \\cos\\theta$$"
+            }
+          ],
+          [
+            {
+              "type": "app",
+              "module": "UnitCircle",
+              "play": "press"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "text": "Largest when aligned, smallest when opposite."
+            }
+          ]
+        ]
+      },
+      {
+        "blocks": [
+          [
+            {
+              "type": "title",
+              "text": "Images as Vectors"
+            },
+            {
+              "type": "text",
+              "text": "With pixels of $\\pm 1$, $\\xi \\cdot s$ counts matches minus mismatches."
+            }
+          ],
+          [
+            {
+              "type": "figure",
+              "module": "HopfieldHeartSimilarityFigure"
+            }
+          ]
+        ]
+      },
+      {
+        "blocks": [
+          [
+            {
+              "type": "title",
+              "text": "Weights Into the Equations"
+            },
+            {
+              "type": "text",
+              "text": "Put $w_{ij}$ into the energy:$$\\begin{aligned} E &= -\\frac{1}{2} \\sum_{\\mu} \\sum_{i \\neq j} \\xi_i^{\\mu} s_i \\, \\xi_j^{\\mu} s_j \\\\ &= -\\frac{1}{2} \\sum_{\\mu} \\left( \\xi^{\\mu} \\cdot s \\right)^2 + \\mathrm{const} \\end{aligned}$$"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "text": "And into the update rule:$$\\begin{aligned} s_i &= \\mathrm{sign}\\Bigl( \\sum_{\\mu} \\xi_i^{\\mu} \\sum_{j \\neq i} \\xi_j^{\\mu} s_j \\Bigr) \\\\ &\\approx \\mathrm{sign}\\Bigl( \\sum_{\\mu} \\left( \\xi^{\\mu} \\cdot s \\right) \\xi_i^{\\mu} \\Bigr) \\end{aligned}$$"
+            }
+          ]
         ]
       }
     ]

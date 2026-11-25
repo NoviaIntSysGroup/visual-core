@@ -1,8 +1,9 @@
 /* Hopfield Heart Equations — figure composition modules.
    Three played 6.5 × 3.3 cm figures, one per equation: one heart, the links of one neuron
    (green where it shares a value with the stored heart, yellow where it differs) and a key
-   beside it. Each press goes from an empty first state through one colour of link at a time,
-   its links flying out from the neuron, the other faded, counting as they land; the key
+   beside it. Each press goes from the heart and its key alone through one colour of link at a
+   time, its links flying out from the neuron (in to it, from the voting pixels, in the update
+   figure, whose neuron reads ? until it turns), the other faded, counting as they land; the key
    stays, its rows of the other colour faded. */
 (function () {
   /* ---- Imports ----------------------------------------------------------- */
@@ -71,12 +72,12 @@
   };
 
   /* ---- Beats --------------------------------------------------------------
-     One record per press, the first empty (`blank`): the state shown, and the links drawn: a colour ('same' is green, 'differ'
+     One record per press: the state shown, and the links drawn: a colour ('same' is green, 'differ'
      yellow), as 'full' or 'faded' in `looks`. A press that brings a colour in flies its links out from the neuron over `fly`
      seconds, the longest taking all of it; any other press switches at once, in `cut` (one frame). */
   var ACT = { fly: 0.5, cut: 0.04 };
   COPY.weight.beats = [
-    { blank: true }, { looks: {} }, { looks: { same: 'full' } },
+    { looks: {} }, { looks: { same: 'full' } },
     { looks: { same: 'faded', differ: 'full' } }, { looks: { same: 'faded', differ: 'faded' } }
   ];
   COPY.energy.beats = ['stored', 'damaged'].reduce(function (beats, state) {
@@ -85,9 +86,8 @@
       { state: state, looks: { same: 'faded', differ: 'full' } },
       { state: state, looks: { same: 'faded', differ: 'faded' }, conclude: true }
     ]);
-  }, [{ blank: true }, { state: 'stored', looks: {} }]);   /* then the pixels and the key alone, to explain the key first */
+  }, [{ state: 'stored', looks: {} }]);   /* then the pixels and the key alone, to explain the key first */
   COPY.update.beats = [
-    { blank: true },
     { state: 'damaged', looks: {} },   /* the pixels and the key alone, to explain the voting first */
     { state: 'damaged', looks: { same: 'full' } },
     { state: 'damaged', looks: { same: 'faded', differ: 'full' } },
@@ -250,16 +250,17 @@
     fig.text(text, { x: x, y: y, align: 'start', role: 'slideBody', cls: faded ? 'hopfield-heart-faded' : '' });
   }
 
-  /* One state: the neuron's links as `looks` gives them, each `reach(r, c)` of its way out, then the pixels, each marked
-     when `marked` and its link has reached it. */
-  function heart(d, rows, looks, marked, reach) {
-    var hub = COPY.hub;
+  /* One state: the neuron's links as `looks` gives them, each `reach(r, c)` of its way out (or in, from the pixel, with
+     `vote.inward`), then the pixels, each marked when `marked` and its link has reached it; the neuron reads `vote.hubLabel`. */
+  function heart(d, rows, looks, marked, reach, vote) {
+    var hub = COPY.hub, inward = vote && vote.inward;
     for (var r = 0; r < 5; r++) {
       for (var c = 0; c < 5; c++) {
         if ((r === hub.row && c === hub.col) || !looks[linkKind(r, c)]) continue;
         var look = { gap: 0, appearance: { color: linkColor(linkKind(r, c), looks[linkKind(r, c)]), width: LINE.link } };
         var bow = greatestDivisor(Math.abs(r - hub.row), Math.abs(c - hub.col)) > 1 ? LINK.bow : 0;
-        link(d, centre(hub.row, hub.col), centre(r, c), bow, reach(r, c), look);
+        if (inward) link(d, centre(r, c), centre(hub.row, hub.col), -bow, reach(r, c), look);
+        else link(d, centre(hub.row, hub.col), centre(r, c), bow, reach(r, c), look);
       }
     }
     for (r = 0; r < 5; r++) {
@@ -269,7 +270,7 @@
         var right = agrees(rows, r, c);
         d.node('p-' + r + '-' + c, {
           x: GRID.x + c * GRID.pitch, y: GRID.top + r * GRID.pitch, w: GRID.pixel, h: GRID.pixel, frame: true, radius: GRID.radius,
-          label: shown ? (right ? '✓' : '×') : undefined,
+          label: isHub ? (vote && vote.hubLabel) : shown ? (right ? '✓' : '×') : undefined,
           appearance: { label: on ? COLOR.onText : COLOR.hub, fill: on ? COLOR.on : COLOR.off, stroke: isHub ? COLOR.hub : (on ? COLOR.on : COLOR.line), strokeWidth: isHub ? LINE.hub : undefined }
         });
       }
@@ -283,7 +284,6 @@
   /* ---- Draw --------------------------------------------------------------- */
   function drawWeight(fig, step) {
     var m = COPY.weight, f = frameOf(m, step), looks = f.s.looks;
-    if (!looks) return;
     var d = newDiagram(m);
     heart(d, COPY.stored, looks, false, f.reach);
     var edgeX = KEY.x + PAIR_W + KEY.gap;
@@ -301,7 +301,6 @@
 
   function drawEnergy(fig, step) {
     var m = COPY.energy, f = frameOf(m, step), s = f.s;
-    if (s.blank) return;
     var d = newDiagram(m);
     var rows = stateRows(s.state), counts = tally(rows, f.landed.looks || {});
     heart(d, rows, s.looks, true, f.reach);
@@ -323,10 +322,9 @@
   /* The key reads: a neighbour box and its edge, `vote`, the neuron ?, `=`, and the vote's box. */
   function drawUpdate(fig, step) {
     var m = COPY.update, f = frameOf(m, step), s = f.s;
-    if (s.blank) return;
     var d = newDiagram(m);
     var counts = votes(stateRows('damaged'), f.landed.looks || {}), countY = CAPTION.y - TEXT.label / 3;
-    heart(d, stateRows(s.state), s.looks, false, f.reach);
+    heart(d, stateRows(s.state), s.looks, false, f.reach, { inward: true, hubLabel: s.conclude ? undefined : '?' });
     var counted = counts.on + counts.off > 0;
     if (counted) [true, false].forEach(function (on, i) { box(d, 'c' + i, GRID.x + i * CAPTION.gap, countY, on); });
     var verdictX = GRID.x + CAPTION.conclusion;

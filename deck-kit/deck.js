@@ -148,13 +148,23 @@
     media.replaceWith(missing);
   }
 
+  /* Each slide is a section. A slide with `below: true` goes under the one before it: both
+     move into a stack section, which Reveal shows as a column reached with the down arrow. */
   function renderSlides(ctx) {
     const root = document.getElementById('slides-root');
     ctx.slides.forEach((slide, i) => {
       const section = document.createElement('section');
       section.setAttribute('data-transition', 'fade');
       section.innerHTML = ctx.templates[slide.layout](slide, i);
-      root.appendChild(section);
+      const above = root.lastElementChild;
+      if (!slide.below || !above) return root.appendChild(section);
+      if (!above.classList.contains('stack')) {
+        const stack = document.createElement('section');
+        stack.className = 'stack';
+        root.replaceChild(stack, above);
+        stack.appendChild(above);
+      }
+      root.lastElementChild.appendChild(section);
     });
     if (window.Tex) editableElements().forEach(el => Tex.typeset(el));
   }
@@ -197,9 +207,9 @@
   }
 
   /* Overflow check. Each slide shown is measured once it settles: in-flow content past the
-     slide's padding box is clipped, and text wider than the element holding it runs out of
-     its box. The toolbar counts the slides seen to overflow, with how on hover, as
-     FigureImport counts scaled-down figures. */
+     slide's padding box, or below the top of the logo and slide number, overflows, and text
+     wider than the element holding it runs out of its box. The toolbar counts the slides
+     seen to overflow, with how on hover, as FigureImport counts scaled-down figures. */
   function initOverflowCheck() {
     const over = {};
     function check() {
@@ -207,7 +217,9 @@
       if (!slide) return;
       const scale = Reveal.getScale(), box = slide.getBoundingClientRect(), style = getComputedStyle(slide);
       const top = box.top / scale + parseFloat(style.paddingTop);
-      const bottom = box.bottom / scale - parseFloat(style.paddingBottom);
+      let bottom = box.bottom / scale - parseFloat(style.paddingBottom);
+      for (const mark of slide.querySelectorAll(':scope > .logo-corner, :scope > .slide-num'))
+        bottom = Math.min(bottom, mark.getBoundingClientRect().top / scale);
       let high = top, low = bottom;
       for (const child of slide.children) {
         if (/absolute|fixed/.test(getComputedStyle(child).position)) continue;
@@ -215,7 +227,7 @@
         high = Math.min(high, r.top / scale);
         low = Math.max(low, r.bottom / scale);
       }
-      const n = Reveal.getIndices().h + 1, past = [];
+      const n = Reveal.getSlides().indexOf(Reveal.getCurrentSlide()) + 1, past = [];
       if (high < top - 0.5) past.push(Math.round(top - high) + ' pt past the top');
       if (low > bottom + 0.5) past.push(Math.round(low - bottom) + ' pt past the bottom');
       const narrow = [...slide.querySelectorAll('*')].filter(el => el instanceof HTMLElement

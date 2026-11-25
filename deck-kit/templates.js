@@ -284,6 +284,10 @@
         && (item.columns || []).some(function (c) { return (c.blocks || []).some(Array.isArray); }));
     });
     var fragment = (opts.fragment && !hasGroups && !opts.nested) ? ' fragment fade-up' : '';
+    // A column that opens on a group entering from nothing arrives with that group's
+    // press; templates.css holds its divider back until then.
+    var arrivesLate = opts.fragment && Array.isArray(column.blocks[0])
+      && column.enter !== 'fade' && column.enter !== 'none';
     var groupIndex = 0;
     var rendered = column.blocks.map(function (item, k) {
       if (Array.isArray(item)) {
@@ -308,6 +312,7 @@
       : '';
 
     return '<div class="deck-column-content' + fragment + '"'
+      + (arrivesLate ? ' data-arrives="first-group"' : '')
       + (opts.divider ? ' data-divider="true"' : '')
       + (opts.dim ? ' data-dim="true"' : '')
       + (column.valign ? ' data-valign="' + column.valign + '"' : '')

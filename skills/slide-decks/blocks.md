@@ -30,6 +30,11 @@ Blocks and widgets are always core. What a project adds is a figure, or an app i
 | `toc`      | Table of contents — a numbered list of the deck's sections | `title`, `items` (array of `{ title, text }`), `highlight` (an item's `title`, or its index; optional), `fragments` (bool, default **false** — the opposite of `columns`) |
 | `references` | Printout page — the deck's sources, grouped by topic | `title`, `groups` (array of `{ title, items }`, items `{ name, title, href }`) |
 
+Any slide may set `below: true` to sit under the slide before it rather than after it: an
+optional deep dive the presenter enters with the down arrow and skips with the right arrow.
+Consecutive `below` slides stack in order under the same slide. `SLIDES` stays one flat array,
+and slide numbers count every slide in that order.
+
 `references` is the one layout written for the exported PDF rather than the room, so below its
 `h1` it sets its own print sizes (see *The size floor: `--t-base` is what a slide is written
 in* in `core/skills/slide-decks/SKILL.md`). The groups run on as one list, each under its `h2`,
@@ -404,10 +409,10 @@ Two more column-level fields build on that:
   dividers stay at full strength). Use it to cue which column the talk dwells on.
 
 Dividers follow along: the rule between two columns is drawn by whichever of them appears
-**last**, so a divider never reaches the slide ahead of the content it separates. Normally that
-is the column on the right, which is the ordinary case and unchanged; it flips only where an
-always-on column sits to the right of a stepping one — a `fragment: false` figure between two
-stepping text columns — and there the left column carries the rule on its own right edge.
+**last**, so a divider never reaches the slide ahead of the content it separates. A column
+appears on its own press, or on its first group's when it opens on one. Normally the last is
+the column on the right; where an always-on column sits right of a stepping one — a `fragment:
+false` figure between two stepping text columns — the left column carries the rule instead.
 
 The per-gap array form (`"dividers": [false, true, false]`) opts out of that dance: it draws a
 flat rule on exactly the gaps set `true` and is for a row shown all at once — columns paired

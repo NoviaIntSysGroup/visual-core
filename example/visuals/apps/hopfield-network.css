@@ -38,8 +38,10 @@
   color: var(--accent-strong);
 }
 
+/* Above the hero's title block, whose 70%-wide box reaches under the network's left half. */
 .hopfield-net {
   position: relative;
+  z-index: 3;
   width: 300px;
 }
 

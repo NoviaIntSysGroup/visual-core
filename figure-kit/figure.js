@@ -219,7 +219,7 @@
 
     /* Nest a child composition at (x, y), optionally scaled. `drawFn(fig)` draws in
        local coordinates; its output is wrapped in one flat <g transform>, so the
-       result stays a single portable SVG with no nested <svg>. o: { x, y, scale } */
+       result stays a single portable SVG with no nested <svg>. o: { x, y, scale, cls } */
     function nest(o, drawFn) {
       o = o || {};
       var open = parts.length;
@@ -227,18 +227,18 @@
       var inner = parts.splice(open).join('');
       var s = o.scale != null ? o.scale : 1;
       var tr = 'translate(' + r(o.x || 0) + ' ' + r(o.y || 0) + ')' + (s !== 1 ? ' scale(' + Math.round(s * 1e4) / 1e4 + ')' : '');
-      parts.push('<g transform="' + tr + '">' + inner + '</g>');
+      parts.push('<g' + (o.cls ? ' class="' + o.cls + '"' : '') + ' transform="' + tr + '">' + inner + '</g>');
       return api;
     }
 
-    /* Nest a whole composition MODULE ({ width, height, draw }) rather than a
-       bare drawFn. Because the module carries its bounds, the child's outline
-       can be drawn too — which is the one level of the debug cascade that plain
-       nest() can't reach, a drawFn having no idea how big it is.
+    /* Nest a whole composition MODULE ({ width, height, draw }) rather than a bare
+       drawFn: its bounds give the child's debug outline, and its <g> carries the
+       child's root classes (`figure <name>-fig`), so the child's own CSS still matches.
        o: { x, y, scale, step } — `step` fixes a stepped child at one state. */
     function nestModule(M, o) {
       o = o || {};
-      return nest({ x: o.x, y: o.y, scale: o.scale }, function (f) {
+      var cls = 'figure' + (M.className ? ' ' + M.className : '');
+      return nest({ x: o.x, y: o.y, scale: o.scale, cls: cls }, function (f) {
         if (o.step != null) M.draw(f, o.step); else M.draw(f);
         f.debugFrame(M.width, M.height, 'nest');
       });

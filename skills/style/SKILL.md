@@ -23,8 +23,10 @@ default instead, so it is not repeated here.
   only decorates the headings beside it goes.
 - **A picture shows the finding**, not a portrait of who found it. Build it from real vector
   art (a public-domain SVG, recoloured to theme tokens, credited in the module header), then
-  from the drawing kit, and generate an image last; never invent organic shapes from made-up
-  coordinates. One or two lines under it state the message. A picture that comes out small
+  from the drawing kit, and generate an image last. A real object drawn to look like itself
+  (a brain, a hand) comes from real art, never from made-up coordinates, which look wrong; a
+  plainly stylised one (people as circles and capsules) may be built from kit shapes. One or
+  two lines under it state the message. A picture that comes out small
   beside empty space means the layout is wrong: measure where the space goes and reshape it.
 - **Motion carries the message, or it goes.** Animate what happens in time: a flow, a signal
   spreading, a rhythm, a zoom into another scale. What a still frame shows equally well, such

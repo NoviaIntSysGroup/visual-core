@@ -21,19 +21,24 @@ editing, running, and presenting workflow is in `core/README.md`.
    sessions may share it: never revert or overwrite changes you did not make, and ask before
    editing a file someone else is changing.
 10. Stay inside the repo. Never search, read, or write outside the working directory; scratch
-    files go in `tmp/<task>/` at its root, one folder per task, since sessions share `tmp/`.
+    files go in `tmp/<task>/` at its root, a new folder per task named unlike any already
+    there, since sessions share `tmp/`. It is not in git: delete your task's folder when the
+    task is done, and keep anything meant to last outside it.
 11. The shell starts in the working directory: never `cd` into it, use paths relative to it.
 
 ## Observing while you work
 
-1. Stay attentive to this repo's instructions and code as you work. A user correction, a failed
-   call, two sources that disagree, a result that surprised you, reading far more than the task
-   needed, code that breaks a *Human-first architecture* rule, or anything you had to guess,
-   work around, work out, or be told that no instruction states are signals.
+1. Stay attentive to this repo's instructions and code as you work. Anything that got in your
+   way (a user correction, a failed call, two sources that disagree, a surprise, a guess, a
+   workaround, reading far more than the task needed, code that breaks a *Human-first
+   architecture* rule), any way the code, docs or tools could be better, and anything you
+   learned that no instruction states are signals.
 
-2. A hook loads `core/skills/issue-log/SKILL.md` into every session, and at the end of each
-   turn that used tools asks you to sweep the turn for anything to log. A suspicion is enough:
-   on any signal, that skill decides whether to log, and how.
+2. A hook loads `core/skills/observation-log/SKILL.md` into every session, and at the end of
+   each turn asks you to sweep it, and what it made clear about earlier turns, for anything to
+   log. A suspicion is enough: on any signal, that skill decides whether to log, and how. The
+   same hook loads `core/skills/session-log/SKILL.md`, which has you name each turn's task,
+   and records the files each turn reads.
 
 3. Then keep working on your original task. Don't patch anything mid-task.
 
@@ -74,8 +79,9 @@ only when the task needs it.
 | `core/skills/figures/SKILL.md` | `figures/`, `core/figure-kit/` | building or editing a publication figure or the figure kit |
 | `core/skills/style/SKILL.md` | the house style: what a slide or drawing says, wording, colour and form | writing slide copy, or designing or editing a figure or diagram |
 | `core/skills/illustrations/SKILL.md` | `visuals/image-prompt.md`, `visuals/assets/generated/` | writing an image-generation prompt; only the SCENE block is written fresh |
-| `core/skills/issue-log/SKILL.md` | `issues/` | loaded by a hook at session start (see *Observing while you work*) |
-| `core/skills/issue-fix/SKILL.md` | instructions: skills, `AGENTS.md`, `README.md`, code comments, kit doc headers | changing any instruction, or working through `issues/`, code entries included |
+| `core/skills/observation-log/SKILL.md` | `observations/` | loaded by a hook at session start (see *Observing while you work*) |
+| `core/skills/session-log/SKILL.md` | `sessions/` | loaded by a hook at session start (see *Observing while you work*) |
+| `core/skills/observation-review/SKILL.md` | instructions: skills, `AGENTS.md`, `README.md`, code comments, kit doc headers | changing any instruction, or working through `observations/`, code entries included |
 | `core/skills/page-check/SKILL.md` | headless screenshots and figure exports | looking at a page or exporting a figure, only when the user asks |
 
 Placing an existing figure onto a slide or into another figure is slides/figures work, not

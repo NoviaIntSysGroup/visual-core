@@ -1,6 +1,7 @@
-/* Unit circle app. Fills its parent with a wash and holds the circle on the right; the plane's
-   own look is the dot-product app's, in dot-product.css. */
-.unit-circle {
+/* Unit circle app. On a hero it fills its parent with a wash and holds the circle on the right;
+   in a column, the circle with its legend and value beside it. The plane's own look is the
+   dot-product app's, in dot-product.css. */
+.unit-circle.is-cover {
   position: absolute;
   inset: 0;
   border-radius: inherit;
@@ -37,6 +38,27 @@
 .unit-circle-note .unit-circle-question {
   margin-top: var(--s3);
   color: var(--accent-strong);
+}
+
+/* In a column: the circle, and its legend and value beside it. */
+.unit-circle.is-block {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s4);
+}
+.unit-circle-readouts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+}
+.reveal .unit-circle-readouts p { margin: 0; white-space: nowrap; }
+/* The value keeps one width, sign or not, so the line never shifts while x̂ turns. */
+.unit-circle-readouts [data-shows] {
+  display: inline-block;
+  min-width: 5ch;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 /* Shown at its own size, never scaled: the script sets it, and draws the plane to fill it. */
